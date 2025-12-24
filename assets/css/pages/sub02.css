@@ -1,0 +1,357 @@
+/*
+---------------------------------------------
+                Sub 02
+---------------------------------------------
+*/
+body {
+    background: var(--black-100);
+}
+
+.cont1 .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 80px;
+}
+
+.cont1 .left {
+    flex: 1;
+}
+
+.cont1 .title-md {
+    white-space: pre-line;
+}
+
+.cont1 .emphasis {
+    color: var(--primary);
+}
+
+.cont1 .count {
+    margin-top: 24px;
+    color: var(--black-700);
+    font-size: var(--font-xl);
+    font-weight: 500;
+    line-height: 33px;
+}
+
+.cont1 .right {
+    flex: 2;
+}
+
+.cont1 .list {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 40px 30px;
+}
+
+.cont1 .card {
+    width: 100%;
+    max-width: 540px;
+    height: 340px;
+    padding: 40px 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-end;
+    background: white;
+    border-radius: 10px;
+    border: 1px solid var(--black-800);
+    box-sizing: border-box;
+    transition: box-shadow .28s ease, outline .28s ease, border-color .22s ease, transform .22s ease;
+    will-change: transform, opacity;
+}
+
+.cont1 .left {
+    backface-visibility: hidden;
+}
+
+.cont1 .card:hover {
+    border-color: transparent;
+    outline: 2px solid var(--primary);
+    outline-offset: -2px;
+    box-shadow: 0 2px 36px rgba(237, 132, 55, 0.2);
+    transform: translateY(-4px);
+}
+
+.cont1 .info {
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 30px;
+}
+
+.cont1 .thumb img {
+    display: block;
+    width: 84px;
+    height: 83px;
+    border-radius: 30px;
+    object-fit: cover;
+}
+
+.cont1 .thumb.default img {
+    border-radius: 0;
+    object-fit: contain;
+    height: auto;
+}
+
+.cont1 .text {
+    padding-left: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.cont1 .name {
+    font-size: var(--font-3xl);
+    font-weight: 600;
+    line-height: 39px;
+    transition: color .2s ease;
+}
+
+.cont1 .card:hover .name {
+    color: var(--primary);
+}
+
+.cont1 .desc {
+    color: var(--black-700);
+    font-size: var(--font-md);
+    font-weight: 400;
+    line-height: 28.8px;
+    transition: color .2s ease;
+}
+
+.cont1 .card:hover .desc {
+    color: var(--black-800);
+}
+
+.cont1 .btn {
+    padding: 10px 22px;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--white-20);
+    border: 1px solid var(--black-500);
+    border-radius: 300px;
+    transition: background .22s ease, border-color .22s ease, transform .22s ease;
+}
+
+.cont1 .btn.is-disabled {
+    background: var(--black-200);
+    border-color: var(--black-400);
+    pointer-events: none;
+    cursor: not-allowed;
+}
+
+.cont1 .card:hover .btn:not(.is-disabled) {
+    background: white;
+    border-color: var(--primary);
+}
+
+.cont1 .btntext {
+    color: var(--black-700);
+    font-size: var(--font-base);
+    font-weight: 500;
+    line-height: 25.6px;
+    transition: color .18s ease;
+}
+
+.cont1 .btn.is-disabled .btntext {
+    color: var(--black-600);
+}
+
+.cont1 .card:hover .btn:not(.is-disabled) .btntext {
+    color: var(--primary);
+}
+
+.cont1 .btn .icon {
+    width: 18px;
+    height: 16px;
+    display: inline-block;
+    background-color: var(--black-700);
+    mask: var(--icon-down);
+    -webkit-mask: var(--icon-down);
+    transition: background-color .18s ease;
+}
+
+.cont1 .card:hover .btn:not(.is-disabled) .icon {
+    background-color: var(--primary);
+}
+
+.cont1 .btn.is-disabled .icon {
+    background-color: var(--black-600);
+}
+
+@media (max-width: 1280px) {
+    .cont1 .container {
+        gap: 60px;
+    }
+
+    .cont1 .count {
+        margin-top: 15px;
+    }
+
+    .cont1 .list {
+        gap: 32px 24px;
+    }
+
+    .cont1 .card {
+        height: 330px;
+        padding: 32px 26px;
+    }
+
+    .cont1 .name {
+        font-size: var(--font-2xl);
+    }
+
+    .cont1 .thumb img {
+        width: 78px;
+        height: 78px;
+    }
+}
+
+@media (max-width: 1024px) {
+    .cont1 .container {
+        flex-direction: column;
+        gap: 32px;
+    }
+
+    .cont1 .right {
+        width: 100%;
+    }
+
+    .cont1 .count {
+        margin-top: 8px;
+        font-size: var(--font-lg);
+    }
+
+    .cont1 .title-md {
+        white-space: normal;
+    }
+
+    .cont1 .list {
+        gap: 26px 20px;
+    }
+
+    .cont1 .card {
+        height: auto;
+        min-height: 300px;
+        padding: 28px 22px;
+    }
+
+    .cont1 .info {
+        gap: 18px;
+    }
+
+    .cont1 .thumb img {
+        width: 72px;
+        height: 72px;
+        border-radius: 20px;
+    }
+
+    .cont1 .name {
+        font-size: var(--font-xl);
+    }
+
+    .cont1 .btn {
+        padding: 10px 18px;
+    }
+}
+
+@media (max-width: 768px) {
+    .cont1 .container {
+        flex-direction: column;
+        gap: 32px;
+    }
+
+    .cont1 .count {
+        margin-top: 0;
+        font-size: var(--font-md);
+    }
+
+    .cont1 .list {
+        grid-template-columns: repeat(1, 1fr);
+        gap: 20px;
+    }
+
+    .cont1 .card {
+        height: auto;
+        max-width: 100%;
+        min-height: unset;
+        padding: 22px 18px;
+        gap: 10px;
+    }
+
+    .cont1 .info {
+        gap: 16px;
+    }
+
+    .cont1 .thumb img {
+        width: 68px;
+        height: 68px;
+        border-radius: 18px;
+    }
+
+    .cont1 .text {
+        gap: 4px;
+    }
+
+    .cont1 .name {
+        font-size: var(--font-lg);
+    }
+
+    .cont1 .desc {
+        font-size: var(--font-base);
+        line-height: 1.55;
+    }
+
+    .cont1 .btn {
+        width: 100%;
+        justify-content: space-between;
+    }
+}
+
+@media (max-width: 480px) {
+    .cont1 .container {
+        gap: 24px;
+    }
+
+    .cont1 .list {
+        gap: 16px;
+    }
+
+    .cont1 .card {
+        padding: 18px 16px;
+        border-radius: 8px;
+    }
+
+    .cont1 .thumb img {
+        width: 62px;
+        height: 62px;
+        border-radius: 16px;
+    }
+
+    .cont1 .name {
+        font-size: var(--font-md);
+        line-height: 1.4;
+    }
+
+    .cont1 .desc {
+        font-size: 13px;
+    }
+
+    .cont1 .btn {
+        padding: 8px 18px;
+        gap: 10px;
+    }
+
+    .cont1 .btntext {
+        font-size: var(--font-sm);
+    }
+
+    .cont1 .btn .icon {
+        width: 16px;
+        height: 14px;
+    }
+}

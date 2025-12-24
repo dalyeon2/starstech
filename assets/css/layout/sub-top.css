@@ -1,0 +1,186 @@
+/* 
+---------------------------------------------
+                Sub Top
+--------------------------------------------- 
+*/
+.subtop {
+    background: var(--black-100);
+    overflow: hidden;
+}
+
+.subtop .container {
+    padding-top: 320px;
+    padding-bottom: 80px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.subtop .text {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.subtop .eyebrow {
+    color: var(--orange);
+    font-size: var(--font-base);
+    font-family: var(--font-en);
+    font-weight: 700;
+    line-height: 24px;
+}
+
+.subtop .title {
+    font-family: var(--font-en);
+    font-size: 112px;
+    font-weight: 700;
+    line-height: 1.4;
+}
+
+.subtop .desc {
+    color: var(--black-800);
+    font-size: var(--font-lg);
+    font-weight: 600;
+    line-height: 32px;
+}
+
+.subtop .tabs {
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+}
+
+.subtop .tab {
+    padding: 0 20px;
+    border-left: 1px solid var(--black-500);
+    color: var(--black-600);
+    font-size: var(--font-sm);
+    font-family: var(--font-kr);
+    font-weight: 500;
+    line-height: 21px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    transition: color .2s ease;
+}
+
+.subtop .tab:hover,
+.subtop .tab:focus-visible {
+    color: var(--black-900);
+}
+
+.subtop .tab.is-active,
+.subtop .tab[aria-current="page"] {
+    color: var(--black-900);
+    font-weight: 600;
+}
+
+@media (max-width: 1440px) {
+    .subtop {
+        min-height: 640px;
+    }
+
+    .subtop > .text {
+        top: 260px;
+        padding-left: 80px;
+    }
+
+    .subtop .title {
+        font-size: 96px;
+        line-height: 1.3;
+    }
+
+    .subtop .desc {
+        font-size: var(--font-md);
+        line-height: 28px;
+    }
+
+    .subtop > .tabs {
+        top: 460px;
+        padding-right: 80px;
+    }
+}
+
+@media (max-width: 1280px) {
+    .subtop {
+        min-height: 600px;
+    }
+
+    .subtop > .text {
+        top: 230px;
+        padding-left: 60px;
+    }
+
+    .subtop .title {
+        font-size: 84px;
+    }
+
+    .subtop > .tabs {
+        top: 420px;
+        padding-right: 60px;
+    }
+}
+
+@media (max-width: 1024px) {
+    .subtop {
+        min-height: auto;
+        padding: 160px 40px 80px;
+    }
+
+    .subtop > .text,
+    .subtop > .tabs {
+        position: static;
+        padding: 0;
+    }
+
+    .subtop .title {
+        font-size: 72px;
+        line-height: 1.2;
+    }
+
+    .subtop > .tabs {
+        margin-top: 24px;
+        flex-wrap: wrap;
+        row-gap: 10px;
+        white-space: normal;
+    }
+
+    .subtop .tab {
+        padding: 0 16px;
+    }
+}
+
+@media (max-width: 768px) {
+    .subtop {
+        padding: 120px 20px 60px;
+    }
+
+    .subtop .title {
+        font-size: 54px;
+    }
+
+    .subtop > .tabs {
+        gap: 12px;
+    }
+
+    .subtop .tab {
+        border-left: none;
+        padding: 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .subtop {
+        padding: 100px 16px 50px;
+    }
+
+    .subtop .title {
+        font-size: 40px;
+    }
+
+    .subtop .desc {
+        font-size: var(--font-sm);
+        line-height: 1.6;
+    }
+}

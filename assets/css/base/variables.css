@@ -1,0 +1,56 @@
+/* 
+---------------------------------------------
+                  Variabls
+--------------------------------------------- 
+*/
+:root {
+  /* Font Sizes */
+  --font-xs: 12px;
+  --font-sm: 14px;
+  --font-base: 16px;
+  --font-md: 18px;
+  --font-lg: 20px;
+  --font-xl: 22px;
+  --font-2xl: 24px;
+  --font-3xl: 26px;
+  --font-4xl: 28px;
+  --font-headline32: 32px;
+  --font-headline36: 36px;
+  --font-headline42: 42px;
+  --font-headline46: 46px;
+  --font-subtop: 74px;
+  --font-title52: 52px;
+  --font-title58: 58px;
+  --font-title62: 62px;
+  --font-title68: 68px;
+  --font-title110: 110px;
+
+  /* Point Colors */
+  --primary: #003685;
+  --orange: #EF8A5F;
+  --brown: #6B635B;
+  --bg: #F5F2EE;
+
+  --black: #111111;
+  --black-900: #3F3F3F;
+  --black-800: #616161;
+  --black-700: #828282;
+  --black-600: #A6A6A6;
+  --black-500: #C3C3C3;
+  --black-400: #D9D9D9;
+  --black-300: #E5E5E5;
+  --black-200: #EDEDED;
+  --black-100: #FAFAFA;
+
+  --white: #FFFFFF;
+  --white-100: rgba(255, 255, 255, 1);
+  --white-90: rgba(255, 255, 255, 0.9);
+  --white-80: rgba(255, 255, 255, 0.8);
+  --white-60: rgba(255, 255, 255, 0.6);
+  --white-50: rgba(255, 255, 255, 0.5);
+  --white-40: rgba(255, 255, 255, 0.4);
+  --white-10: rgba(255, 255, 255, 0.1);
+
+  --container-width: 1704px;
+
+}
