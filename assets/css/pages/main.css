@@ -6,186 +6,80 @@
 
 /* cont1 */
 .cont1 {
-    position: fixed;
-    inset: 0;
-    width: 100%;
-    height: 100vh;
-    display: flex;
-    align-items: stretch;
-    z-index: 30;
-    transition: opacity 0.6s ease, transform 0.6s ease, filter 0.6s ease;
-    will-change: opacity, transform, filter;
-}
-
-body.intro-exit .cont1 {
-    opacity: 0;
-    filter: blur(2px);
-}
-
-body.intro-done .cont1 {
-    display: none;
-}
-
-.cont1 .intro {
     position: relative;
     width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #FFFAF5;
+    min-height: 100vh;
+    color: var(--white);
     overflow: hidden;
 }
 
 .cont1 .bg {
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, rgba(27, 120, 132, 0) 0%, rgba(27, 120, 132, 0.06) 100%), #FFFAF5;
+    overflow: hidden;
     z-index: 0;
 }
 
-.cont1 .brand {
+.cont1 .bg video {
     position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    color: #314DBE;
-    font-family: var(--font-en);
-    font-size: 365px;
-    font-weight: 900;
-    line-height: 1.2;
-    letter-spacing: 0.2em;
-    font-kerning: none;
-    font-feature-settings: "kern" 0;
-    white-space: nowrap;
-    word-wrap: break-word;
-    pointer-events: none;
-    z-index: 1;
-    opacity: 0.04;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    z-index: 0;
 }
 
 .cont1 .container {
     position: relative;
-    height: 100%;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 2;
+    z-index: 1;
 }
 
-.cont1 .slogan {
-    max-width: 960px;
-    color: #3F3F3F;
+.cont1 .title {
     font-family: var(--font-en);
-    font-size: 48px;
-    font-weight: 900;
-    line-height: 1.2;
+    font-size: var(--font-title100);
+    font-weight: 700;
+    line-height: 1.3;
     text-align: center;
-    will-change: transform, opacity;
+    word-wrap: break-word;
+    white-space: pre-line;
 }
 
-html.intro-lock,
-body.intro-lock {
-    overflow: hidden;
-    height: 100%;
+.cont1 .desc {
+    font-size: var(--font-lg);
+    font-weight: 600;
+    line-height: 1.6;
+    text-align: center;
+    word-wrap: break-word;
 }
 
-body.intro-lock {
-    overscroll-behavior: none;
-}
-
-body.intro-lock .main-header {
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-}
-
-body.intro-css .cont1.is-intro .slogan {
-    opacity: 0;
-    transform: translateY(40px);
-    transition: transform 1s cubic-bezier(0.22, 1, 0.36, 1), opacity 1s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-body.intro-css .cont1.is-intro .slogan.is-in {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-@media (max-width: 1440px) {
-    .cont1 .container {
-        padding: 0 32px;
-    }
-
-    .cont1 .brand {
-        font-size: 300px;
-    }
-
-    .cont1 .slogan {
-        font-size: 42px;
-    }
-}
-
-@media (max-width: 1280px) {
-    .cont1 .container {
-        padding: 0 28px;
-    }
-
-    .cont1 .brand {
-        font-size: 260px;
-    }
-
-    .cont1 .slogan {
-        font-size: 38px;
-    }
+.cont1 .scroll {
+    font-family: var(--font-en);
+    font-size: var(--font-md);
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: 0.12em;
 }
 
 @media (max-width: 1024px) {
-    .cont1 .brand {
-        top: 22%;
-        font-size: 220px;
-        letter-spacing: 0.16em;
-    }
-
-    .cont1 .container {
-        padding: 0 24px;
-    }
-
-    .cont1 .slogan {
-        font-size: 32px;
+    .cont1,
+    .cont1 .content {
+        min-height: 720px;
     }
 }
 
 @media (max-width: 768px) {
-    .cont1 .brand {
-        top: 18%;
-        font-size: 180px;
-        letter-spacing: 0.12em;
-    }
-
-    .cont1 .container {
-        padding: 0 20px;
-    }
-
-    .cont1 .slogan {
-        font-size: 28px;
+    .cont1,
+    .cont1 .content {
+        min-height: 640px;
     }
 }
 
 @media (max-width: 480px) {
-    .cont1 .brand {
-        font-size: 140px;
-        letter-spacing: 0.1em;
-    }
-
-    .cont1 .slogan {
-        font-size: 22px;
-    }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .cont1.is-intro .slogan {
-        opacity: 1;
-        transform: none;
-        transition: none;
+    .cont1,
+    .cont1 .content {
+        min-height: 560px;
     }
 }
 

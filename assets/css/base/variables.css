@@ -19,28 +19,28 @@
   --font-headline42: 42px;
   --font-headline46: 46px;
   --font-subtop: 74px;
-  --font-title52: 52px;
   --font-title58: 58px;
   --font-title62: 62px;
   --font-title68: 68px;
-  --font-title110: 110px;
+  --font-title80: 80px;
+  --font-title100: 100px;
 
   /* Point Colors */
-  --primary: #003685;
-  --orange: #EF8A5F;
-  --brown: #6B635B;
-  --bg: #F5F2EE;
+  --green: #87B145;
+  --blue: #1880F8;
+  --brown: #322823;
+  --bg-1: rgba(248, 248, 248, 0.5);
+  --bg-2: #F8F8F8;
 
   --black: #111111;
-  --black-900: #3F3F3F;
-  --black-800: #616161;
-  --black-700: #828282;
-  --black-600: #A6A6A6;
-  --black-500: #C3C3C3;
-  --black-400: #D9D9D9;
-  --black-300: #E5E5E5;
-  --black-200: #EDEDED;
-  --black-100: #FAFAFA;
+  --black-800: #4D4D4D;
+  --black-700: #747474;
+  --black-600: #A6A5A5;
+  --black-500: #C0C0C0;
+  --black-400: #D6D6D5;
+  --black-300: #E5E5E4;
+  --black-200: #F1F1F1;
+  --black-100: #F6F7F8;
 
   --white: #FFFFFF;
   --white-100: rgba(255, 255, 255, 1);
@@ -51,6 +51,6 @@
   --white-40: rgba(255, 255, 255, 0.4);
   --white-10: rgba(255, 255, 255, 0.1);
 
-  --container-width: 1704px;
+  --container-width: 1584px;
 
 }

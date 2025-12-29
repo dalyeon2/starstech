@@ -16,7 +16,6 @@ window.addEventListener('pageshow', (e) => {
 /* ===== Global config ===== */
 window.__snapOff = window.__snapOff || false;
 window.__snapSetOff = window.__snapSetOff || function (v) { window.__snapOff = !!v; };
-window.headerHideEnabled = true;
 window.SancSmoothScrollConfig = window.SancSmoothScrollConfig || {};
 if (typeof window.SancSmoothScrollConfig.lerp !== 'number') {
     window.SancSmoothScrollConfig.lerp = 0.03;
@@ -189,18 +188,12 @@ const initSmoothScroll = (function () {
     };
 })();
 
-/* ===== Header show/hide ===== */
+/* ===== Header scroll state ===== */
 function initHeader(scrollBus) {
-    const $header = $('.main-header');
+    const $header = $('.headerwrap');
     if (!$header.length) return;
 
-    // Scroll state tracking
-    const moveScroll = 1;
     let scrollRootOverride = null;
-
-    function headerHeight() {
-        return $header.get(0)?.offsetHeight || 0;
-    }
 
     function getScrollMetrics() {
         const root = scrollRootOverride
@@ -250,110 +243,53 @@ function initHeader(scrollBus) {
     // Header style update
     function applyState(y) {
         const atTop = y <= 5;
-        const isMainPage = document.body?.dataset?.page === 'main';
-        const useTransparent = atTop && isMainPage;
-        const useWhiteTransparent = atTop && !isMainPage;
-
-        // Basic header state
-        $header.toggleClass('is-scroll', !atTop);
-
-        // Logo color swap
-        const $logo = $('.header-left .logo img');
-        if ($logo.length) {
-            const defaultSrc = $logo.data('logo-default') || $logo.data('original') || $logo.attr('src');
-            const transparentSrc = $logo.data('logo-transparent') || defaultSrc;
-            $logo.attr('src', useTransparent ? transparentSrc : defaultSrc);
-        }
-        if (useTransparent) {
-            $header.addClass('is-transparent').removeClass('is-white');
-        } else {
-            $header.removeClass('is-transparent').addClass('is-white');
-        }
-        $header.toggleClass('is-white-transparent', useWhiteTransparent);
+        $header.toggleClass('scrolled', !atTop);
     }
 
-    // Show header now
-    function showHeader() {
-        if (!$header.hasClass('hide-header')) return;
-        $header.removeClass('hide-header');
-    }
-
-    // Hide header now
-    function hideHeader() {
-        if ($header.hasClass('hide-header')) return;
-        $header.addClass('hide-header');
-    }
-
-    // Scroll direction logic
-    function handleScroll(y, source) {
+    function handleScroll(y) {
         applyState(y);
-
-        if (!window.headerHideEnabled) {
-            showHeader();
-            lastY = y;
-            return;
-        }
-
-        if (y <= 5) {
-            showHeader();
-            lastY = y;
-            return;
-        }
-
-        const delta = y - lastY;
-        if (Math.abs(delta) <= moveScroll) return;
-        if (y > lastY) {
-            hideHeader();
-        } else {
-            showHeader();
-        }
-
-        lastY = y;
     }
 
-    let lastY = getScrollY();
-    handleScroll(lastY, 'init');
+    handleScroll(getScrollY());
 
-    const onScroll = (source) => {
+    const onScroll = () => {
         const metrics = getScrollMetrics();
-        handleScroll(metrics.y, source);
+        handleScroll(metrics.y);
     };
     let ticking = false;
-    const schedule = (source) => {
+    const schedule = () => {
         if (ticking) return;
         ticking = true;
         requestAnimationFrame(() => {
             ticking = false;
-            onScroll(source);
+            onScroll();
         });
     };
     const scrollRoot = getScrollRootEl();
-    window.addEventListener('scroll', () => schedule('window'), { passive: true });
+    window.addEventListener('scroll', schedule, { passive: true });
     if (scrollRoot && scrollRoot !== window) {
-        scrollRoot.addEventListener('scroll', () => schedule('root'), { passive: true });
+        scrollRoot.addEventListener('scroll', schedule, { passive: true });
     }
-    window.addEventListener('wheel', () => {
-        schedule('wheel');
-    }, { passive: true });
+    window.addEventListener('wheel', schedule, { passive: true });
 
     if (scrollBus && typeof scrollBus.on === 'function') {
-        scrollBus.on('scroll', ({ scroll }) => handleScroll(scroll?.y || 0, 'engine'));
+        scrollBus.on('scroll', ({ scroll }) => handleScroll(scroll?.y || 0));
     }
 
     document.addEventListener('scroll', (e) => {
         const root = findMainScrollRoot(e.target);
         if (root) {
             if (scrollRootOverride !== root) scrollRootOverride = root;
-            handleScroll(root.scrollTop || 0, 'capture');
+            handleScroll(root.scrollTop || 0);
         }
     }, true);
 
-    let lastObservedY = lastY;
+    let lastObservedY = getScrollY();
     const watchScroll = () => {
         const y = getScrollY();
         if (y !== lastObservedY) {
             lastObservedY = y;
-            handleScroll(y, 'raf');
+            handleScroll(y);
         }
         requestAnimationFrame(watchScroll);
     };
@@ -366,11 +302,11 @@ function setHeaderActive() {
     if (!rawCat) return;
 
     const want = rawCat.trim().toUpperCase();
-    const $hdr = $('.main-header');
+    const $hdr = $('.headerwrap');
     if (!$hdr.length) return;
 
-    const $items = $hdr.find('.main-nav .menu-item');
-    $items.removeClass('is-active')
+    const $items = $hdr.find('.nav .item');
+    $items.removeClass('active')
         .find('a')
         .removeAttr('aria-current');
 
@@ -381,7 +317,7 @@ function setHeaderActive() {
         const menuKey = ($li.data('menu') || '').toString().trim().toUpperCase();
 
         if ((menuKey && menuKey === want) || label === want) {
-            $li.addClass('is-active');
+            $li.addClass('active');
             $a.attr('aria-current', 'page');
         }
     });
@@ -416,7 +352,7 @@ window.Subtop = (function () {
         };
 
         // build nav items from header menu
-        const $menuItems = $('.main-nav .menu-item');
+        const $menuItems = $('.headerwrap .nav .item');
         let $targetMenu = $();
         $menuItems.each(function () {
             const $item = $(this);
@@ -427,7 +363,7 @@ window.Subtop = (function () {
             }
         });
 
-        const $submenuLinks = $targetMenu.find('.submenu li a');
+        const $submenuLinks = $targetMenu.find('.panel .link');
 
         // breadcrumb
         const $crumbCategory = $subtop.find('.subtop-category');
@@ -553,7 +489,7 @@ function initScrollTop(scrollBus) {
 
     // Footer overlap docking
     const updateDock = () => {
-        const footerEl = document.querySelector('.site-footer');
+        const footerEl = document.querySelector('.footer');
         if (!footerEl || !btnEl) {
             btnEl?.style.setProperty('--scroll-top-dock', '0px');
             return;
@@ -644,11 +580,11 @@ function initScrollTop(scrollBus) {
 
 /* ===== Footer popup ===== */
 function initFooterPopup() {
-    const $wraps = $('.site-footer .family');
+    const $wraps = $('.footer .family');
     if (!$wraps.length) return;
 
     const closeAll = () => {
-        $wraps.removeClass('is-open');
+        $wraps.removeClass('open');
         $wraps.find('.btn').attr('aria-expanded', 'false');
         $wraps.find('.panel').attr('aria-hidden', 'true');
     };
@@ -661,10 +597,10 @@ function initFooterPopup() {
         $btn.off('click.family').on('click.family', function (e) {
             e.preventDefault();
             e.stopPropagation();
-            const wasOpen = $wrap.hasClass('is-open');
+            const wasOpen = $wrap.hasClass('open');
             closeAll();
             if (!wasOpen) {
-                $wrap.addClass('is-open');
+                $wrap.addClass('open');
                 $btn.attr('aria-expanded', 'true');
                 $panel.attr('aria-hidden', 'false');
             }
@@ -672,7 +608,7 @@ function initFooterPopup() {
     });
 
     $(document).off('click.family').on('click.family', function (e) {
-        if ($(e.target).closest('.site-footer .family').length) return;
+        if ($(e.target).closest('.footer .family').length) return;
         closeAll();
     });
 
