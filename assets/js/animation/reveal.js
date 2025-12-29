@@ -67,14 +67,9 @@ Init from common.js:
             trigger: el,
             scroller: scroller(),
             start: 'top 70%',
+            once: true,
             onEnter: function () {
                 tween.restart();
-            },
-            onEnterBack: function () {
-                tween.restart();
-            },
-            onLeaveBack: function () {
-                w.gsap.set(el, { y: dist, autoAlpha: 0 });
             }
         });
     }

@@ -17,7 +17,7 @@
         const $stats = $section.find('.stats');
         const $lead = $section.find('.lead');
         const $desc = $section.find('.desc');
-        const $image = $section.find('.visiual');
+        const $image = $section.find('.visual');
         if (!$headline.length && !$stats.length && !$image.length && !$lead.length && !$desc.length) return;
 
         function formatValue(value) {
@@ -102,19 +102,103 @@
         w.ScrollTrigger.create({
             trigger: $section.get(0),
             start: 'top 65%',
+            once: true,
             onEnter: function () {
                 tl.restart();
-            },
-            onEnterBack: function () {
-                tl.restart();
-            },
-            onLeaveBack: function () {
-                tl.pause(0);
             }
         });
     }
 
+    /* Section 4: about */
+    function initAbout() {
+        const $section = $('.cont4');
+        if (!$section.length || !w.gsap) return;
+
+        const leftTargets = $section.find('.left').toArray();
+        const rightItems = $section.find('.right .item').toArray();
+        if (!leftTargets.length && !rightItems.length) return;
+
+        if (w.ScrollTrigger) {
+            w.gsap.registerPlugin(w.ScrollTrigger);
+        }
+
+        if (!w.ScrollTrigger || prefersReducedMotion()) return;
+
+        const tl = w.gsap.timeline({ paused: true });
+
+        if (leftTargets.length) {
+            tl.from(leftTargets, {
+                autoAlpha: 0,
+                y: 50,
+                duration: 0.5,
+                ease: 'power3.out',
+                stagger: 0.08
+            });
+        }
+
+        if (rightItems.length) {
+            tl.from(rightItems, {
+                autoAlpha: 0,
+                y: 50,
+                duration: 0.55,
+                ease: 'power3.out',
+                stagger: 0.18
+            }, leftTargets.length ? '-=0.1' : 0);
+        }
+
+        w.ScrollTrigger.create({
+            trigger: $section.get(0),
+            start: 'top 70%',
+            once: true,
+            onEnter: function () {
+                tl.restart();
+            }
+        });
+    }
+
+    /* Section 5: results */
+    function initResults() {
+        const $section = $('.cont5');
+        if (!$section.length) return;
+
+        const $cards = $section.find('.card');
+        if ($cards.length < 2) return;
+
+        let index = 0;
+
+        function setActive(nextIndex) {
+            $cards.each(function (cardIndex) {
+                const $card = $(this);
+                const isActive = cardIndex === nextIndex;
+                $card.toggleClass('active', isActive);
+
+                const $icon = $card.find('.icon');
+                if ($icon.length) {
+                    const onSrc = $icon.data('on');
+                    const offSrc = $icon.data('off');
+                    const nextSrc = isActive ? onSrc : offSrc;
+                    if (nextSrc && $icon.attr('src') !== nextSrc) {
+                        $icon.attr('src', nextSrc);
+                    }
+                }
+            });
+            index = nextIndex;
+        }
+
+        setActive(0);
+
+        if (prefersReducedMotion()) {
+            return;
+        }
+
+        w.setInterval(function () {
+            setActive((index + 1) % $cards.length);
+        }, 2000);
+    }
+
     $(function () {
         initOverview();
+        initResults();
+        initAbout();
     });
 })(window.jQuery, window, document);
