@@ -8,7 +8,6 @@
 .cont1 {
     position: relative;
     width: 100%;
-    min-height: 100vh;
     color: var(--white);
     overflow: hidden;
 }
@@ -32,7 +31,13 @@
 
 .cont1 .container {
     position: relative;
+    min-height: 100vh;
     display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 45px;
+    text-align: center;
     z-index: 1;
 }
 
@@ -41,25 +46,38 @@
     font-size: var(--font-title100);
     font-weight: 700;
     line-height: 1.3;
-    text-align: center;
     word-wrap: break-word;
     white-space: pre-line;
 }
 
 .cont1 .desc {
+    padding-bottom: 70px;
     font-size: var(--font-lg);
     font-weight: 600;
     line-height: 1.6;
-    text-align: center;
     word-wrap: break-word;
+    white-space: pre-line;
 }
 
 .cont1 .scroll {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     font-family: var(--font-en);
     font-size: var(--font-md);
     font-weight: 700;
     line-height: 1.3;
-    letter-spacing: 0.12em;
+}
+
+.cont1 .scroll::after {
+    content: "";
+    width: 1px;
+    height: 93px;
+    background: var(--white-60);
 }
 
 @media (max-width: 1024px) {
