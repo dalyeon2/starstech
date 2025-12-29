@@ -80,11 +80,20 @@
 
         <div class="right">
             <div class="actions">
-                <button class="lang" type="button" aria-label="Select language">
-                    <i class="globe" aria-hidden="true"></i>
-                    <span class="text">KR</span>
-                    <i class="arrow" aria-hidden="true"></i>
-                </button>
+                <div class="lang-select">
+                    <button class="lang" type="button" aria-label="Select language" aria-expanded="false" aria-controls="langMenu">
+                        <i class="globe" aria-hidden="true"></i>
+                        <span class="text">KR</span>
+                        <i class="arrow" aria-hidden="true"></i>
+                    </button>
+                    <div class="lang-menu" id="langMenu" role="menu" aria-hidden="true">
+                        <a href="../ko/" data-lang="ko" role="menuitem">KR</a>
+                        <a href="../en/" data-lang="en" role="menuitem">EN</a>
+                        <a href="../fr/" data-lang="fr" role="menuitem">FR</a>
+                        <a href="../ja/" data-lang="ja" role="menuitem">JA</a>
+                        <a href="../mn/" data-lang="mn" role="menuitem">MN</a>
+                    </div>
+                </div>
                 <a class="contact" href="../pages/sub0601.html">Contact Us</a>
             </div>
             <button class="navbtn" type="button" aria-label="Open navigation" aria-expanded="false">

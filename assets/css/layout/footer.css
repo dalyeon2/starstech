@@ -232,6 +232,13 @@
     line-height: 21px;
 }
 
+.footer .line .contact-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
 .footer .line .name {
     font-weight: 600;
 }

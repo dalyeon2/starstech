@@ -70,28 +70,117 @@ function loadCommonScriptOnce(src) {
     return promise;
 }
 
+/* ===== Language helpers ===== */
+function resolveFooterLang() {
+    const fromBody = $('body').data('footer-lang') || '';
+    const fromHtml = $('html').attr('lang') || '';
+    const match = window.location.pathname.match(/^\/([a-z]{2})(?:\/|$)/i);
+    const fromPath = match ? match[1] : '';
+    const raw = fromBody || fromHtml || fromPath;
+
+    if (!raw) return '';
+    const normalized = $.trim(String(raw)).toLowerCase().replace('_', '-');
+    const base = normalized.split('-')[0];
+    if (base === 'kr') return 'ko';
+    return base;
+}
+
+/* ===== Language menu ===== */
+function initLangMenu() {
+    const $wrap = $('.header .lang-select');
+    if (!$wrap.length) return;
+
+    const $btn = $wrap.find('.lang');
+    const $label = $btn.find('.text');
+    const $menu = $wrap.find('.lang-menu');
+    const lang = resolveFooterLang();
+    const labelMap = {
+        ko: 'KR',
+        en: 'EN',
+        fr: 'FR',
+        ja: 'JA',
+        mn: 'MN'
+    };
+    const labelText = labelMap[lang] || labelMap.ko;
+
+    $label.text(labelText);
+    $menu.find('a').removeClass('is-active').removeAttr('aria-current');
+    if (lang) {
+        $menu.find(`a[data-lang="${lang}"]`).addClass('is-active').attr('aria-current', 'true');
+    }
+
+    const closeMenu = () => {
+        $wrap.removeClass('open');
+        $btn.attr('aria-expanded', 'false');
+        $menu.attr('aria-hidden', 'true');
+    };
+
+    const openMenu = () => {
+        $wrap.addClass('open');
+        $btn.attr('aria-expanded', 'true');
+        $menu.attr('aria-hidden', 'false');
+    };
+
+    closeMenu();
+
+    $btn.off('click.langmenu').on('click.langmenu', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        if ($wrap.hasClass('open')) {
+            closeMenu();
+        } else {
+            openMenu();
+        }
+    });
+
+    $menu.find('a').off('click.langmenu').on('click.langmenu', function () {
+        closeMenu();
+    });
+
+    $(document).off('click.langmenu').on('click.langmenu', function (e) {
+        if ($(e.target).closest('.lang-select').length) return;
+        closeMenu();
+    });
+
+    $(document).off('keydown.langmenu').on('keydown.langmenu', function (e) {
+        if (e.key === 'Escape') closeMenu();
+    });
+}
+
 /* ===== Components loader ===== */
 async function loadComponents() {
     try {
-        const isEN = location.pathname.startsWith('/en/');
-        const compBase = isEN ? '/en/components' : '/components';
+        const compBase = '/components';
+        const footerLang = resolveFooterLang();
+        const footerPath = footerLang ? `${compBase}/footer/${footerLang}.html` : `${compBase}/footer.html`;
 
         const hasSubtop = !!$('#subtop-container').length;
         const hasCta = !!$('#cta-container').length;
 
         const [headerRes, footerRes, subtopRes, ctaRes] = await Promise.all([
             fetch(`${compBase}/header.html`),
-            fetch(`${compBase}/footer.html`),
+            fetch(footerPath),
             hasSubtop ? fetch(`${compBase}/sub-top.html`) : Promise.resolve({ text: async () => '' }),
             hasCta ? fetch(`${compBase}/cta.html`) : Promise.resolve({ text: async () => '' })
         ]);
 
-        $('#header-container').html(await headerRes.text());
-        $('#footer-container').html(await footerRes.text());
+        const headerHtml = await headerRes.text();
+        let footerHtml = await footerRes.text();
+
+        if (!footerRes.ok && footerPath !== `${compBase}/footer.html`) {
+            const fallbackRes = await fetch(`${compBase}/footer.html`);
+            if (fallbackRes.ok) {
+                footerHtml = await fallbackRes.text();
+            }
+        }
+
+        $('#header-container').html(headerHtml);
+        $('#footer-container').html(footerHtml);
 
         if (hasSubtop) $('#subtop-container').html(await subtopRes.text());
         if (hasCta) $('#cta-container').html(await ctaRes.text());
         setHeaderActive();
+        initLangMenu();
 
         $(document).trigger('components:ready');
         if (hasSubtop) window.Subtop?.init();
@@ -190,10 +279,60 @@ const initSmoothScroll = (function () {
 
 /* ===== Header scroll state ===== */
 function initHeader(scrollBus) {
-    const $header = $('.headerwrap');
+    const $header = $('.header');
     if (!$header.length) return;
 
     let scrollRootOverride = null;
+
+    function resolveScrollRootElement() {
+        const cfg = window.SancSmoothScrollConfig || {};
+        const scroller = cfg.scroller;
+        let root = null;
+
+        if (typeof scroller === 'string') {
+            root = document.querySelector(scroller);
+        } else if (scroller && scroller.nodeType === 1) {
+            root = scroller;
+        }
+
+        if (root) {
+            const scrollable = (root.scrollHeight || 0) > (root.clientHeight || 0) + 1;
+            if (!scrollable) root = null;
+        }
+
+        return root || document.scrollingElement || document.documentElement || document.body;
+    }
+
+    function updateScrollbarWidth(scrollRoot) {
+        const root = scrollRoot || resolveScrollRootElement();
+        const isNarrow = (window.innerWidth || 0) <= 1024;
+        if (isNarrow) {
+            document.documentElement.style.setProperty('--scrollbar-width', '0px');
+            return;
+        }
+
+        const getWidth = (el) => {
+            if (!el) return 0;
+            return Math.max(0, (el.offsetWidth || 0) - (el.clientWidth || 0));
+        };
+
+        let width = getWidth(root);
+
+        if (!width) {
+            const docEl = document.documentElement;
+            const body = document.body;
+            width = Math.max(getWidth(docEl), getWidth(body));
+        }
+
+        if (!width) {
+            const docEl = document.documentElement;
+            const inner = window.innerWidth || 0;
+            const client = docEl ? docEl.clientWidth || 0 : 0;
+            width = Math.max(0, Math.round(inner - client));
+        }
+
+        document.documentElement.style.setProperty('--scrollbar-width', `${Math.round(width)}px`);
+    }
 
     function getScrollMetrics() {
         const root = scrollRootOverride
@@ -251,6 +390,9 @@ function initHeader(scrollBus) {
     }
 
     handleScroll(getScrollY());
+    updateScrollbarWidth();
+    window.addEventListener('resize', updateScrollbarWidth, { passive: true });
+    window.addEventListener('load', updateScrollbarWidth, { once: true });
 
     const onScroll = () => {
         const metrics = getScrollMetrics();
@@ -302,7 +444,7 @@ function setHeaderActive() {
     if (!rawCat) return;
 
     const want = rawCat.trim().toUpperCase();
-    const $hdr = $('.headerwrap');
+    const $hdr = $('.header');
     if (!$hdr.length) return;
 
     const $items = $hdr.find('.nav .item');
@@ -352,7 +494,7 @@ window.Subtop = (function () {
         };
 
         // build nav items from header menu
-        const $menuItems = $('.headerwrap .nav .item');
+        const $menuItems = $('.header .nav .item');
         let $targetMenu = $();
         $menuItems.each(function () {
             const $item = $(this);
