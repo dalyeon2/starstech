@@ -55,15 +55,27 @@ Init from common.js:
 
     function makeSingle(el) {
         if (bound(el)) return;
-        w.gsap.set(el, { y: 100, autoAlpha: 0 });
+        var dist = Number(el && el.dataset && el.dataset.distance);
+        var dur = Number(el && el.dataset && el.dataset.duration);
+        var ease = (el && el.dataset && el.dataset.ease) || 'power3.out';
+        if (!isFinite(dist)) dist = 50;
+        if (!isFinite(dur)) dur = 0.55;
+
+        w.gsap.set(el, { y: dist, autoAlpha: 0 });
+        var tween = w.gsap.to(el, { y: 0, autoAlpha: 1, duration: dur, ease: ease, paused: true });
         w.ScrollTrigger.create({
             trigger: el,
             scroller: scroller(),
-            start: 'top 88%',
+            start: 'top 70%',
             onEnter: function () {
-                w.gsap.to(el, { y: 0, autoAlpha: 1, duration: 1.5, ease: 'power3.out' });
+                tween.restart();
             },
-            once: true
+            onEnterBack: function () {
+                tween.restart();
+            },
+            onLeaveBack: function () {
+                w.gsap.set(el, { y: dist, autoAlpha: 0 });
+            }
         });
     }
 

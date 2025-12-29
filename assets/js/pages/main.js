@@ -24,10 +24,10 @@
             return Math.round(value).toLocaleString('en-US');
         }
 
-        function runCount(instant) {
+        function runCount(instant, force) {
             $stats.find('.value').each(function () {
                 const $el = $(this);
-                if ($el.data('counted')) return;
+                if ($el.data('counted') && !force) return;
                 $el.data('counted', true);
 
                 const text = ($el.text() || '').trim();
@@ -67,41 +67,51 @@
             return;
         }
 
-        const tl = w.gsap.timeline({
-            scrollTrigger: {
-                trigger: $section.get(0),
-                start: 'top 65%',
-                toggleActions: 'play none none none'
-            }
-        });
+        const tl = w.gsap.timeline({ paused: true });
 
         if ($headline.length) {
-            tl.from($headline.get(0), { autoAlpha: 0, y: 50, duration: 0.6, ease: 'power3.out' });
+            tl.from($headline.get(0), { autoAlpha: 0, y: 50, duration: 0.5, ease: 'power3.out' });
         }
         if ($stats.length) {
+            const statsPosition = $headline.length ? '-=0.2' : 0;
             tl.from($stats.get(0), {
                 autoAlpha: 0,
                 y: 50,
-                duration: 0.55,
+                duration: 0.45,
                 ease: 'power3.out',
                 onStart: function () {
-                    runCount(false);
+                    runCount(false, true);
                 }
-            });
+            }, statsPosition);
         }
         const textTargets = [];
         if ($lead.length) textTargets.push($lead.get(0));
         if ($desc.length) textTargets.push($desc.get(0));
         if ($image.length) textTargets.push($image.get(0));
         if (textTargets.length) {
+            const textPosition = ($headline.length || $stats.length) ? '-=0.15' : 0;
             tl.from(textTargets, {
                 autoAlpha: 0,
                 y: 50,
-                duration: 0.55,
+                duration: 0.5,
                 ease: 'power3.out',
-                stagger: 0.1
-            });
+                stagger: 0.08
+            }, textPosition);
         }
+
+        w.ScrollTrigger.create({
+            trigger: $section.get(0),
+            start: 'top 65%',
+            onEnter: function () {
+                tl.restart();
+            },
+            onEnterBack: function () {
+                tl.restart();
+            },
+            onLeaveBack: function () {
+                tl.pause(0);
+            }
+        });
     }
 
     $(function () {
