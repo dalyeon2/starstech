@@ -1037,7 +1037,6 @@
 
 .cont4 .item {
     display: flex;
-    justify-content: space-between;
     gap: 48px;
     padding: 40px 12px;
 }
