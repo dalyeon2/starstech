@@ -279,7 +279,27 @@
 
 @media (max-width: 1280px) {
     .footer {
-        padding: 52px 60px;
+        padding: 40px 60px;
+    }
+
+    .footer .main {
+        gap: 50px;
+    }
+
+    .footer .menus {
+        gap: 30px;
+    }
+
+    .footer .inner {
+        gap: 30px;
+    }
+
+    .footer .bottom {
+        padding-top: 30px;
+    }
+
+    .footer .line {
+        gap: 8px;
     }
 }
 
@@ -288,25 +308,34 @@
         padding: 48px 40px;
     }
 
-    .footer .top {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
     .footer .main {
         flex-direction: column;
-        gap: 40px;
+        gap: 30px;
         width: 100%;
-    }
-
-    .footer .family {
-        width: 100%;
-        align-items: stretch;
     }
 
     .footer .panel {
         right: auto;
         left: 0;
+    }
+
+    .footer .menus {
+        gap: 20px;
+    }
+
+    .footer .line {
+        gap: 5px;
+    }
+
+    .footer .inner {
+        gap: 20px;
+    }
+
+    .footer .bottom {
+        padding-top: 20px;
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 20px;
     }
 }
 
@@ -319,17 +348,45 @@
         gap: 32px;
     }
 
-    .footer .units {
-        gap: 32px;
+    .footer .top {
+        width: 100%;
+        flex-direction: column;
+        gap: 20px;
     }
 
-    .footer .bottom {
-        gap: 20px;
-        align-items: flex-start;
+    .footer .units {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .footer .menus {
+        gap: 10px;
+    }
+
+    .footer .unit {
+        flex-direction: row;
+    }
+
+    .footer .list {
+        flex-direction: row;
+    }
+
+    .footer .brands .groups {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .footer .brands .group {   
+        flex-direction: row;
+        gap: 12px;
     }
 
     .footer .line {
         gap: 12px;
+    }
+
+    .footer .family {
+        width: 100%;
     }
 }
 
@@ -359,5 +416,18 @@
     .footer .copy {
         font-size: 11px;
         line-height: 16px;
+    }
+
+    .footer .unit {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .footer .menus {
+        gap: 12px;
+    }
+
+    .footer .line {
+        gap: 5px;
     }
 }
