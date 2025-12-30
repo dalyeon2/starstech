@@ -25,7 +25,7 @@
     max-width: var(--container-width);
     margin: 0 auto;
     width: 100%;
-    padding: 140px 0;
+    padding: 120px 0;
 }
 
 .container.no-pb {
@@ -46,7 +46,7 @@
 
 @media (max-width: 1280px) {
     .container {
-        padding: 150px 20px;
+        padding: 120px 20px;
     }
 
     .end-spacer {
@@ -56,13 +56,13 @@
 
 @media (max-width: 1024px) {
     .container {
-        padding: 130px 20px;
+        padding: 100px 20px;
     }
 }
 
 @media (max-width: 768px) {
     .container {
-        padding: 100px 20px;
+        padding: 80px 20px;
     }
 
     .end-spacer {
