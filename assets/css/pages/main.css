@@ -1737,6 +1737,8 @@ html[lang="ja"] .cont6 .name {
     font-size: var(--font-2xl);
     font-weight: 500;
     line-height: 1.4;
+    word-break: keep-all;
+    overflow-wrap: break-word;
 }
 
 .cont7 .badge {
