@@ -170,7 +170,7 @@
 
 .header .cards {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, 289px);
     gap: 40px;
 }
 
@@ -405,10 +405,23 @@
     transition: background 0.2s ease, border-color 0.2s ease;
 }
 
-.header .navbtn img {
+.header .navbtn .icon {
     width: 24px;
-    height: 24px;
-    object-fit: contain;
+    height: 16px;
+    display: block;
+    background: url("data:image/svg+xml,%3Csvg%20width%3D%2224%22%20height%3D%2216%22%20viewBox%3D%220%200%2024%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M0%200.923096H24%22%20stroke%3D%22%23111111%22%20stroke-width%3D%221.84615%22/%3E%3Cpath%20d%3D%22M0%207.9231H24%22%20stroke%3D%22%23111111%22%20stroke-width%3D%221.84615%22/%3E%3Cpath%20d%3D%22M0%2014.9231H24%22%20stroke%3D%22%23111111%22%20stroke-width%3D%221.84615%22/%3E%3C/svg%3E") no-repeat center/contain;
+}
+
+body.navopen .header .navbtn .icon {
+    width: 19px;
+    height: 19px;
+    display: block;
+    background: url("data:image/svg+xml,%3Csvg%20width%3D%2219%22%20height%3D%2219%22%20viewBox%3D%220%200%2019%2019%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M0.652832%2017.6233L17.6234%200.65271M17.6528%2017.6234L0.682281%200.652851%22%20stroke%3D%22%23111111%22%20stroke-width%3D%221.84615%22/%3E%3C/svg%3E") no-repeat center/contain;
+}
+
+body.navopen .header .navbtn {
+    background: var(--black-100);
+    border-color: var(--black-200);
 }
 
 .header .navbtn:hover,
@@ -419,6 +432,26 @@
 }
 
 @media (max-width: 1280px) {
+    .header .inner {
+        padding: 0 60px;
+        padding-right: max(0px, calc(60px - var(--scrollbar-width, 0px)));
+        gap: 20px;
+    }
+
+    .header .menu {
+        gap: 28px;
+    }
+
+    .header .right {
+        gap: 12px;
+    }
+
+    .header .actions {
+        gap: 10px;
+    }
+}
+
+@media (max-width: 1024px) {
     .header .nav {
         display: none;
     }
@@ -447,8 +480,7 @@
     }
 
     .header .logo img {
-        height: 40px;
-        width: auto;
+        width: 100px;
     }
 
     .header .right {
@@ -456,8 +488,13 @@
     }
 }
 
-/* Overlay Menu */
-.overlay {
+/* overlay-menu Menu */
+body.navopen {
+    overflow: hidden;
+    padding-right: var(--scrollbar-width, 0px);
+}
+
+.overlay-menu {
     position: fixed;
     inset: 0;
     background: var(--white);
@@ -467,12 +504,12 @@
     transition: opacity 0.25s ease;
 }
 
-body.navopen .overlay {
+body.navopen .overlay-menu {
     opacity: 1;
     pointer-events: auto;
 }
 
-.overlay .inner {
+.overlay-menu .inner {
     display: flex;
     flex-direction: column;
     width: 100%;
@@ -481,58 +518,36 @@ body.navopen .overlay {
     box-sizing: border-box;
 }
 
-.overlay .left {
-    display: none;
-}
-
-.overlay .right {
-    position: relative;
-    flex: 1 1 auto;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-    overflow-y: auto;
-    scrollbar-width: none;
-}
-
-.overlay .right::-webkit-scrollbar {
-    display: none;
-}
-
-.overlay .top {
+.overlay-menu .top {
+    margin-bottom: 20px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 10px;
 }
 
-.overlay .brandline {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.overlay .logo {
-    width: 66px;
+.overlay-menu .logo {
+    width: 120px;
     height: auto;
+    align-self: center;
 }
 
-.overlay .menulist {
+.overlay-menu .menulist {
     display: flex;
     flex-direction: column;
     gap: 14px;
     width: 100%;
 }
 
-.overlay .draweritem {
+.overlay-menu .draweritem {
     border: none;
     padding: 0;
 }
 
-.overlay .drawertoggle {
+.overlay-menu .drawertoggle {
     width: 100%;
-    border: 0;
+    border: 1px solid transparent;
+    border-radius: 12px;
     background: transparent;
     padding: 12px 2px;
     display: flex;
@@ -544,58 +559,81 @@ body.navopen .overlay {
     font-weight: 600;
     text-align: left;
     cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
-.overlay .drawertoggle::after {
+.overlay-menu .drawertoggle::after {
     content: "";
     width: 12px;
     height: 7px;
+    display: block;
     flex-shrink: 0;
     background: var(--black-800);
     mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7' viewBox='0 0 12 7' fill='none'%3E%3Cpath d='M10.7002 0.699951L5.7002 5.69995L0.700195 0.699951' stroke='%231D1D1D' stroke-width='1.4' stroke-miterlimit='10' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat center/contain;
     -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7' viewBox='0 0 12 7' fill='none'%3E%3Cpath d='M10.7002 0.699951L5.7002 5.69995L0.700195 0.699951' stroke='%231D1D1D' stroke-width='1.4' stroke-miterlimit='10' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat center/contain;
+    transform-origin: center;
     transition: transform 0.3s ease, background 0.3s ease;
 }
 
-.overlay .draweritem.open .drawertoggle {
-    color: #ed8437;
+.overlay-menu .drawertoggle:hover,
+.overlay-menu .drawertoggle:focus-visible {
+    background: var(--black-100);
+    border-color: var(--black-200);
+    outline: none;
 }
 
-.overlay .draweritem.open .drawertoggle::after {
+.overlay-menu .drawertoggle:hover::after,
+.overlay-menu .drawertoggle:focus-visible::after {
+    background: var(--black);
+}
+
+.overlay-menu .draweritem.open .drawertoggle {
+    color: var(--primary);
+}
+
+.overlay-menu .draweritem.open .drawertoggle::after {
     transform: rotate(-180deg);
-    background: #ed8437;
+    background: var(--primary);
 }
 
-.overlay .drawerpanel {
+.overlay-menu .drawerpanel {
     max-height: 0;
     display: flex;
     flex-direction: column;
     gap: 6px;
     background: var(--black-100);
+    border: 1px solid transparent;
     border-radius: 12px;
     opacity: 0;
     overflow: hidden;
     transition: max-height 0.3s ease, padding 0.3s ease, opacity 0.25s ease;
 }
 
-.overlay .draweritem.open .drawerpanel {
+.overlay-menu .draweritem.open .drawerpanel {
     max-height: 320px;
     padding: 10px 20px;
     opacity: 1;
+    border-color: var(--black-200);
 }
 
-.overlay .drawerlink {
-    padding: 6px 4px;
+.overlay-menu .drawerlink {
+    display: block;
+    padding: 6px 8px;
+    border-radius: 8px;
     color: var(--black-700);
     font-size: var(--font-base);
     text-decoration: none;
+    transition: background 0.2s ease, color 0.2s ease;
 }
 
-.overlay .drawerlink:hover {
+.overlay-menu .drawerlink:hover,
+.overlay-menu .drawerlink:focus-visible {
+    background: var(--black-200);
     color: var(--primary);
+    outline: none;
 }
 
-.overlay .contactbtn {
+.overlay-menu .contactbtn {
     margin-top: auto;
     width: 100%;
     background: var(--primary);
@@ -608,7 +646,7 @@ body.navopen .overlay {
     box-shadow: 0 12px 24px rgba(237, 132, 55, 0.25);
 }
 
-.overlay .closebtn {
+.overlay-menu .closebtn {
     width: 40px;
     height: 40px;
     background: var(--white);
@@ -618,67 +656,65 @@ body.navopen .overlay {
     cursor: pointer;
     flex-shrink: 0;
     border: 1px solid transparent;
-    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    border-radius: 12px;
+    transition: background 0.2s ease, border-color 0.2s ease;
 }
 
-.overlay .closebtn img {
-    width: 16px;
-    height: 16px;
-    object-fit: contain;
+.overlay-menu .closebtn .icon {
+    width: 19px;
+    height: 19px;
+    display: block;
+    background: url("data:image/svg+xml,%3Csvg%20width%3D%2219%22%20height%3D%2219%22%20viewBox%3D%220%200%2019%2019%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M0.652832%2017.6233L17.6234%200.65271M17.6528%2017.6234L0.682281%200.652851%22%20stroke%3D%22%23111111%22%20stroke-width%3D%221.84615%22/%3E%3C/svg%3E") no-repeat center/contain;
 }
 
-.overlay .closebtn:hover,
-.overlay .closebtn:focus-visible {
-    transform: scale(1.07);
-    border-color: var(--black-500);
+.overlay-menu .closebtn:hover,
+.overlay-menu .closebtn:focus-visible {
+    background: var(--black-100);
+    border-color: var(--black-200);
     outline: none;
 }
 
 @media (max-width: 1024px) {
-    .overlay .inner {
+    .overlay-menu .inner {
         padding: 24px 18px 28px;
     }
 
-    .overlay .drawertoggle {
+    .overlay-menu .drawertoggle {
         font-size: 17px;
     }
 
-    .overlay .menulist {
+    .overlay-menu .menulist {
         gap: 16px;
     }
 }
 
 @media (max-width: 768px) {
-    .overlay .menulist {
+    .overlay-menu .menulist {
         gap: 10px;
     }
 
-    .overlay .drawertoggle {
+    .overlay-menu .drawertoggle {
         padding: 8px 2px;
         font-size: 17px;
     }
 
-    .overlay .inner {
+    .overlay-menu .inner {
         padding: 22px 20px 26px;
     }
 
-    .overlay .right {
+    .overlay-menu .right {
         gap: 20px;
     }
 
-    .overlay .top {
+    .overlay-menu .top {
         align-items: flex-start;
     }
 
-    .overlay .logo {
-        width: 60px;
-    }
-
-    .overlay .drawerlink {
+    .overlay-menu .drawerlink {
         font-size: var(--font-sm);
     }
 
-    .overlay .contactbtn {
+    .overlay-menu .contactbtn {
         padding: 12px 20px;
     }
 }

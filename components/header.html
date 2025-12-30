@@ -96,36 +96,20 @@
                 </div>
                 <a class="contact" href="../pages/sub0601.html">Contact Us</a>
             </div>
-            <button class="navbtn" type="button" aria-label="Open navigation" aria-expanded="false">
-                <img src="../../assets/icons/icon-hambergur.svg" alt="Menu">
+            <button class="navbtn" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="mobileNav">
+                <span class="icon" aria-hidden="true"></span>
             </button>
         </div>
     </div>
 </header>
 
-<div class="overlay" aria-hidden="true">
+<div class="overlay-menu" id="mobileNav" aria-hidden="true">
     <div class="inner">
-        <div class="left">
-            <img src="../../assets/img/common/logo.png" alt="">
-            <div class="brand">
-                <p class="brandtitle">GB Tech</p>
-                <p class="brandsub">genebiotech</p>
-            </div>
+        <div class="top">
+            <img class="logo" src="../../assets/img/common/logo.png" alt="">
+            <button class="closebtn" type="button"><i class="icon" aria-hidden="true"></i></button>
         </div>
-
-        <div class="right">
-            <div class="top">
-                <div class="brandline">
-                    <img class="logo" src="../../assets/img/common/logo.png" alt="">
-                </div>
-
-                <button class="closebtn" type="button" aria-label="Close navigation">
-                    <img src="../../assets/icons/icon-close.svg" alt="">
-                </button>
-            </div>
-            <div class="menulist"></div>
-            <a class="contactbtn" href="../pages/sub0601.html">Contact</a>
-        </div>
+        <div class="menulist"></div>
     </div>
 </div>
 <!-- e: HEADER -->

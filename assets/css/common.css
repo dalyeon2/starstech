@@ -38,15 +38,14 @@
 
 @media (max-width: 1720px) {
     .container {
-        margin: 0 auto;
-        padding-left: 30px;
-        padding-right: 30px;
+        padding-left: 60px;
+        padding-right: 60px;
     }
 }
 
 @media (max-width: 1280px) {
     .container {
-        padding: 120px 20px;
+        padding: 120px 30px;
     }
 
     .end-spacer {
