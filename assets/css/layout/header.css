@@ -520,6 +520,10 @@ body.navopen .header .navbtn {
 }
 
 /* overlay-menu Menu */
+html.navopen {
+    overflow: hidden;
+}
+
 body.navopen {
     overflow: hidden;
     padding-right: var(--scrollbar-width, 0px);
@@ -528,16 +532,21 @@ body.navopen {
 .overlay-menu {
     position: fixed;
     inset: 0;
+    background: #ffffff;
     background: var(--white);
     z-index: 900;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.25s ease;
+    visibility: hidden;
+    transition: opacity 0.25s ease, visibility 0s linear 0.25s;
+    overscroll-behavior: contain;
 }
 
-body.navopen .overlay-menu {
+.overlay-menu[aria-hidden="false"] {
     opacity: 1;
     pointer-events: auto;
+    visibility: visible;
+    transition: opacity 0.25s ease, visibility 0s linear 0s;
 }
 
 .overlay-menu .inner {
@@ -568,6 +577,11 @@ body.navopen .overlay-menu {
     flex-direction: column;
     gap: 14px;
     width: 100%;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
 }
 
 .overlay-menu .draweritem {
@@ -619,12 +633,20 @@ body.navopen .overlay-menu {
 }
 
 .overlay-menu .draweritem.open .drawertoggle {
-    color: var(--primary);
+    color: var(--black);
+    background: transparent;
+    border-color: transparent;
+}
+
+.overlay-menu .draweritem.open .drawertoggle:hover,
+.overlay-menu .draweritem.open .drawertoggle:focus-visible {
+    background: transparent;
+    border-color: transparent;
 }
 
 .overlay-menu .draweritem.open .drawertoggle::after {
     transform: rotate(-180deg);
-    background: var(--primary);
+    background: var(--black);
 }
 
 .overlay-menu .drawerpanel {
@@ -645,6 +667,14 @@ body.navopen .overlay-menu {
     padding: 10px 20px;
     opacity: 1;
     border-color: var(--black-200);
+}
+
+.overlay-menu .drawerlabel {
+    display: block;
+    padding: 4px 8px 2px;
+    color: var(--black);
+    font-size: var(--font-sm);
+    font-weight: 600;
 }
 
 .overlay-menu .drawerlink {

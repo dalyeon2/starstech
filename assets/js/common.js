@@ -254,13 +254,11 @@ function initMobileMenu() {
     const $menuList = $overlay.find('.menulist');
     let scrollLockActive = false;
     const lockOptions = { passive: false, capture: true };
-    const overlayScroll = $overlay.find('.right').get(0);
+    const overlayScroll = $menuList.get(0);
 
     const lockScroll = (e) => {
         if (!$('body').hasClass('navopen')) return;
         if (overlayScroll && overlayScroll.contains(e.target)) {
-            if (typeof e.stopImmediatePropagation === 'function') e.stopImmediatePropagation();
-            e.stopPropagation();
             return;
         }
         e.preventDefault();
@@ -315,21 +313,53 @@ function initMobileMenu() {
         $items.each(function () {
             const $item = $(this);
             const label = $.trim($item.children('a').first().text());
+            const $cards = $item.find('.panel .card');
             const $subLinks = $item.find('.panel .link');
 
             const $drawer = $('<div class="draweritem"></div>');
             const $toggle = $('<button type="button" class="drawertoggle" aria-expanded="false"></button>').text(label);
             const $panel = $('<div class="drawerpanel" aria-hidden="true"></div>');
+            let hasPanelContent = false;
 
-            if ($subLinks.length) {
+            if ($cards.length) {
+                $cards.each(function () {
+                    const $card = $(this);
+                    const titleText = $.trim($card.find('.title').first().text());
+                    if (titleText) {
+                        const $label = $('<div class="drawerlabel"></div>').text(titleText);
+                        $panel.append($label);
+                        hasPanelContent = true;
+                    }
+                    const $cardLinks = $card.find('.link');
+                    if ($cardLinks.length) {
+                        $cardLinks.each(function () {
+                            const $link = $(this);
+                            const text = $.trim($link.text());
+                            if (!text) return;
+                            const href = $link.attr('href') || '#';
+                            const $a = $('<a class="drawerlink"></a>').attr('href', href).text(text);
+                            $panel.append($a);
+                            hasPanelContent = true;
+                        });
+                    }
+                });
+            }
+
+            if (!hasPanelContent && $subLinks.length) {
+                let addedSubLink = false;
                 $subLinks.each(function () {
                     const $link = $(this);
                     const text = $.trim($link.text());
+                    if (!text) return;
                     const href = $link.attr('href') || '#';
                     const $a = $('<a class="drawerlink"></a>').attr('href', href).text(text);
                     $panel.append($a);
+                    addedSubLink = true;
                 });
-            } else {
+                hasPanelContent = addedSubLink;
+            }
+
+            if (!hasPanelContent) {
                 const $mainLink = $item.children('a').first();
                 const href = $mainLink.attr('href') || '#';
                 const $a = $('<a class="drawerlink"></a>').attr('href', href).text(label);
@@ -435,6 +465,42 @@ function normalizeLangMenuLinks($root) {
     });
 }
 
+function getCleanSlugFromHash() {
+    const raw = window.location.hash || '';
+    if (!raw.startsWith('#/')) return '';
+    let slug = raw.slice(2);
+    if (!slug) return '';
+    slug = slug.split('?')[0];
+    if (slug.indexOf('/') !== -1) return '';
+    try {
+        slug = decodeURIComponent(slug);
+    } catch (e) {
+    }
+    return slug.toLowerCase();
+}
+
+function routeCleanHashToPage() {
+    const slug = getCleanSlugFromHash();
+    if (!slug) return;
+    const routes = window.__cleanSlugRoutes;
+    if (!routes || !routes[slug]) return;
+    const current = (window.__htmlPath || stripBasePath(window.location.pathname || '/')).toLowerCase();
+    let targetPath = '';
+    try {
+        targetPath = stripBasePath(new URL(routes[slug], window.location.href).pathname).toLowerCase();
+    } catch (e) {
+        targetPath = stripBasePath(routes[slug]).toLowerCase();
+    }
+    if (current && targetPath && current === targetPath) return;
+    window.location.replace(routes[slug]);
+}
+
+function ensureCleanHashRouter() {
+    if (window.__cleanHashRouterBound) return;
+    window.__cleanHashRouterBound = true;
+    window.addEventListener('hashchange', routeCleanHashToPage);
+}
+
 function applyCleanDisplayFromMap(htmlToClean) {
     const currentPath = stripBasePath(window.location.pathname || '/');
     const entry = htmlToClean && htmlToClean[currentPath];
@@ -477,6 +543,7 @@ function normalizeCleanUrls($root) {
     const conflicts = new Set();
     const items = [];
     const htmlToClean = {};
+    const slugRoutes = Object.create(null);
 
     $links.each(function () {
         const $link = $(this);
@@ -518,8 +585,14 @@ function normalizeCleanUrls($root) {
         const cleanHref = joinPath(base, pagesBase) + hash;
         item.$link.attr('href', cleanHref);
         htmlToClean[item.pathWithLang] = { path: pagesBase, hash: hash };
+        if (!slugRoutes[slug]) {
+            slugRoutes[slug] = joinPath(base, item.pathWithLang);
+        }
     });
 
+    window.__cleanSlugRoutes = slugRoutes;
+    ensureCleanHashRouter();
+    routeCleanHashToPage();
     applyCleanDisplayFromMap(htmlToClean);
 }
 

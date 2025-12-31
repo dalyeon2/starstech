@@ -264,10 +264,13 @@
         let step = 0;
         let maxIndex = 0;
 
-        function getColumns(width) {
-            if (width <= 768) return 2;
-            if (width <= 1024) return 3;
-            return 4;
+        function getLayout(width) {
+            if (width <= 480) {
+                return { mode: 'stacked', columns: 1, rows: 2 };
+            }
+            if (width <= 768) return { mode: 'slider', columns: 2 };
+            if (width <= 1024) return { mode: 'slider', columns: 3 };
+            return { mode: 'grid', columns: 4 };
         }
 
         function updateButtons() {
@@ -288,7 +291,7 @@
         }
 
         function resetSlider() {
-            $section.removeClass('is-slider');
+            $section.removeClass('is-slider is-stacked');
             $track.css('transform', '');
             $cards.each(function () {
                 this.style.flex = '';
@@ -298,22 +301,40 @@
 
         function applyLayout() {
             const width = w.innerWidth || d.documentElement.clientWidth;
-            const columns = getColumns(width);
+            const layout = getLayout(width);
 
-            if (columns === 4) {
+            if (layout.mode === 'grid') {
                 resetSlider();
                 return;
             }
 
             $section.addClass('is-slider');
+            $section.toggleClass('is-stacked', layout.mode === 'stacked');
 
             const trackEl = $track.get(0);
             const trackWidth = trackEl.clientWidth;
             const styles = w.getComputedStyle(trackEl);
-            const gap = parseFloat(styles.columnGap || styles.gap || 0) || 0;
-            const cardWidth = Math.floor((trackWidth - gap * (columns - 1)) / columns);
+            const columnGap = parseFloat(styles.columnGap || styles.gap || 0) || 0;
 
-            step = cardWidth + gap;
+            if (layout.mode === 'stacked') {
+                const rows = layout.rows;
+                step = trackWidth + columnGap;
+                maxIndex = Math.max(0, Math.ceil($cards.length / rows) - 1);
+                if (index > maxIndex) index = maxIndex;
+
+                $cards.each(function () {
+                    this.style.flex = '';
+                });
+
+                applyTransform();
+                updateButtons();
+                return;
+            }
+
+            const columns = layout.columns;
+            const cardWidth = Math.floor((trackWidth - columnGap * (columns - 1)) / columns);
+
+            step = cardWidth + columnGap;
             maxIndex = Math.max(0, $cards.length - columns);
             if (index > maxIndex) index = maxIndex;
 
