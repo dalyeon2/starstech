@@ -7,6 +7,104 @@
     }
 
     /* Section 1: intro splash */
+    function initIntroVideoLoop() {
+        const $section = $('.cont1');
+        if (!$section.length) return;
+
+        const $bg = $section.find('.bg');
+        const $video = $bg.find('video').first();
+        if (!$bg.length || !$video.length) return;
+        if (prefersReducedMotion()) return;
+        if ($bg.data('seamlessInit')) return;
+        $bg.data('seamlessInit', true);
+
+        const videoA = $video.get(0);
+        if (!videoA || typeof videoA.play !== 'function') return;
+
+        const videoB = videoA.cloneNode(true);
+        videoB.removeAttribute('id');
+        videoB.removeAttribute('autoplay');
+        videoB.autoplay = false;
+        videoB.muted = true;
+        videoB.setAttribute('muted', '');
+        videoB.playsInline = true;
+        videoB.setAttribute('playsinline', '');
+        videoB.setAttribute('aria-hidden', 'true');
+        videoB.tabIndex = -1;
+
+        $bg.addClass('is-seamless');
+        $video.addClass('is-active');
+        $bg.append(videoB);
+
+        let active = videoA;
+        let standby = videoB;
+        let swapping = false;
+        let watchTimer = null;
+        const fadeMs = 500;
+        const overlapSec = 0.55;
+
+        const safePlay = (video) => {
+            try {
+                const promise = video.play();
+                if (promise && typeof promise.catch === 'function') {
+                    promise.catch(() => { });
+                }
+            } catch (e) {
+            }
+        };
+
+        const resetVideo = (video) => {
+            try {
+                video.pause();
+            } catch (e) {
+            }
+            try {
+                video.currentTime = 0;
+            } catch (e) {
+            }
+        };
+
+        const swapVideos = () => {
+            if (swapping) return;
+            swapping = true;
+
+            resetVideo(standby);
+            safePlay(standby);
+            standby.classList.add('is-active');
+            active.classList.remove('is-active');
+
+            const prev = active;
+            active = standby;
+            standby = prev;
+
+            setTimeout(() => {
+                resetVideo(standby);
+                swapping = false;
+            }, fadeMs + 60);
+        };
+
+        const checkLoop = () => {
+            if (swapping) return;
+            const duration = active.duration;
+            if (!isFinite(duration) || duration <= 0) return;
+            if (duration - active.currentTime <= overlapSec) {
+                swapVideos();
+            }
+        };
+
+        const startWatch = () => {
+            if (watchTimer) return;
+            watchTimer = w.setInterval(checkLoop, 180);
+        };
+
+        if (isFinite(videoA.duration) && videoA.duration > 0) {
+            startWatch();
+        } else {
+            videoA.addEventListener('loadedmetadata', startWatch, { once: true });
+        }
+
+        safePlay(videoA);
+    }
 
     /* Section 2: overview */
     function initOverview() {
@@ -448,6 +546,7 @@
     }
 
     $(function () {
+        initIntroVideoLoop();
         initOverview();
         initResults();
         initAbout();

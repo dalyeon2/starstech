@@ -94,7 +94,6 @@
     min-height: 565px;
     padding-top: 160px;
     padding-bottom: 80px;
-    color: var(--black);
 }
 
 .subtop.text-only .copy {
@@ -102,10 +101,10 @@
 }
 
 .subtop.text-only .copy .title {
+    color: var(--black); 
     font-family: var(--font-en);
-    font-size: clamp(36px, 7vw, 120px);
+    font-size: 120px;
     line-height: 1.2;
-    color: var(--black);
 }
 
 .subtop.text-only .copy .title .dot {

@@ -28,12 +28,16 @@
     padding: 120px 0;
 }
 
+.subpage-content .container {
+    max-width: var(--sub-container-width);
+}
+
 .container.no-pb {
     padding-bottom: 0 !important;
 }
 
 .end-spacer {
-    padding-bottom: 240px;
+    padding-bottom: 200px;
 }
 
 @media (max-width: 1720px) {

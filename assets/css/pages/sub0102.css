@@ -3,10 +3,6 @@
                 Sub 0102
 --------------------------------------------- 
 */
-body {
-    background: var(--black-200);
-}
-
 /* cont1 */
 .cont1 .container {
     width: 100%;
