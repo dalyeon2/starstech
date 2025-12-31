@@ -3,283 +3,153 @@
                 Sub 0103
 --------------------------------------------- 
 */
-body {
-    background: var(--black-200);
-}
-
 /* cont1 */
-.cont1 .layout {
-    max-width: 1920px;
+.cont1 {
+    position: relative;
+}
+
+.cont1 .bg {
+    position: absolute;
+    inset: 0;
     width: 100%;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: row-reverse;
-    justify-content: space-between;
-    align-items: stretch;
-    background: white;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    z-index: -1;
 }
 
-.cont1 .left {
-    max-width: 1120px;
-    margin: 0 auto;
-    padding: 100px 0 80px;
+.cont1 .container {
+    min-height: 423px;
+    padding-top: 100px;
+    padding-bottom: 100px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.cont1 .stats {
+    display: flex;
+    gap: 128px;
+}
+
+.cont1 .tag {
+    color: white;
+}
+
+.cont1 .item {
+    padding: 10px 0;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    gap: 40px;
+    gap: 14px;
 }
 
-.cont1 .text {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
+.cont1 .value {
+    color: white;
+    text-align: right;
+    font-family: var(--font-en);
+    font-size: 80px;
+    font-weight: 700;
+    line-height: 1.1;
 }
 
-.cont1 .para {
-    max-width: 855px;
-    color: var(--black-900);
-    font-size: var(--font-md);
-    font-weight: 500;
+.cont1 .copy {
+    align-self: flex-end;
+    color: white;
+    font-size: 32px;
+    font-weight: 600;
     line-height: 1.6;
+    word-break: keep-all;
     white-space: pre-line;
 }
 
-.cont1 .para:first-child {
-    padding-bottom: 22px;
-    border-bottom: 1px solid var(--black-500);
-}
-
-.cont1 .lead {
-    font-size: var(--font-3xl);
-    line-height: 39px;
-    font-weight: 500;
-}
-
-.cont1 .cards {
-    max-width: 890px;
-    margin-top: 26px;
-    padding: 30px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    background: var(--black-100);
-    border-radius: 30px;
-}
-
-.cont1 .card {
-    display: flex;
-    gap: 20px;
-    align-items: center;
-    padding: 17px 23px;
-    border-radius: 20px;
-    background: #EAECEF;
-}
-
-.cont1 .card.soft {
-    background: #FFF3EA;
-}
-
-.cont1 .card h3 {
-    min-width: 120px;
-    color: var(--blue-deep);
-    font-size: var(--font-lg);
-    font-weight: 600;
-    line-height: 1.4;
-    white-space: nowrap;
-}
-
-.cont1 .card.soft h3 {
-    color: var(--teal);
-}
-
-.cont1 .card p {
-    color: var(--black-900);
-    font-size: var(--font-sm);
-    font-weight: 500;
-    line-height: 1.5;
-}
-
-.cont1 .right {
-    position: relative;
-    display: flex;
-    align-items: stretch;
-    min-height: 960px;
-}
-
-.cont1 .right img {
-    width: 100%;
-    height: 100%;
-    flex: 1 1 auto;
-    object-fit: cover;
-    display: block;
-}
-
-@media (max-width: 1680px) {
-    .cont1 .left {
-        padding-left: 30px;
-        padding-right: 30px;
-    }
-}
-
-@media (max-width: 1440px) {
-    .cont1 .left {
-        padding: 80px 30px 100px;
-    }
-
-    .cont1 .right {
-        min-height: 860px;
-    }
-}
-
 @media (max-width: 1280px) {
-    .cont1 .left {
-        max-width: 960px;
-        padding: 70px 30px 90px;
+    .cont1 .value {
+        font-size: 68px;
     }
 
-    .cont1 .text {
-        gap: 18px;
-    }
-
-    .cont1 .lead {
-        font-size: var(--font-2xl);
-        line-height: 1.45;
-    }
-
-    .cont1 .right {
-        min-height: 720px;
-        flex: 1 1 48%;
-    }
-
-    .cont1 .cards {
-        padding: 25px;
+    .cont1 .copy {
+        font-size: 28px;
     }
 }
 
 @media (max-width: 1024px) {
-    .cont1 .left {
+    .cont1 .wrap {
+        height: auto;
+        min-height: 360px;
+        padding: 70px 28px;
+        display: flex;
+        flex-direction: column;
+        gap: 32px;
+    }
+
+    .cont1 .stats {
+        position: relative;
+        left: auto;
+        top: auto;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 22px;
+    }
+
+    .cont1 .copy {
+        position: relative;
+        right: auto;
+        top: auto;
         max-width: none;
-        padding: 60px 20px 80px;
-    }
-
-    .cont1 .text {
-        gap: 16px;
-    }
-
-    .cont1 .lead {
-        font-size: var(--font-xl);
-        line-height: 1.4;
-    }
-
-    .cont1 .right {
-        min-height: 520px;
-        flex: 1 1 52%;
-    }
-
-    .cont1 .cards {
-        padding: 20px;
-    }
-
-    .cont1 .card {
-        display: grid;
-        grid-template-columns: auto 1fr;
-        gap: 10px 14px;
-        align-items: start;
-    }
-
-    .cont1 .card h3 {
-        font-size: var(--font-md);
-        min-width: 0;
-        white-space: normal;
-    }
-
-    .cont1 .card p {
-        line-height: 1.55;
     }
 }
 
 @media (max-width: 768px) {
-    .cont1 .layout {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 20px;
-        padding: 0 28px;
+    .cont1 .wrap {
+        padding: 60px 20px;
+        gap: 24px;
     }
 
-    .cont1 .left {
-        padding: 50px 0 0;
-        gap: 30px;
+    .cont1 .item {
+        gap: 10px;
     }
 
-    .cont1 .text {
-        gap: 12px;
+    .cont1 .meta {
+        gap: 10px;
     }
 
-    .cont1 .para {
-        font-size: var(--font-base);
-        line-height: 1.56;
+    .cont1 .dot {
+        width: 8px;
+        height: 8px;
     }
 
-    .cont1 .cards {
-        margin-top: 15px;
-        gap: 15px;
+    .cont1 .label {
+        font-size: 16px;
     }
 
-    .cont1 .card {
-        padding: 14px 18px;
-        grid-template-columns: 1fr;
-        gap: 8px;
+    .cont1 .value {
+        font-size: 52px;
     }
 
-    .cont1 .right {
-        flex: auto;
-        width: 100%;
-        min-height: auto;
-        height: 400px;
+    .cont1 .copy {
+        font-size: 24px;
+        line-height: 1.5;
     }
 }
 
 @media (max-width: 480px) {
-    .cont1 .layout {
-        gap: 16px;
-        padding: 0 14px;
+    .cont1 .wrap {
+        padding: 50px 16px;
     }
 
-    .cont1 .left {
-        padding: 40px 0 0;
-        gap: 20px;
+    .cont1 .stats {
+        gap: 18px;
     }
 
-    .cont1 .text {
-        gap: 10px;
+    .cont1 .label {
+        font-size: 14px;
     }
 
-    .cont1 .lead {
-        font-size: var(--font-lg);
-        line-height: 1.3;
+    .cont1 .value {
+        font-size: 42px;
     }
 
-    .cont1 .para {
-        font-size: var(--font-sm);
-        line-height: 1.6;
-    }
-
-    .cont1 .cards {
-        padding: 15px;
-    }
-
-    .cont1 .card {
-        padding: 12px 16px;
-        gap: 5px;
-        border-radius: 16px;
-    }
-
-    .cont1 .card h3 {
-        font-size: var(--font-base);
-    }
-
-    .cont1 .right {
-        height: 300px;
+    .cont1 .copy {
+        font-size: 20px;
     }
 }
 
