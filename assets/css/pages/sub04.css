@@ -140,8 +140,27 @@
 }
 
 .cont2 .head.line {
-    padding-bottom: 12px;
-    border-bottom: 1px dashed var(--black-300);
+    position: relative;
+}
+
+.cont2 .head.line::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    width: 100vw;
+    height: 1px;
+    transform: translateX(-50%);
+    background-image: repeating-linear-gradient(90deg, var(--black-400) 0 2px, transparent 7px 10px);
+    background-repeat: repeat-x;
+    background-position: left bottom;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.cont2 .head.line > * {
+    position: relative;
+    z-index: 1;
 }
 
 .cont2 .tabs {
@@ -161,6 +180,11 @@
     font-family: inherit;
     cursor: pointer;
     transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.cont2 .tab:hover,
+.cont2 .tab:focus-visible {
+    color: var(--black);
 }
 
 .cont2 .tab.active {
