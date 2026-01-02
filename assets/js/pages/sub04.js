@@ -1,14 +1,19 @@
 /**
- * sub04 (Newsroom)
+ * sub04 (Newsroom + PR)
  * list + detail
  */
 (function () {
     var NEWS_ENDPOINT = '../../assets/data/newsroom.json';
     var NEWS_LIST_URL = './sub0401.html';
     var NEWS_KEY = 'news';
+    var BOARD_ENDPOINT = '../../assets/data/prboard.json';
+    var BOARD_LIST_URL = './sub0402.html';
+    var NOTICE_KEY = 'notice';
     var NEWS_PLACEHOLDER_IMG = '../../assets/img/common/default-image.jpg';
     var NEWS_STORAGE_KEY = 'newsroom-items-v1';
+    var BOARD_STORAGE_KEY = 'prboard-items-v1';
     var newsCache = null;
+    var boardCache = null;
     var lastDetailSignature = '';
     var detailHasLoaded = false;
 
@@ -20,9 +25,9 @@
         return (key || '').toLowerCase();
     }
 
-    function parseHashIdx() {
+    function parseHash() {
         var raw = (window.location.hash || '').replace(/^#/, '');
-        if (!raw) return null;
+        if (!raw) return { key: null, idx: null };
 
         var query = '';
         var queryIdx = raw.indexOf('?');
@@ -48,13 +53,11 @@
             }
         }
 
-        if (key && key !== NEWS_KEY) return null;
-        return idx;
+        return { key: key || null, idx: idx };
     }
 
-    function getIndexParam(total) {
-        var hashIdx = parseHashIdx();
-        if (hashIdx !== null) {
+    function getIndexParam(total, hashIdx) {
+        if (hashIdx !== null && hashIdx !== undefined) {
             var safeIdx = hashIdx;
             if (typeof total === 'number' && total > 0) {
                 return Math.min(Math.max(0, safeIdx), total - 1);
@@ -100,7 +103,32 @@
                 thumb: thumb,
                 images: images,
                 content: (item && item.content) || '',
-                source: (item && item.source) || null
+                source: (item && item.source) || null,
+                label: (item && item.label) || '보도자료',
+                type: (item && item.type) || 'news'
+            };
+        });
+    }
+
+    function normalizeBoardItems(items) {
+        if (!Array.isArray(items)) return [];
+        return items.map(function (item, idx) {
+            var images = Array.isArray(item && item.images) ? item.images.filter(function (img) {
+                return img && img.src;
+            }) : [];
+            var thumb = (item && item.thumb) || (images[0] ? images[0].src : NEWS_PLACEHOLDER_IMG);
+            var type = normalizeKey(item && item.type) || 'pr';
+            return {
+                id: (item && item.id) || ('board-' + idx),
+                type: type,
+                label: (item && item.label) || (type === NOTICE_KEY ? '공지사항' : '홍보자료'),
+                title: (item && item.title) || 'Untitled',
+                date: (item && item.date) || '',
+                thumb: thumb,
+                images: images,
+                content: (item && item.content) || '',
+                source: (item && item.source) || null,
+                link: (item && item.link) || ''
             };
         });
     }
@@ -111,10 +139,10 @@
         });
     }
 
-    function getCachedNewsItems() {
-        if (!window.sessionStorage) return null;
+    function getCachedItems(storageKey) {
+        if (!window.sessionStorage || !storageKey) return null;
         try {
-            var raw = window.sessionStorage.getItem(NEWS_STORAGE_KEY);
+            var raw = window.sessionStorage.getItem(storageKey);
             if (!raw) return null;
             var data = JSON.parse(raw);
             if (!Array.isArray(data)) return null;
@@ -124,10 +152,10 @@
         }
     }
 
-    function setCachedNewsItems(items) {
-        if (!window.sessionStorage || !Array.isArray(items)) return;
+    function setCachedItems(storageKey, items) {
+        if (!window.sessionStorage || !storageKey || !Array.isArray(items)) return;
         try {
-            window.sessionStorage.setItem(NEWS_STORAGE_KEY, JSON.stringify(items));
+            window.sessionStorage.setItem(storageKey, JSON.stringify(items));
         } catch (err) {
             // ignore storage failures
         }
@@ -152,9 +180,17 @@
         };
     }
 
-    function buildNewsDetailUrl(idx) {
+    function buildDetailUrl(key, idx) {
         var safeIdx = Math.max(0, Number(idx) || 0);
-        return './sub-detail.html#' + encodeURIComponent(NEWS_KEY) + '/' + safeIdx;
+        return './sub-detail.html#' + encodeURIComponent(key) + '/' + safeIdx;
+    }
+
+    function buildNewsDetailUrl(idx) {
+        return buildDetailUrl(NEWS_KEY, idx);
+    }
+
+    function buildNoticeDetailUrl(idx) {
+        return buildDetailUrl(NOTICE_KEY, idx);
     }
 
     function fetchNewsData() {
@@ -177,6 +213,28 @@
                 return null;
             });
         return newsCache;
+    }
+
+    function fetchBoardData() {
+        if (boardCache) return boardCache;
+        if (!BOARD_ENDPOINT) return Promise.resolve(null);
+        boardCache = fetch(BOARD_ENDPOINT)
+            .then(function (resp) {
+                if (!resp.ok) throw new Error('network');
+                return resp.json();
+            })
+            .then(function (data) {
+                if (!data || !Array.isArray(data.items)) throw new Error('invalid');
+                return normalizeBoardItems(data.items);
+            })
+            .catch(function (err) {
+                console.warn('[sub04] Board data load failed.', {
+                    endpoint: BOARD_ENDPOINT,
+                    message: err && err.message ? err.message : err
+                });
+                return null;
+            });
+        return boardCache;
     }
 
     function refreshScrollHeight() {
@@ -215,8 +273,23 @@
         }
     }
 
+    function updateSubtop(key) {
+        var $title = $('.subtop .title');
+        var $desc = $('.subtop .desc');
+        if (!$title.length || !$desc.length) return;
+
+        if (key === NOTICE_KEY) {
+            $title.html('PR<span class="dot">.</span>');
+            $desc.text('홍보자료와 공지사항을 확인하세요.');
+            return;
+        }
+
+        $title.html('Newsroom<span class="dot">.</span>');
+        $desc.text('스타스테크의 새로운 소식을 확인하세요.');
+    }
+
     function initNewsList() {
-        var $section = $('.cont2');
+        var $section = $('.cont2.news');
         if (!$section.length) return;
 
         var $list = $section.find('.list');
@@ -432,7 +505,7 @@
                 if (sorted.length) {
                     renderHighlight(sorted[0], 0);
                 }
-                setCachedNewsItems(sorted);
+                setCachedItems(NEWS_STORAGE_KEY, sorted);
                 renderCards(sorted);
                 items = buildItemsIndex(sorted);
                 totalCount = items.length;
@@ -444,10 +517,298 @@
         });
     }
 
-    function initNewsDetail(items) {
-        var listUrl = NEWS_LIST_URL;
+    function initBoardList() {
+        var $section = $('.cont2.board');
+        if (!$section.length) return;
+
+        var $list = $section.find('.list');
+        var $tabs = $section.find('.tab');
+        var $searchInput = $section.find('.input');
+        var $searchBtn = $section.find('.btn');
+        var $totalNum = $section.find('.num');
+        var $pagination = $section.find('.pagination');
+        var $pagesContainer = $pagination.find('.pages');
+        var $prevBtn = $pagination.find('.nav.prev');
+        var $nextBtn = $pagination.find('.nav.next');
+        var $empty = null;
+
+        function ensureEmpty() {
+            $empty = $list.find('.empty');
+            if (!$empty.length) {
+                $empty = $('<div/>', { 'class': 'empty', role: 'status', 'aria-live': 'polite' });
+                $list.append($empty);
+            }
+        }
+
+        function normalizeText(text) {
+            return (text || '')
+                .toLowerCase()
+                .replace(/\s+/g, ' ')
+                .trim();
+        }
+
+        var currentType = 'all';
+        var currentPage = 1;
+        var perPage = 6;
+        var currentQuery = normalizeText($searchInput.val());
+        var items = [];
+        var totalCount = 0;
+        var noticeIndexMap = {};
+
+        function updateTotal(count) {
+            if ($totalNum.length) $totalNum.text(String(count));
+        }
+
+        function buildNoticeIndex(sortedItems) {
+            noticeIndexMap = {};
+            var noticeItems = sortedItems.filter(function (item) {
+                return item.type === NOTICE_KEY;
+            });
+            noticeItems.forEach(function (item, idx) {
+                noticeIndexMap[item.id] = idx;
+            });
+        }
+
+        function renderHighlight(item) {
+            var $highlight = $('.cont1');
+            if (!$highlight.length || !item) return;
+
+            var $img = $highlight.find('.img');
+            var $title = $highlight.find('.title');
+            var $date = $highlight.find('.date');
+            var $desc = $highlight.find('.desc');
+            var $label = $highlight.find('.label');
+            var $btn = $highlight.find('.btn');
+
+            var cover = (item.images && item.images[0] && item.images[0].src) || item.thumb || NEWS_PLACEHOLDER_IMG;
+            var summary = (item.content || '').split(/\n+/).filter(Boolean)[0] || '';
+
+            if ($img.length) {
+                $img.attr('src', cover);
+                $img.attr('alt', item.title || '');
+            }
+            if ($label.length) $label.text(item.label || '');
+            if ($title.length) $title.text(item.title || '');
+            if ($date.length) $date.text(item.date || '');
+            if ($desc.length) $desc.text(summary);
+
+            if ($btn.length) {
+                var href = '';
+                var target = 'self';
+                if (item.type === NOTICE_KEY) {
+                    var noticeIdx = noticeIndexMap[item.id];
+                    href = buildNoticeDetailUrl(typeof noticeIdx === 'number' ? noticeIdx : 0);
+                } else {
+                    href = item.link || '';
+                    target = '_blank';
+                }
+
+                $btn.attr('data-href', href);
+                $btn.off('click.board').on('click.board', function () {
+                    if (!href) return;
+                    if (target === '_blank') {
+                        var win = window.open(href, '_blank', 'noopener');
+                        if (win) win.opener = null;
+                    } else {
+                        window.location.href = href;
+                    }
+                });
+            }
+        }
+
+        function renderCards(boardItems) {
+            $list.empty();
+            boardItems.forEach(function (item) {
+                var thumb = item.thumb || (item.images && item.images[0] ? item.images[0].src : NEWS_PLACEHOLDER_IMG);
+                var isNotice = item.type === NOTICE_KEY;
+                var noticeIdx = noticeIndexMap[item.id];
+                var href = isNotice ? buildNoticeDetailUrl(noticeIdx || 0) : (item.link || '#');
+                var $card = $('<a/>', { 'class': 'card', href: href });
+                if (!isNotice) {
+                    $card.attr('target', '_blank');
+                    $card.attr('rel', 'noopener');
+                }
+                var $img = $('<img/>', { 'class': 'thumb', src: thumb, alt: item.title || '' });
+                var $media = $('<div/>', { 'class': 'media' });
+                var $meta = $('<div/>', { 'class': 'meta' });
+                var $label = $('<div/>', { 'class': 'label', text: item.label || '' });
+                var $title = $('<div/>', { 'class': 'title', text: item.title || '' });
+                var $date = $('<div/>', { 'class': 'date', text: item.date || '' });
+
+                $meta.append($label, $title, $date);
+                $media.append($img);
+                $card.append($media, $meta);
+                $list.append($card);
+            });
+            ensureEmpty();
+        }
+
+        function buildItemsIndex(boardItems) {
+            var $cards = $list.find('.card');
+            return boardItems.map(function (item, idx) {
+                return {
+                    $el: $cards.eq(idx),
+                    type: item.type,
+                    text: normalizeText((item.label || '') + ' ' + (item.title || '') + ' ' + (item.date || '') + ' ' + (item.content || ''))
+                };
+            });
+        }
+
+        function buildItemsFromDom() {
+            var arr = [];
+            $list.find('.card').each(function () {
+                var $card = $(this);
+                var labelText = $card.find('.label').text();
+                var title = $card.find('.title').text();
+                var date = $card.find('.date').text();
+                var type = labelText.indexOf('공지') !== -1 ? NOTICE_KEY : 'pr';
+                arr.push({
+                    $el: $card,
+                    type: type,
+                    text: normalizeText(labelText + ' ' + title + ' ' + date)
+                });
+            });
+            ensureEmpty();
+            return arr;
+        }
+
+        function getFilteredItems() {
+            var filtered = items;
+            if (currentType !== 'all') {
+                filtered = filtered.filter(function (item) {
+                    return item.type === currentType;
+                });
+            }
+            if (!currentQuery) return filtered;
+            return filtered.filter(function (item) {
+                return item.text.indexOf(currentQuery) !== -1;
+            });
+        }
+
+        function updateNav(totalPages) {
+            var prevDisabled = currentPage <= 1;
+            var nextDisabled = currentPage >= totalPages;
+            if ($prevBtn.length) $prevBtn.prop('disabled', prevDisabled).attr('aria-disabled', String(prevDisabled));
+            if ($nextBtn.length) $nextBtn.prop('disabled', nextDisabled).attr('aria-disabled', String(nextDisabled));
+        }
+
+        function renderPages(totalPages) {
+            if (!$pagesContainer.length) return;
+            $pagesContainer.empty();
+            for (var i = 1; i <= totalPages; i++) {
+                var $pageBtn = $('<button/>', {
+                    'class': 'page' + (i === currentPage ? ' active' : ''),
+                    type: 'button',
+                    text: i
+                }).data('page', i);
+                $pagesContainer.append($pageBtn);
+            }
+        }
+
+        function renderList() {
+            var filtered = getFilteredItems();
+            var total = filtered.length;
+            var totalPages = Math.max(1, Math.ceil(total / perPage));
+
+            if (currentPage > totalPages) currentPage = totalPages;
+            updateTotal(total);
+
+            if (total === 0) {
+                var message = totalCount ? '검색 결과가 없습니다.' : '게시물이 없습니다.';
+                if ($empty) $empty.text(message);
+                $list.addClass('showempty');
+            } else {
+                $list.removeClass('showempty');
+            }
+
+            items.forEach(function (item) {
+                item.$el.hide();
+            });
+
+            var start = (currentPage - 1) * perPage;
+            var end = start + perPage;
+            for (var i = start; i < end && i < filtered.length; i++) {
+                filtered[i].$el.show();
+            }
+
+            renderPages(totalPages);
+            updateNav(totalPages);
+        }
+
+        $pagesContainer.off('click.sub04board').on('click.sub04board', '.page', function () {
+            var nextPage = parseInt($(this).data('page'), 10);
+            if (!isNaN(nextPage)) {
+                currentPage = nextPage;
+                renderList();
+            }
+        });
+
+        $prevBtn.off('click.sub04board').on('click.sub04board', function () {
+            if ($(this).prop('disabled')) return;
+            currentPage = Math.max(1, currentPage - 1);
+            renderList();
+        });
+
+        $nextBtn.off('click.sub04board').on('click.sub04board', function () {
+            if ($(this).prop('disabled')) return;
+            currentPage = currentPage + 1;
+            renderList();
+        });
+
+        $tabs.off('click.sub04board').on('click.sub04board', function () {
+            var nextType = normalizeKey($(this).data('type')) || 'all';
+            currentType = nextType;
+            $tabs.removeClass('active');
+            $(this).addClass('active');
+            currentPage = 1;
+            renderList();
+        });
+
+        function runSearch() {
+            currentQuery = normalizeText($searchInput.val());
+            currentPage = 1;
+            renderList();
+        }
+
+        if ($searchInput.length) {
+            $searchInput.off('keydown.sub04board').on('keydown.sub04board', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    runSearch();
+                }
+            });
+        }
+
+        if ($searchBtn.length) {
+            $searchBtn.off('click.sub04board').on('click.sub04board', function () {
+                runSearch();
+            });
+        }
+
+        fetchBoardData().then(function (boardItems) {
+            if (Array.isArray(boardItems)) {
+                var sorted = sortNewsItems(boardItems);
+                buildNoticeIndex(sorted);
+                if (sorted.length) {
+                    renderHighlight(sorted[0]);
+                }
+                setCachedItems(BOARD_STORAGE_KEY, sorted);
+                renderCards(sorted);
+                items = buildItemsIndex(sorted);
+                totalCount = items.length;
+            } else {
+                items = buildItemsFromDom();
+                totalCount = items.length;
+            }
+            renderList();
+        });
+    }
+
+    function initNewsDetail(items, config) {
+        var cfg = config || {};
+        var listUrl = cfg.listUrl || NEWS_LIST_URL;
         var safeItems = Array.isArray(items) ? items : [];
-        var idx = getIndexParam(safeItems.length);
+        var idx = getIndexParam(safeItems.length, cfg.idx);
         if (safeItems.length) {
             idx = Math.max(0, Math.min(idx, safeItems.length - 1));
         } else {
@@ -455,10 +816,11 @@
         }
 
         var item = safeItems[idx] || null;
-        var signature = item ? JSON.stringify(item) + '|' + idx : 'empty|' + idx;
+        var signature = (cfg.key || '') + '|' + (item ? JSON.stringify(item) : 'empty') + '|' + idx;
         if (signature === lastDetailSignature) return;
         lastDetailSignature = signature;
         var $head = $('.cont1 .head');
+        var $label = $head.find('.label');
         var $title = $head.find('.title');
         var $date = $head.find('.date');
         var $content = $('.cont1 .content');
@@ -466,6 +828,10 @@
         var $nextBtn = $('.cont1 .btn.next');
         var $backBtn = $('.cont1 .back');
 
+        if ($label.length) {
+            var fallbackLabel = cfg.label || '보도자료';
+            $label.text(item && item.label ? item.label : fallbackLabel);
+        }
         if ($title.length) $title.text(item ? item.title || '' : '');
         if ($date.length) $date.text(item ? item.date || '' : '');
 
@@ -521,7 +887,9 @@
                     $content.append($('<div/>', { 'class': 'text', html: formatText(parts.after) }));
                 }
 
-                if (item.source && (item.source.text || item.source.url)) {
+                var isNewsContext = (cfg.key || (item && item.type)) === NEWS_KEY;
+                var showSource = isNewsContext && item && item.source && (item.source.text || item.source.url);
+                if (showSource) {
                     var $source = $('<div/>', { 'class': 'source' });
                     $source.append($('<span/>', { 'class': 'label', text: '출처' }));
                     if (item.source.text) {
@@ -558,7 +926,7 @@
         }
 
         function navUrl(targetIdx) {
-            return buildNewsDetailUrl(targetIdx);
+            return buildDetailUrl(cfg.key || NEWS_KEY, targetIdx);
         }
 
         function bindNav($btn, targetIdx, label) {
@@ -600,16 +968,21 @@
         refreshScrollAfterImages($content);
     }
 
-    function loadNewsDetail() {
+    function loadNewsDetail(hashIdx) {
         scrollToTop();
 
         if (!detailHasLoaded && document.body) {
             document.body.classList.add('news-loading');
         }
 
-        var cached = getCachedNewsItems();
+        var cached = getCachedItems(NEWS_STORAGE_KEY);
         if (cached && cached.length) {
-            initNewsDetail(cached);
+            initNewsDetail(cached, {
+                key: NEWS_KEY,
+                listUrl: NEWS_LIST_URL,
+                label: '보도자료',
+                idx: hashIdx
+            });
             scrollToTop();
             if (document.body) {
                 document.body.classList.remove('news-loading');
@@ -619,8 +992,13 @@
         return fetchNewsData().then(function (newsItems) {
             if (!Array.isArray(newsItems)) return;
             var sorted = sortNewsItems(newsItems);
-            setCachedNewsItems(sorted);
-            initNewsDetail(sorted);
+            setCachedItems(NEWS_STORAGE_KEY, sorted);
+            initNewsDetail(sorted, {
+                key: NEWS_KEY,
+                listUrl: NEWS_LIST_URL,
+                label: '보도자료',
+                idx: hashIdx
+            });
             scrollToTop();
         }).finally(function () {
             if (document.body) {
@@ -630,15 +1008,78 @@
         });
     }
 
+    function loadNoticeDetail(hashIdx) {
+        scrollToTop();
+
+        if (!detailHasLoaded && document.body) {
+            document.body.classList.add('news-loading');
+        }
+
+        var cached = getCachedItems(BOARD_STORAGE_KEY);
+        if (cached && cached.length) {
+            var cachedSorted = sortNewsItems(cached);
+            var cachedNotices = cachedSorted.filter(function (item) {
+                return item.type === NOTICE_KEY;
+            });
+            initNewsDetail(cachedNotices, {
+                key: NOTICE_KEY,
+                listUrl: BOARD_LIST_URL,
+                label: '공지사항',
+                idx: hashIdx
+            });
+            scrollToTop();
+            if (document.body) {
+                document.body.classList.remove('news-loading');
+            }
+        }
+
+        return fetchBoardData().then(function (boardItems) {
+            if (!Array.isArray(boardItems)) return;
+            var sorted = sortNewsItems(boardItems);
+            setCachedItems(BOARD_STORAGE_KEY, sorted);
+            var noticeItems = sorted.filter(function (item) {
+                return item.type === NOTICE_KEY;
+            });
+            initNewsDetail(noticeItems, {
+                key: NOTICE_KEY,
+                listUrl: BOARD_LIST_URL,
+                label: '공지사항',
+                idx: hashIdx
+            });
+            scrollToTop();
+        }).finally(function () {
+            if (document.body) {
+                document.body.classList.remove('news-loading');
+            }
+            detailHasLoaded = true;
+        });
+    }
+
+    function loadDetail() {
+        var hashInfo = parseHash();
+        var key = normalizeKey(hashInfo.key) || NEWS_KEY;
+        var idx = hashInfo.idx;
+
+        updateSubtop(key === NOTICE_KEY ? NOTICE_KEY : NEWS_KEY);
+
+        if (key === NOTICE_KEY) {
+            loadNoticeDetail(idx);
+            return;
+        }
+
+        loadNewsDetail(idx);
+    }
+
     $(function () {
         initNewsList();
+        initBoardList();
 
         if (!isDetailPage()) return;
 
-        loadNewsDetail();
+        loadDetail();
 
         $(window).off('hashchange.sub04').on('hashchange.sub04', function () {
-            loadNewsDetail();
+            loadDetail();
         });
     });
 })();

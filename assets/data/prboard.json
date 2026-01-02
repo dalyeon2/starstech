@@ -1,0 +1,104 @@
+{
+  "items": [
+    {
+      "id": "pr-20250925-01",
+      "type": "pr",
+      "label": "홍보자료",
+      "title": "[Kia TV, 환경에진심인 시즌3 EP.4] 세계 최초 불가사리 제설제를 개발하다, EV9 X 스타스테크",
+      "date": "2025.09.25",
+      "thumb": "../../assets/img/news/exam08.png",
+      "images": [
+        {
+          "src": "../../assets/img/news/exam08.png"
+        }
+      ],
+      "content": "스타스테크의 불가사리 제설제 기술과 브랜드 스토리를 영상으로 확인할 수 있습니다.",
+      "link": "https://www.youtube.com/watch?v=cWB_KLgs1i0"
+    },
+    {
+      "id": "pr-20250920-02",
+      "type": "pr",
+      "label": "홍보자료",
+      "title": "[대한상공회의소] 불가사리로 제설제와 화장품을 만든다고? ㈜스타스테크",
+      "date": "2025.09.20",
+      "thumb": "../../assets/img/news/exam09.png",
+      "images": [
+        {
+          "src": "../../assets/img/news/exam09.png"
+        }
+      ],
+      "content": "스타스테크의 친환경 원료 기술과 제품 사례를 소개하는 인터뷰 영상입니다.",
+      "link": "https://www.youtube.com/watch?v=iD_032W2gco"
+    },
+    {
+      "id": "notice-20250918-01",
+      "type": "notice",
+      "label": "공지사항",
+      "title": "스타스테크의 홈페이지가 리뉴얼되었습니다.",
+      "date": "2025.09.18",
+      "content": "스타스테크 홈페이지가 브랜드 스토리와 제품 정보를 더 쉽게 확인할 수 있도록 새롭게 개편되었습니다.\n\n모바일 접근성을 개선하고, Newsroom/PR 메뉴를 통합해 최신 소식을 빠르게 확인할 수 있습니다.\n\n문의 사항은 고객센터를 통해 남겨주세요."
+    },
+    {
+      "id": "pr-20250910-03",
+      "type": "pr",
+      "label": "홍보자료",
+      "title": "[아산 유스프러너 데모데이] 군인이 휴가 얻으려고 대회 나갔다가 창업하게 된 사연",
+      "date": "2025.09.10",
+      "thumb": "../../assets/img/news/exam05.png",
+      "images": [
+        {
+          "src": "../../assets/img/news/exam05.png"
+        }
+      ],
+      "content": "스타스테크 창업 스토리를 담은 데모데이 하이라이트 영상입니다.",
+      "link": "https://www.youtube.com/watch?v=IjmTcX5ABEk"
+    },
+    {
+      "id": "notice-20250830-02",
+      "type": "notice",
+      "label": "공지사항",
+      "title": "스타스테크 신규 공장 준공 및 견학 일정 안내",
+      "date": "2025.08.30",
+      "thumb": "../../assets/img/news/exam06.png",
+      "images": [
+        {
+          "src": "../../assets/img/news/exam06.png"
+        },
+        {
+          "src": "../../assets/img/news/exam07.png",
+          "caption": "(사진) 신규 공장 전경 및 생산 라인"
+        }
+      ],
+      "content": "당진 석문국가산단 내 스타스테크 신규 공장이 준공되었습니다.\n\n견학은 9월 둘째 주부터 사전 예약제로 진행되며, 방문 신청은 이메일로 접수합니다.\n\n자세한 일정 및 문의는 공지 내용을 확인해주세요."
+    },
+    {
+      "id": "pr-20250820-04",
+      "type": "pr",
+      "label": "홍보자료",
+      "title": "[유퀴즈온더블럭] 화학알못 큰자기와 작은자기 웃으면서 차단하는 양승찬 대표님",
+      "date": "2025.08.20",
+      "thumb": "../../assets/img/news/exam01.png",
+      "images": [
+        {
+          "src": "../../assets/img/news/exam01.png"
+        }
+      ],
+      "content": "스타스테크 대표 인터뷰가 소개된 방송 하이라이트 영상입니다.",
+      "link": "https://www.youtube.com/watch?v=fKlZz-mqKmU"
+    },
+    {
+      "id": "notice-20250715-03",
+      "type": "notice",
+      "label": "공지사항",
+      "title": "2025년 스타스테크 상반기 채용 공고",
+      "date": "2025.07.15",
+      "thumb": "../../assets/img/news/exam02.png",
+      "images": [
+        {
+          "src": "../../assets/img/news/exam02.png"
+        }
+      ],
+      "content": "스타스테크는 연구개발, 생산관리, 품질보증 부문에서 경력/신입 인재를 모집합니다.\n\n지원 기간은 7월 15일부터 8월 5일까지이며, 채용 페이지를 통해 접수해주세요."
+    }
+  ]
+}
