@@ -409,11 +409,20 @@ function initMobileMenu() {
 /* ===== Component path normalization ===== */
 function normalizeComponentAssets($root) {
     if (!$root || !$root.length) return;
-    $root.find('img[src]').each(function () {
-        const $img = $(this);
-        const raw = $img.attr('src') || '';
+    const updateAttr = ($el, attr) => {
+        const raw = $el.attr(attr) || '';
         const fixed = normalizeAssetSrc($.trim(raw));
-        if (fixed && fixed !== raw) $img.attr('src', fixed);
+        if (fixed && fixed !== raw) $el.attr(attr, fixed);
+    };
+
+    $root.find('img[src]').each(function () {
+        updateAttr($(this), 'src');
+    });
+    $root.find('source[src]').each(function () {
+        updateAttr($(this), 'src');
+    });
+    $root.find('video[poster]').each(function () {
+        updateAttr($(this), 'poster');
     });
 }
 
@@ -646,6 +655,7 @@ async function loadComponents() {
         if (hasSubtop) $('#subtop-container').html(await subtopRes.text());
         if (hasCta) $('#cta-container').html(await ctaRes.text());
         normalizeComponentPaths();
+        normalizeComponentAssets($(document.body));
         setHeaderActive();
         initLangMenu();
         initMobileMenu();

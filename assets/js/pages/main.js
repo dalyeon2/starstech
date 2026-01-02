@@ -14,12 +14,53 @@
         const $bg = $section.find('.bg');
         const $video = $bg.find('video').first();
         if (!$bg.length || !$video.length) return;
-        if (prefersReducedMotion()) return;
-        if ($bg.data('seamlessInit')) return;
-        $bg.data('seamlessInit', true);
 
         const videoA = $video.get(0);
         if (!videoA || typeof videoA.play !== 'function') return;
+
+        const safePlay = (video, onFail) => {
+            try {
+                const promise = video.play();
+                if (promise && typeof promise.catch === 'function') {
+                    promise.catch(() => {
+                        if (onFail) onFail();
+                    });
+                }
+            } catch (e) {
+                if (onFail) onFail();
+            }
+        };
+
+        const bindManualPlay = () => {
+            if ($section.data('videoManualBound')) return;
+            $section.data('videoManualBound', true);
+
+            const trigger = () => safePlay(videoA);
+            $section.on('touchstart.videoplay click.videoplay', trigger);
+            $video.on('play.videoplay', function () {
+                $section.off('touchstart.videoplay click.videoplay', trigger);
+                $video.off('play.videoplay');
+            });
+        };
+
+        videoA.muted = true;
+        videoA.setAttribute('muted', '');
+        videoA.playsInline = true;
+        videoA.setAttribute('playsinline', '');
+        videoA.setAttribute('webkit-playsinline', '');
+
+        if (prefersReducedMotion()) return;
+
+        const isCompact = w.matchMedia
+            && (w.matchMedia('(max-width: 1024px)').matches || w.matchMedia('(pointer: coarse)').matches);
+
+        if (isCompact) {
+            safePlay(videoA, bindManualPlay);
+            return;
+        }
+
+        if ($bg.data('seamlessInit')) return;
+        $bg.data('seamlessInit', true);
 
         const videoB = videoA.cloneNode(true);
         videoB.removeAttribute('id');
@@ -29,6 +70,7 @@
         videoB.setAttribute('muted', '');
         videoB.playsInline = true;
         videoB.setAttribute('playsinline', '');
+        videoB.setAttribute('webkit-playsinline', '');
         videoB.setAttribute('aria-hidden', 'true');
         videoB.tabIndex = -1;
 
@@ -42,16 +84,6 @@
         let watchTimer = null;
         const fadeMs = 500;
         const overlapSec = 0.55;
-
-        const safePlay = (video) => {
-            try {
-                const promise = video.play();
-                if (promise && typeof promise.catch === 'function') {
-                    promise.catch(() => { });
-                }
-            } catch (e) {
-            }
-        };
 
         const resetVideo = (video) => {
             try {
@@ -103,7 +135,7 @@
             videoA.addEventListener('loadedmetadata', startWatch, { once: true });
         }
 
-        safePlay(videoA);
+        safePlay(videoA, bindManualPlay);
     }
 
     /* Section 2: overview */
