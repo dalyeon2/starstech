@@ -81,13 +81,21 @@ Init from common.js:
         var $items = $group.find(CHILD_SELECTOR);
         if (!$items.length) return;
 
+        var dist = Number(group && group.dataset && group.dataset.distance);
+        var dur = Number(group && group.dataset && group.dataset.duration);
+        var stagger = Number(group && group.dataset && group.dataset.stagger);
+        var ease = (group && group.dataset && group.dataset.ease) || 'power3.out';
+        if (!isFinite(dist)) dist = 50;
+        if (!isFinite(dur)) dur = 0.55;
+        if (!isFinite(stagger)) stagger = 0.12;
+
         var $splitTargets = $group.find('.split-text');
         $splitTargets.each(function () { splitCharsOnce($(this)); });
 
         var $descEl = $splitTargets.eq(0);
         var $headEl = $splitTargets.eq(1);
 
-        w.gsap.set($items, { y: 120, autoAlpha: 0 });
+        w.gsap.set($items, { y: dist, autoAlpha: 0 });
         w.ScrollTrigger.create({
             trigger: group,
             scroller: scroller(),
@@ -96,9 +104,9 @@ Init from common.js:
                 w.gsap.to($items, {
                     y: 0,
                     autoAlpha: 1,
-                    duration: 1.4,
-                    ease: 'power3.out',
-                    stagger: 0.4
+                    duration: dur,
+                    ease: ease,
+                    stagger: stagger
                 });
 
                 if ($splitTargets.length === 0) return;

@@ -1,0 +1,106 @@
+/*
+---------------------------------------------
+                Policy
+---------------------------------------------
+*/
+.container {
+    padding-top: 0;
+}
+
+.policy {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+}
+
+.policy .date {
+    width: 100%;
+    padding-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid var(--black-500);
+}
+
+.policy .label,
+.policy .value,
+.policy .title,
+.policy .text,
+.policy .sub {
+    line-height: 1.6;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+}
+
+.policy .label {
+    color: var(--black);
+    font-size: var(--font-md);
+    font-weight: 600;
+}
+
+.policy .value {
+    color: var(--black-800);
+    font-size: var(--font-md);
+    font-weight: 500;
+}
+
+.policy .block {
+    width: 100%;
+    max-width: 1330px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.policy .title {
+    font-size: var(--font-2xl);
+    font-weight: 600;
+}
+
+.policy .text {
+    font-size: var(--font-md);
+    font-weight: 500;
+}
+
+.policy .sub {
+    color: var(--black-800);
+    font-size: var(--font-md);
+    font-weight: 400;
+}
+
+.policy .link {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    transition: color 0.2s ease;
+}
+
+.policy .link:hover,
+.policy .link:focus-visible {
+    color: var(--eco-1);
+}
+
+@media (max-width: 1024px) {
+    .policy .block {
+        max-width: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .policy {
+        gap: 32px;
+    }
+
+    .policy .title {
+        font-size: var(--font-xl);
+    }
+
+    .policy .label,
+    .policy .value,
+    .policy .text,
+    .policy .sub {
+        font-size: var(--font-base);
+    }
+}

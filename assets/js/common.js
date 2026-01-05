@@ -324,9 +324,20 @@ function initMobileMenu() {
             if ($cards.length) {
                 $cards.each(function () {
                     const $card = $(this);
-                    const titleText = $.trim($card.find('.title').first().text());
+                    const $title = $card.find('.title').first();
+                    const titleText = $.trim($title.text());
+                    const titleHref = $title.attr('href');
                     if (titleText) {
-                        const $label = $('<div class="drawerlabel"></div>').text(titleText);
+                        let $label;
+                        if (titleHref) {
+                            $label = $('<a class="drawerlabel"></a>').attr('href', titleHref).text(titleText);
+                            const target = $title.attr('target');
+                            const rel = $title.attr('rel');
+                            if (target) $label.attr('target', target);
+                            if (rel) $label.attr('rel', rel);
+                        } else {
+                            $label = $('<div class="drawerlabel"></div>').text(titleText);
+                        }
                         $panel.append($label);
                         hasPanelContent = true;
                     }
@@ -1074,6 +1085,30 @@ window.Subtop = (function () {
     return { init: init };
 })();
 
+/* ===== Subtop reveal ===== */
+function initSubtopReveal() {
+    const $subtops = $('.subtop');
+    if (!$subtops.length) return;
+
+    if (!('IntersectionObserver' in window)) {
+        $subtops.addClass('visible');
+        return;
+    }
+
+    const io = new IntersectionObserver(function (entries, ob) {
+        entries.forEach(function (entry) {
+            if (!entry.isIntersecting) return;
+            entry.target.classList.add('visible');
+            ob.unobserve(entry.target);
+        });
+    }, { threshold: 0.25 });
+
+    $subtops.each(function () {
+        if (this.classList.contains('visible')) return;
+        io.observe(this);
+    });
+}
+
 /* ===== Scroll-to-top button ===== */
 function initScrollTop(scrollBus) {
     const $btn = $("#scrollTopBtn");
@@ -1240,6 +1275,7 @@ function initFooterPopup() {
 /* ===== Boot ===== */
 $(async function () {
     await loadComponents();
+    initSubtopReveal();
     await loadCommonScriptOnce(resolveCommonAssetPath('animation/reveal.js'));
 
     const scroller = await initSmoothScroll();

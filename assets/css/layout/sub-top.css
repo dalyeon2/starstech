@@ -64,6 +64,24 @@
     white-space: pre-line;
 }
 
+.subtop .title,
+.subtop .desc {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: transform 0.6s ease, opacity 0.6s ease;
+    will-change: transform, opacity;
+}
+
+.subtop.visible .title,
+.subtop.visible .desc {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.subtop.visible .desc {
+    transition-delay: 0.16s;
+}
+
 .subtop .scroll {
     position: absolute;
     bottom: 0;
@@ -118,6 +136,15 @@
     line-height: 32px;
 }
 
+@media (prefers-reduced-motion: reduce) {
+    .subtop .title,
+    .subtop .desc {
+        opacity: 1;
+        transform: none;
+        transition: none;
+    }
+}
+
 .subtop.duo {
     width: 100%;
     background: var(--bg-2);
@@ -135,7 +162,7 @@
     padding: 167px 80px 0 228px;
     display: flex;
     flex-direction: column;
-    gap: 36px;
+    gap: 130px;
 }
 
 .subtop.duo .copy {
@@ -155,7 +182,7 @@
 }
 
 .subtop.duo .copy .title {
-    font-size: 68px;
+    font-size: var(--font-headline46);
     font-weight: 700;
     line-height: 1.4;
     white-space: pre-line;
@@ -172,8 +199,8 @@
     display: inline-flex;
     align-items: center;
     gap: 12px;
-    background: var(--eco-1);
-    color: var(--white);
+    background: transparent;
+    border: 1px solid var(--black-800);
     border-radius: 6px;
     font-size: var(--font-base);
     font-weight: 500;
@@ -186,26 +213,6 @@
 }
 
 .subtop.duo .btn:focus-visible {
-    outline: 2px solid var(--black);
-    outline-offset: 2px;
-}
-
-.subtop.duo .btn.line {
-    padding: 8px 16px;
-    display: inline-flex;
-    align-items: center;
-    gap: 12px;
-    background: transparent;
-    color: var(--black);
-    border-radius: 6px;
-    font-weight: 700;
-    line-height: 1.6;
-    outline: 0.6px solid #464646;
-    outline-offset: -0.6px;
-    transition: transform .2s ease, box-shadow .2s ease, background-color .2s ease;
-}
-
-.subtop.duo .btn.line:focus-visible {
     outline: 2px solid var(--black);
     outline-offset: 2px;
 }

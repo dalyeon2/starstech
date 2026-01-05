@@ -191,15 +191,23 @@
 }
 
 .header .panel .title {
+    color: var(--black);
     font-size: var(--font-base);
     font-family: var(--font-en);
     font-weight: 600;
     line-height: 1.6;
+    text-decoration: none;
+    transition: color 0.2s ease;
 }
 
 .header .panel .title.big {
     font-size: var(--font-md);
     line-height: 1.6;
+}
+
+.header .panel .title:hover,
+.header .panel .title:focus-visible {
+    color: var(--eco-1);
 }
 
 .header .panel .link {
@@ -675,6 +683,16 @@ body.navopen {
     color: var(--black);
     font-size: var(--font-sm);
     font-weight: 600;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.overlay-menu .drawerlabel[href]:hover,
+.overlay-menu .drawerlabel[href]:focus-visible {
+    background: var(--black-200);
+    color: var(--primary);
+    outline: none;
 }
 
 .overlay-menu .drawerlink {

@@ -65,6 +65,16 @@
     line-height: 25.6px;
 }
 
+.footer .title[href] {
+    text-decoration: none;
+    transition: color 0.2s ease, opacity 0.2s ease;
+}
+
+.footer .title[href]:hover,
+.footer .title[href]:focus-visible {
+    opacity: 0.7;
+}
+
 .footer .list {
     display: flex;
     flex-direction: column;
@@ -107,6 +117,14 @@
     font-size: var(--font-sm);
     font-weight: 500;
     line-height: 22.4px;
+    text-decoration: none;
+    transition: color 0.2s ease, opacity 0.2s ease;
+}
+
+.footer .brands .label[href]:hover,
+.footer .brands .label[href]:focus-visible {
+    color: var(--black);
+    opacity: 0.7;
 }
 
 .footer .brands .sub {
