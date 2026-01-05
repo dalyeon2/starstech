@@ -7,6 +7,7 @@ body {
     background: var(--black-100);
 }
 
+/* cont1 */
 .cont1 .container {
     display: flex;
     justify-content: space-between;
@@ -355,4 +356,3 @@ body {
         height: 14px;
     }
 }
-
