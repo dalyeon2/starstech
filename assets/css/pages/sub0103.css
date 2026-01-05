@@ -157,7 +157,7 @@
 .cont2 {
     --history-head-height: 0px;
     --history-offset: 32px;
-    --history-left-nudge: -8px;
+    --history-left-nudge: -50px;
 }
 
 .cont2 .container {
@@ -313,7 +313,7 @@
     position: relative;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 8px;
 }
 
 .cont2 .item::before {
