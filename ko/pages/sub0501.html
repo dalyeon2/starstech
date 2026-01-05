@@ -33,6 +33,121 @@
         <!-- s: section 1 -->
         <section class="cont1" aria-labelledby="cont1-title">
             <div class="container">
+                <div class="tagline">
+                    <div class="tag" id="cont1-title">Contact</div>
+                </div>
+
+                <div class="layout">
+                    <p class="note"><span class="mark">*</span>는 필수 입력사항입니다.</p>
+
+                    <form class="form">
+                        <div class="group">
+                            <div class="intro">
+                                <div class="step">01 문의유형</div>
+                                <div class="question">
+                                    <span>문의 유형을 선택해주세요.</span>
+                                    <span class="mark">*</span>
+                                </div>
+                            </div>
+                            <div class="options">
+                                <label class="option">
+                                    <input type="radio" name="inquiry" value="product">
+                                    <span>제품 문의</span>
+                                </label>
+                                <label class="option">
+                                    <input type="radio" name="inquiry" value="overseas">
+                                    <span>해외 사업 문의</span>
+                                </label>
+                                <label class="option">
+                                    <input type="radio" name="inquiry" value="cosmetic">
+                                    <span>화장품 사업 문의</span>
+                                </label>
+                                <label class="option">
+                                    <input type="radio" name="inquiry" value="company">
+                                    <span>기업 문의</span>
+                                </label>
+                                <label class="option">
+                                    <input type="radio" name="inquiry" value="rnd">
+                                    <span>기업부설연구소(R&amp;D) 문의</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="group">
+                            <div class="intro">
+                                <div class="step">02 기본정보</div>
+                                <div class="question">
+                                    <span>기본정보를 입력해주세요.</span>
+                                    <span class="mark">*</span>
+                                </div>
+                            </div>
+
+                            <div class="fields">
+                                <label class="field">
+                                    <span class="name">기업 또는 소속명</span>
+                                    <input type="text" name="company" placeholder="기업 및 소속명을 입력해주세요.">
+                                </label>
+                                <label class="field">
+                                    <span class="name">담당자 성명/직급</span>
+                                    <input type="text" name="manager" placeholder="담당자의 성명과 직급을 입력해주세요.">
+                                </label>
+                                <label class="field">
+                                    <span class="name">국가</span>
+                                    <input type="text" name="country" placeholder="국가를 입력해주세요.">
+                                </label>
+                                <label class="field">
+                                    <span class="name">이메일</span>
+                                    <input type="email" name="email" placeholder="연락을 받으실 이메일을 입력해주세요.">
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="group message">
+                            <div class="intro">
+                                <div class="step">03 문의내용</div>
+                                <div class="question">
+                                    <span>문의하실 내용을 작성해주세요.</span>
+                                    <span class="mark">*</span>
+                                </div>
+                            </div>
+                            <div class="fields">
+                                <label class="field">
+                                    <span class="name">제목</span>
+                                    <input type="text" name="subject" placeholder="제목을 입력해주세요.">
+                                </label>
+                                <label class="field">
+                                    <span class="name">문의 내용</span>
+                                    <textarea name="message" placeholder="스타스테크에 문의하고 싶은 내용을 작성해주세요."></textarea>
+                                </label>
+                                <div class="attach">
+                                    <button class="filebtn" type="button">
+                                        <span>파일 첨부하기</span>
+                                        <i class="icon" aria-hidden="true"></i>
+                                    </button>
+                                    <div class="filename">
+                                        <span>첨부파일 이름이 들어갑니다.</span>
+                                        <i class="remove" aria-hidden="true"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="agree">
+                            <label class="check">
+                                <input type="checkbox" name="privacy">
+                                <span>개인정보 수집 및 이용에 대한 동의(필수)</span>
+                            </label>
+                            <button class="link" type="button">전문보기</button>
+                        </div>
+
+                        <div class="action">
+                            <button class="submit" type="submit">
+                                <span>문의하기</span>
+                                <i class="arrow" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </section>
     </main>
@@ -50,7 +165,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollToPlugin.min.js"></script>
     
     <script src="../../assets/js/common.js"></script>
-    <script src="../../assets/js/pages/sub0501.js"></script>
 </body>
 
 </html>

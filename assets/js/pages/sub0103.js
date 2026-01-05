@@ -5,13 +5,14 @@
     'use strict';
     if (!$) return;
 
-    var BREAKPOINT = 1024;
+    function prefersReducedMotion() {
+        return !!(w.matchMedia && w.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    }
+
     var $section = $('.cont2');
     if (!$section.length) return;
 
-    var $layout = $section.find('.layout').first();
     var $left = $section.find('.left').first();
-    var $right = $section.find('.right').first();
     var $track = $section.find('.track').first();
     var $groups = $track.find('.group');
     var $tabs = $section.find('.tab');
@@ -22,19 +23,12 @@
     var $photo = $left.find('.photo').first();
     var $summary = $left.find('.summary').first();
 
-    var pinTrigger = null;
-    var trackTween = null;
     var observer = null;
+    var groupTriggers = [];
     var scrollSync = null;
-    var groupOffsets = [];
-    var tabOffsets = [];
-    var maxScroll = 0;
-    var panelHeight = 0;
-    var pinBuffer = 0;
-    var totalScroll = 0;
-    var pinTop = 0;
     var tabOffset = 0;
     var activeId = '';
+    var hasInitialized = false;
     var resizeTimer = null;
 
     function scrollRootEl() {
@@ -66,6 +60,13 @@
         return Number.isFinite(num) ? num : 0;
     }
 
+    function historyOffset() {
+        if (!$section.length) return 0;
+        var value = w.getComputedStyle($section.get(0)).getPropertyValue('--history-offset') || '0';
+        var num = parseFloat(value);
+        return Number.isFinite(num) ? num : 0;
+    }
+
     function setGroupGaps() {
         $groups.each(function () {
             var count = $(this).find('.item').length;
@@ -78,56 +79,23 @@
     }
 
     function measure() {
-        maxScroll = 0;
-        groupOffsets = [];
-        tabOffsets = [];
-        panelHeight = 0;
-        pinBuffer = 0;
-        totalScroll = 0;
-        pinTop = 0;
         tabOffset = 0;
-        if (!$track.length || !$right.length) return;
+        if (!$track.length) return;
 
         setGroupGaps();
 
-        if (w.gsap) {
-            w.gsap.set($track, { y: 0 });
-        } else {
-            $track.css('transform', '');
-        }
-
-        var trackEl = $track.get(0);
-        var rightEl = $right.get(0);
         var headEl = $section.find('.head').get(0);
         var headHeight = headEl ? headEl.getBoundingClientRect().height : 0;
-        pinTop = headerOffset();
-        tabOffset = headerOffset() + headHeight + 20;
-        panelHeight = rightEl.clientHeight || 0;
-        $section.get(0).style.setProperty('--panel-height', panelHeight + 'px');
+        $section.get(0).style.setProperty('--history-head-height', headHeight + 'px');
+        tabOffset = headerOffset() + headHeight + historyOffset();
 
-        var firstEl = $groups.get(0);
-        var lastEl = $groups.get($groups.length - 1);
-        var firstHeight = firstEl ? (firstEl.offsetHeight || 0) : 0;
-        var lastHeight = lastEl ? (lastEl.offsetHeight || 0) : 0;
-        var padTop = Math.max(0, (panelHeight - firstHeight) * 0.5);
-        var padBottom = Math.max(0, (panelHeight - lastHeight) * 0.5);
-        trackEl.style.setProperty('--track-pad-top', padTop + 'px');
-        trackEl.style.setProperty('--track-pad-bottom', padBottom + 'px');
-
-        groupOffsets = $groups.map(function () {
-            var top = this.offsetTop || 0;
-            return Math.max(0, top);
-        }).get();
-        maxScroll = Math.max(0, (trackEl.scrollHeight || 0) - (rightEl.clientHeight || 0));
-        tabOffsets = $groups.map(function () {
-            var top = this.offsetTop || 0;
-            var firstItem = this.querySelector('.item');
-            var itemOffset = firstItem ? (firstItem.offsetTop || 0) : 0;
-            var target = Math.max(0, top + itemOffset);
-            return Math.min(target, maxScroll);
-        }).get();
-        pinBuffer = Math.round(Math.max(80, panelHeight * 0.18));
-        totalScroll = maxScroll + pinBuffer * 2;
+        var leftEl = $left.get(0);
+        var viewport = w.innerHeight || d.documentElement.clientHeight || 0;
+        var leftHeight = leftEl ? leftEl.getBoundingClientRect().height : 0;
+        var available = Math.max(0, viewport - tabOffset);
+        var centerOffset = Math.max(0, (available - leftHeight) * 0.5);
+        var leftTop = Math.round(tabOffset + centerOffset);
+        $section.get(0).style.setProperty('--history-left-top', leftTop + 'px');
     }
 
     function setActiveTab(id) {
@@ -142,43 +110,46 @@
 
     function applyGroup($group) {
         if (!$group || !$group.length) return;
+        var id = $group.attr('id') || '';
+        if (id && id === activeId) return;
         var title = $group.data('title');
         var photo = $group.data('photo');
         var summary = $group.data('summary');
-        if (title) $title.text(title);
-        if (photo) $photo.attr('src', photo);
-        if (summary) $summary.text(summary);
-        setActiveTab($group.attr('id'));
-    }
+        var update = function () {
+            if (title) $title.text(title);
+            if (photo) $photo.attr('src', photo);
+            if (summary) $summary.text(summary);
+        };
 
-    function updateActiveByScroll(scrollY) {
-        if (!groupOffsets.length) return;
-        var idx = 0;
-        for (var i = 0; i < groupOffsets.length; i += 1) {
-            if (scrollY + 1 >= groupOffsets[i]) idx = i;
+        if (!hasInitialized || prefersReducedMotion() || !$left.length) {
+            update();
+            $left.removeClass('is-switching');
+        } else {
+            $left.addClass('is-switching');
+            update();
+            w.requestAnimationFrame(function () {
+                w.requestAnimationFrame(function () {
+                    $left.removeClass('is-switching');
+                });
+            });
         }
-        var $group = $groups.eq(idx);
-        if ($group.length && $group.attr('id') !== activeId) {
-            applyGroup($group);
-        }
+
+        hasInitialized = true;
+        setActiveTab(id);
     }
 
     function cleanup() {
-        if (pinTrigger) {
-            pinTrigger.kill();
-            pinTrigger = null;
-        }
-        if (trackTween) {
-            if (trackTween.tween && typeof trackTween.tween.kill === 'function') {
-                trackTween.tween.kill();
-            } else if (typeof trackTween.kill === 'function') {
-                trackTween.kill();
-            }
-            trackTween = null;
-        }
         if (observer) {
             observer.disconnect();
             observer = null;
+        }
+        if (groupTriggers.length) {
+            groupTriggers.forEach(function (trigger) {
+                if (trigger && typeof trigger.kill === 'function') {
+                    trigger.kill();
+                }
+            });
+            groupTriggers = [];
         }
         if (scrollSync && w.scrollInstance && typeof w.scrollInstance.off === 'function') {
             w.scrollInstance.off('scroll', scrollSync);
@@ -195,6 +166,12 @@
             applyGroup($groups.eq(0));
             return;
         }
+        var root = scrollRootEl();
+        var rootEl = (root && root.nodeType === 1 && root !== d.body && root !== d.documentElement && root !== d.scrollingElement)
+            ? root
+            : null;
+        var marginTop = Math.round(tabOffset);
+        var margin = '-' + marginTop + 'px 0px -45% 0px';
         observer = new IntersectionObserver(function (entries) {
             var best = null;
             entries.forEach(function (entry) {
@@ -206,7 +183,7 @@
             if (best) {
                 applyGroup($(best.target));
             }
-        }, { root: null, threshold: [0.2, 0.4, 0.6] });
+        }, { root: rootEl, rootMargin: margin, threshold: [0.1, 0.35, 0.6] });
 
         $groups.each(function () {
             observer.observe(this);
@@ -215,15 +192,8 @@
 
     function build() {
         cleanup();
-        var pinCandidate = w.gsap && w.ScrollTrigger && w.innerWidth > BREAKPOINT;
-        if (pinCandidate) {
-            $section.addClass('pin');
-        }
         measure();
-
-        var canPin = pinCandidate && maxScroll > 0;
-        if (!canPin) {
-            $section.removeClass('pin');
+        if (!(w.gsap && w.ScrollTrigger)) {
             createObserver();
             return;
         }
@@ -234,38 +204,26 @@
             w.gsap.registerPlugin(w.ScrollToPlugin);
         }
 
-        trackTween = w.gsap.quickTo($track.get(0), 'y', { duration: 0.28, ease: 'power2.out' });
-
-        pinTrigger = w.ScrollTrigger.create({
-            trigger: $layout.get(0),
-            scroller: scrollerEl(),
-            start: function () { return 'top top+=' + Math.round(pinTop); },
-            end: function () { return '+=' + totalScroll; },
-            pin: $layout.get(0),
-            pinSpacing: true,
-            anticipatePin: 2,
-            invalidateOnRefresh: true,
-            onRefreshInit: function () {
-                measure();
-            },
-            onUpdate: function (self) {
-                var scrollY = self.progress * totalScroll - pinBuffer;
-                scrollY = Math.max(0, Math.min(maxScroll, scrollY));
-                if (trackTween) {
-                    trackTween(-scrollY);
-                } else if (w.gsap) {
-                    w.gsap.set($track, { y: -scrollY });
-                } else {
-                    $track.css('transform', 'translateY(' + (-scrollY) + 'px)');
+        var scroller = scrollerEl();
+        groupTriggers = $groups.map(function (_, el) {
+            var $group = $(el);
+            var firstItem = $group.find('.item').first().get(0) || el;
+            return w.ScrollTrigger.create({
+                trigger: firstItem,
+                endTrigger: el,
+                scroller: scroller,
+                start: function () { return 'top top+=' + Math.round(tabOffset); },
+                end: function () { return 'bottom top+=' + Math.round(tabOffset); },
+                onEnter: function () {
+                    applyGroup($group);
+                },
+                onEnterBack: function () {
+                    applyGroup($group);
                 }
-                updateActiveByScroll(scrollY);
-            }
-        });
+            });
+        }).get();
 
-        $section.addClass('pin');
-        updateActiveByScroll(0);
-
-        if (!scrollSync && w.scrollInstance && typeof w.scrollInstance.on === 'function' && w.ScrollTrigger) {
+        if (!scrollSync && w.scrollInstance && typeof w.scrollInstance.on === 'function') {
             scrollSync = function () {
                 w.ScrollTrigger.update();
             };
@@ -281,16 +239,20 @@
     function getTargetScroll(id) {
         var $target = $('#' + id);
         if (!$target.length) return null;
-
-        if (pinTrigger && typeof pinTrigger.start === 'number') {
-            var idx = $groups.index($target);
-            if (idx > -1 && tabOffsets[idx] != null) {
-                return pinTrigger.start + pinBuffer + tabOffsets[idx];
-            }
+        var targetEl = $target.find('.item').first().get(0) || $target.get(0);
+        var root = scrollRootEl();
+        var rootTop = 0;
+        if (root && root.getBoundingClientRect) {
+            rootTop = root.getBoundingClientRect().top || 0;
         }
-
-        var rect = $target.get(0).getBoundingClientRect();
-        return rect.top + (w.pageYOffset || d.documentElement.scrollTop || 0);
+        var baseScroll = 0;
+        if (root && root !== d.documentElement && root !== d.body && root !== d.scrollingElement) {
+            baseScroll = root.scrollTop || 0;
+        } else {
+            baseScroll = w.pageYOffset || d.documentElement.scrollTop || 0;
+        }
+        var rect = targetEl.getBoundingClientRect();
+        return rect.top - rootTop + baseScroll;
     }
 
     function scrollToY(targetY, offset) {
@@ -325,6 +287,11 @@
             return;
         }
 
+        if (target && target !== w && typeof target.scrollTo === 'function') {
+            target.scrollTo({ top: y, behavior: 'smooth' });
+            return;
+        }
+
         w.scrollTo({ top: y, behavior: 'smooth' });
     }
 
@@ -335,7 +302,7 @@
         var targetY = getTargetScroll(id);
         if (targetY == null) return;
         e.preventDefault();
-        scrollToY(targetY, pinTrigger ? 0 : tabOffset);
+        scrollToY(targetY, tabOffset);
         applyGroup($groups.filter('#' + id));
     });
 
@@ -345,6 +312,10 @@
     $(w).off('resize.cont2history').on('resize.cont2history', function () {
         clearTimeout(resizeTimer);
         resizeTimer = setTimeout(build, 150);
+    });
+
+    $(w).on('load.cont2history', function () {
+        build();
     });
 
     $(d).on('scrollengine:ready', function () {
