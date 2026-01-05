@@ -115,19 +115,17 @@
                                     <span class="name">제목</span>
                                     <input type="text" name="subject" placeholder="제목을 입력해주세요.">
                                 </label>
-                                <label class="field">
+                                <label class="field area">
                                     <span class="name">문의 내용</span>
                                     <textarea name="message" placeholder="스타스테크에 문의하고 싶은 내용을 작성해주세요."></textarea>
                                 </label>
                                 <div class="attach">
+                                    <input class="fileinput" type="file" name="files" multiple>
                                     <button class="filebtn" type="button">
                                         <span>파일 첨부하기</span>
                                         <i class="icon" aria-hidden="true"></i>
                                     </button>
-                                    <div class="filename">
-                                        <span>첨부파일 이름이 들어갑니다.</span>
-                                        <i class="remove" aria-hidden="true"></i>
-                                    </div>
+                                    <div class="files empty"></div>
                                 </div>
                             </div>
                         </div>
@@ -148,6 +146,42 @@
                         </div>
                     </form>
                 </div>
+
+                <div class="policy" aria-hidden="true">
+                    <div class="box" role="dialog" aria-modal="true">
+                        <button class="close" type="button" aria-label="닫기" tabindex="-1">
+                            <i class="icon" aria-hidden="true"></i>
+                        </button>
+                        <div class="copy">
+                            <div class="title" id="policytitle">개인정보 수집 및 이용</div>
+                            <div class="text">
+                                <div class="para">
+                                    <p>스타스테크는 귀하가 제공하는 개인정보가 「개인정보 보호법」 등 관련 법령에 따라 개인정보보호 규정을 준수하여 수집·보유·처리되고 있습니다.</p>
+                                    <p>귀하의 개인정보 수집·이용 및 제3자 제공과 관련하여 아래의 내용을 정확히 숙지하시고 동의여부를 결정하여 주시기 바랍니다</p>
+                                </div>
+                                <div class="para">
+                                    <p>1. 개인정보의 수집 항목</p>
+                                    <p>(1) 필수 : 성명, 연락처, 이메일 주소, 상담 문의 내용 (제목, 내용), 기업명, 직급</p>
+                                    <p>(2) 선택 : 사업정보, 첨부 파일</p>
+                                </div>
+                                <div class="para">
+                                    <p>2. 개인정보의 이용목적</p>
+                                    <p>수집한 개인정보를 아래와 같은 목적을 위해 활용합니다.</p>
+                                    <p>(1) 문의에 대한 답변 전달</p>
+                                </div>
+                                <div class="para">
+                                    <p>3. 개인정보의 보유 및 이용기간</p>
+                                    <p>아래와 같이 동의받은 이용자의 개인정보를 이용 보관함을 원칙으로 하며, 보유 기간 이후 해당 정보를 지체 없이 파기 합니다.</p>
+                                    <p>(1) 이메일 문의, 상담 이용 시 수집된 개인정보 : 3년</p>
+                                </div>
+                                <div class="para">
+                                    <p>4. 동의 거부권 및 미동의에 대한 불이익 안내</p>
+                                    <p>본 개인정보 수집 이용에 대해 거부하실 수 있으며, 미동의 시 상담 이용에 제약이 있을 수 있습니다.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
     </main>
@@ -165,6 +199,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollToPlugin.min.js"></script>
     
     <script src="../../assets/js/common.js"></script>
+    <script src="../../assets/js/pages/sub0501.js"></script>
 </body>
 
 </html>

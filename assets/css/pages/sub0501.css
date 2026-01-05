@@ -18,10 +18,14 @@
 .cont1 .layout {
     position: relative;
     display: flex;
+    gap: 24px;
+    align-items: flex-start;
 }
 
 .cont1 .note {
-    flex: 1;
+    min-width: 200px;
+    flex: 0 0 200px;
+    flex-shrink: 0;
     position: relative;
     display: flex;
     gap: 4px;
@@ -41,6 +45,8 @@
     display: flex;
     flex-direction: column;
     gap: 50px;
+    flex: 1;
+    min-width: 0;
 }
 
 .cont1 .group {
@@ -56,7 +62,7 @@
     min-width: 360px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 5px;
 }
 
 .cont1 .step {
@@ -94,6 +100,15 @@
     font-weight: 500;
     line-height: 25.6px;
     cursor: pointer;
+    transition: color 0.4s ease;
+}
+
+.cont1 .option:hover {
+    color: var(--black);
+}
+
+.cont1 .option:hover input {
+    border-color: var(--black);
 }
 
 .cont1 .option input {
@@ -107,6 +122,7 @@
     justify-content: center;
     position: relative;
     cursor: pointer;
+    transition: border-color 0.4s ease;
 }
 
 .cont1 .option input::after {
@@ -156,11 +172,27 @@
     font-size: var(--font-base);
     font-weight: 500;
     line-height: 25.6px;
+    transition: border-color 0.4s ease;
+}
+
+.cont1 .field input:hover,
+.cont1 .field textarea:hover,
+.cont1 .field input:focus-visible,
+.cont1 .field textarea:focus-visible {
+    border-bottom-color: var(--black);
 }
 
 .cont1 .field textarea {
     min-height: 203px;
-    resize: vertical;
+    resize: none;
+}
+
+.cont1 .field.area {
+    align-items: flex-start;
+}
+
+.cont1 .field.area .name {
+    padding-top: 9px;
 }
 
 .cont1 .field input::placeholder,
@@ -169,10 +201,14 @@
 }
 
 .cont1 .attach {
-    padding-left: 72px;
+    padding-left: 105px;
     display: flex;
     flex-direction: column;
     gap: 16px;
+}
+
+.cont1 .fileinput {
+    display: none;
 }
 
 .cont1 .filebtn {
@@ -188,6 +224,13 @@
     font-size: var(--font-base);
     font-weight: 500;
     line-height: 25.6px;
+    transition: background 0.4s ease, border-color 0.4s ease, color 0.4s ease;
+}
+
+.cont1 .filebtn:hover,
+.cont1 .filebtn:focus-visible {
+    background: var(--black-100);
+    border-color: var(--black);
 }
 
 .cont1 .filebtn .icon {
@@ -198,26 +241,65 @@
     background: url("data:image/svg+xml,%3Csvg%20width=%2216%22%20height=%2214%22%20viewBox=%220%200%2016%2014%22%20fill=%22none%22%20xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cpath%20d=%22M0.599609%207.60156V12.8516H14.5996V7.60156%22%20stroke=%22%23111111%22%20stroke-width=%221.2%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22/%3E%3Cpath%20d=%22M7.59961%2010.2266V0.601562M7.59961%200.601562L3.22461%204.97656M7.59961%200.601562L11.9746%204.97656%22%20stroke=%22%23111111%22%20stroke-width=%221.2%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22/%3E%3C/svg%3E") no-repeat center / contain;
 }
 
-.cont1 .filename {
-    width: fit-content;
-    padding: 8px 16px;
-    border-radius: 6px;
-    border: 1px solid var(--black-700);
+.cont1 .files {
     display: flex;
     align-items: center;
     gap: 12px;
+    flex-wrap: wrap;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.cont1 .files.empty {
+    display: none;
+}
+
+.cont1 .file {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: 1px solid var(--black-700);
     color: var(--black-700);
     font-size: var(--font-base);
     font-weight: 500;
     line-height: 25.6px;
+    max-width: 100%;
+    transition: border-color 0.4s ease, color 0.4s ease, background 0.4s ease;
 }
 
-.cont1 .filename .remove {
+.cont1 .file:hover,
+.cont1 .file:focus-within {
+    border-color: var(--black);
+    color: var(--black);
+    background: var(--black-100);
+}
+
+.cont1 .file .filename {
+    color: var(--black-700);
+    font-size: var(--font-base);
+    font-weight: 500;
+    line-height: 25.6px;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+.cont1 .file .remove {
     width: 20px;
     height: 20px;
     display: inline-block;
     flex-shrink: 0;
     background: url("data:image/svg+xml,%3Csvg%20width=%2220%22%20height=%2220%22%20viewBox=%220%200%2020%2020%22%20fill=%22none%22%20xmlns=%22http://www.w3.org/2000/svg%22%3E%3Crect%20x=%220.6%22%20y=%220.6%22%20width=%2218.8%22%20height=%2218.8%22%20rx=%229.4%22%20stroke=%22%23747474%22%20stroke-width=%221.2%22/%3E%3Cpath%20d=%22M14.1181%205.88281L5.88281%2014.1181M5.88281%205.88281L14.1181%2014.1181%22%20stroke=%22%23747474%22%20stroke-width=%221.2%22%20stroke-linecap=%22round%22/%3E%3C/svg%3E") no-repeat center / contain;
+    cursor: pointer;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.cont1 .file .remove:hover,
+.cont1 .file .remove:focus-visible {
+    opacity: 0.7;
+    transform: scale(0.95);
 }
 
 .cont1 .agree {
@@ -234,6 +316,15 @@
     font-weight: 500;
     line-height: 25.6px;
     cursor: pointer;
+    transition: color 0.4s ease;
+}
+
+.cont1 .check:hover {
+    color: var(--black);
+}
+
+.cont1 .check:hover input {
+    border-color: var(--black);
 }
 
 .cont1 .check input {
@@ -247,6 +338,7 @@
     justify-content: center;
     position: relative;
     cursor: pointer;
+    transition: border-color 0.4s ease;
 }
 
 .cont1 .check input::after {
@@ -263,9 +355,18 @@
 }
 
 .cont1 .agree .link {
+    color: var(--black-800);
     font-size: var(--font-base);
     font-weight: 600;
     text-decoration: underline;
+    padding: 0;
+    transition: color 0.4s ease, text-decoration-color 0.4s ease;
+}
+
+.cont1 .agree .link:hover,
+.cont1 .agree .link:focus-visible {
+    color: var(--black);
+    text-decoration-color: var(--black);
 }
 
 .cont1 .action {
@@ -285,6 +386,13 @@
     font-size: var(--font-lg);
     font-weight: 600;
     line-height: 32px;
+    transition: background 0.4s ease, border-color 0.4s ease, color 0.4s ease;
+}
+
+.cont1 .submit:hover,
+.cont1 .submit:focus-visible {
+    background: var(--black-100);
+    border-color: var(--black);
 }
 
 .cont1 .submit .arrow {
@@ -294,6 +402,106 @@
     flex-shrink: 0;
     background: url("data:image/svg+xml,%3Csvg%20width=%2218%22%20height=%2214%22%20viewBox=%220%200%2018%2014%22%20fill=%22none%22%20xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cpath%20d=%22M16.75%206.75L10.0833%200.75M16.75%206.75L10.0833%2012.75M16.75%206.75H0.75%22%20stroke=%22%23111111%22%20stroke-width=%221.5%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22/%3E%3C/svg%3E") no-repeat center / contain;
 }
+
+.cont1 .policy {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 30px;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 100;
+}
+
+.cont1 .policy.open {
+    display: flex;
+}
+
+.cont1 .policy .box {
+    position: relative;
+    width: 100%;
+    max-width: 620px;
+    padding: 30px;
+    background: white;
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-end;
+    gap: 10px;
+    border-radius: 8px;
+    max-height: calc(100vh - 60px);
+    overflow-y: auto;
+    z-index: 1;
+}
+
+.cont1 .policy .close {
+    width: 25px;
+    height: 25px;
+    border: 0;
+    background: transparent;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.4s ease;
+    outline: none;
+    box-shadow: none;
+}
+
+.cont1 .policy .close .icon {
+    width: 25px;
+    height: 25px;
+    display: inline-block;
+    background: url("data:image/svg+xml,%3Csvg%20width=%2225%22%20height=%2225%22%20viewBox=%220%200%2025%2025%22%20fill=%22none%22%20xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cpath%20d=%22M24.5%200.5L0.5%2024.5M0.5%200.5L24.5%2024.5%22%20stroke=%22%23111111%22%20stroke-linecap=%22round%22/%3E%3C/svg%3E") no-repeat center / contain;
+    transition: transform 0.4s ease, opacity 0.4s ease;
+}
+
+.cont1 .policy .close:hover {
+    background: var(--black-100);
+}
+
+.cont1 .policy .close:focus,
+.cont1 .policy .close:focus-visible {
+    outline: none;
+    box-shadow: none;
+}
+
+.cont1 .policy .close:hover .icon {
+    transform: rotate(90deg);
+    opacity: 0.8;
+}
+
+.cont1 .policy .copy {
+    padding-bottom: 30px;
+    padding-left: 30px;
+    padding-right: 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 10px;
+}
+
+.cont1 .policy .title {
+    color: var(--black);
+    font-size: var(--font-lg);
+    font-weight: 600;
+    line-height: 32px;
+    text-align: center;
+}
+
+.cont1 .policy .text {
+    color: var(--black-800);
+    font-size: var(--font-base);
+    font-weight: 500;
+    line-height: 25.6px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
 
 @media (max-width: 1440px) {
     .cont1 .group {
@@ -406,8 +614,17 @@
         line-height: 22px;
     }
 
-    .cont1 .filebtn,
-    .cont1 .filename {
+    .cont1 .filebtn {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .cont1 .files {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .cont1 .file {
         width: 100%;
         justify-content: space-between;
     }
@@ -415,5 +632,24 @@
     .cont1 .submit {
         width: 100%;
         justify-content: center;
+    }
+
+    .cont1 .policy {
+        padding: 20px;
+    }
+
+    .cont1 .policy .box {
+        width: 100%;
+        padding: 20px;
+        border-radius: 6px;
+    }
+
+    .cont1 .policy .copy {
+        padding: 0;
+        width: 100%;
+    }
+
+    .cont1 .policy .text {
+        width: 100%;
     }
 }

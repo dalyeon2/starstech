@@ -34,13 +34,33 @@
     function scrollRootEl() {
         var cfg = w.SancSmoothScrollConfig || {};
         var scroller = cfg.scroller;
+        var doc = d.documentElement;
+        var body = d.body;
+        var fallback = d.scrollingElement || doc || body;
+        var root = null;
+
         if (typeof scroller === 'string') {
-            var root = d.querySelector(scroller);
-            if (root) return root;
+            root = d.querySelector(scroller);
         } else if (scroller && scroller.nodeType === 1) {
-            return scroller;
+            root = scroller;
         }
-        return d.scrollingElement || d.documentElement || d.body;
+
+        if (!root) {
+            if (doc && body) {
+                var docScroll = (doc.scrollHeight || 0) - (doc.clientHeight || 0);
+                var bodyScroll = (body.scrollHeight || 0) - (body.clientHeight || 0);
+                root = bodyScroll > docScroll ? body : doc;
+            } else {
+                root = fallback;
+            }
+        }
+
+        if (root && root !== fallback) {
+            var scrollable = (root.scrollHeight || 0) > (root.clientHeight || 0) + 1;
+            if (!scrollable) root = fallback;
+        }
+
+        return root || fallback;
     }
 
     function scrollerEl() {
@@ -94,7 +114,9 @@
         var leftHeight = leftEl ? leftEl.getBoundingClientRect().height : 0;
         var available = Math.max(0, viewport - tabOffset);
         var centerOffset = Math.max(0, (available - leftHeight) * 0.5);
-        var leftTop = Math.round(tabOffset + centerOffset);
+        var leftNudge = parseFloat(w.getComputedStyle($section.get(0)).getPropertyValue('--history-left-nudge') || '0');
+        if (!Number.isFinite(leftNudge)) leftNudge = 0;
+        var leftTop = Math.round(tabOffset + centerOffset + leftNudge);
         $section.get(0).style.setProperty('--history-left-top', leftTop + 'px');
     }
 
@@ -236,10 +258,8 @@
         }
     }
 
-    function getTargetScroll(id) {
-        var $target = $('#' + id);
-        if (!$target.length) return null;
-        var targetEl = $target.find('.item').first().get(0) || $target.get(0);
+    function getTargetScroll(targetEl) {
+        if (!targetEl) return null;
         var root = scrollRootEl();
         var rootTop = 0;
         if (root && root.getBoundingClientRect) {
@@ -255,9 +275,9 @@
         return rect.top - rootTop + baseScroll;
     }
 
-    function scrollToY(targetY, offset) {
+    function scrollToTarget(targetEl, offset) {
         var base = typeof offset === 'number' ? offset : 0;
-        var y = Math.max(0, targetY - base);
+        var y = 0;
         var root = scrollRootEl();
         var target = (root && root !== d.documentElement && root !== d.body && root !== d.scrollingElement) ? root : w;
 
@@ -265,7 +285,7 @@
             if (typeof w.__snapSetOff === 'function') {
                 w.__snapSetOff(true);
             }
-            w.scrollInstance.scrollTo(y, { duration: 0.8, disableLerp: false });
+            w.scrollInstance.scrollTo(targetEl, { duration: 0.8, disableLerp: false, offset: -base });
             if (w.ScrollTrigger) {
                 w.ScrollTrigger.update();
             }
@@ -279,13 +299,17 @@
 
         if (w.gsap && w.ScrollToPlugin) {
             w.gsap.to(target, {
-                scrollTo: { y: y, autoKill: false },
+                scrollTo: { y: targetEl, offsetY: base, autoKill: false },
                 duration: 0.9,
                 ease: 'power2.out',
                 overwrite: true
             });
             return;
         }
+
+        y = getTargetScroll(targetEl);
+        if (y == null) return;
+        y = Math.max(0, y - base);
 
         if (target && target !== w && typeof target.scrollTo === 'function') {
             target.scrollTo({ top: y, behavior: 'smooth' });
@@ -299,11 +323,14 @@
         var href = $(this).attr('href') || '';
         if (href.charAt(0) !== '#') return;
         var id = href.slice(1);
-        var targetY = getTargetScroll(id);
-        if (targetY == null) return;
+        var $group = $groups.filter('#' + id);
+        if (!$group.length) return;
+        measure();
+        var targetEl = $group.find('.item').first().get(0) || $group.get(0);
+        if (!targetEl) return;
         e.preventDefault();
-        scrollToY(targetY, tabOffset);
-        applyGroup($groups.filter('#' + id));
+        scrollToTarget(targetEl, tabOffset);
+        applyGroup($group);
     });
 
     applyGroup($groups.eq(0));
