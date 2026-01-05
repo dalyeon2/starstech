@@ -118,6 +118,16 @@
         });
     }
 
+    function updateTotals() {
+        $('.cont1 .total').each(function () {
+            var $total = $(this);
+            var $panel = $total.closest('.panel');
+            if (!$panel.length) return;
+            var count = $panel.find('.card').length;
+            $total.find('.num').text(count);
+        });
+    }
+
     $(function () {
         $('.cont1 .tabs').each(function () {
             bindTabs(this);
@@ -126,5 +136,7 @@
         $('.cont1 .more').each(function () {
             bindMore(this);
         });
+
+        updateTotals();
     });
 })(window.jQuery);

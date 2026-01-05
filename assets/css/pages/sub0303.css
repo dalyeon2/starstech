@@ -149,6 +149,12 @@
     border-radius: 6px;
     border: 1px solid var(--black-300);
     object-fit: cover;
+    transition: transform 0.8s ease;
+}
+
+.cont1 .card:hover .img,
+.cont1 .card:focus-within .img {
+    transform: scale(1.03);
 }
 
 .cont1 .title {
