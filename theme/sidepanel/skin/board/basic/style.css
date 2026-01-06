@@ -1,0 +1,110 @@
+
+.board-basic .board-box {
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 10px 36px rgba(0, 0, 0, 0.04);
+}
+.board-basic .tbl_board {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+}
+.board-basic .tbl_board th,
+.board-basic .tbl_board td {
+    padding: 16px 18px;
+    border-bottom: 1px solid #e4e7ef;
+    font-size: 16px;
+    text-align: center;
+}
+.board-basic .tbl_board th {
+    background: #f7f8fb;
+    font-weight: 800;
+    color: #111;
+    letter-spacing: -0.01em;
+}
+.board-basic .tbl_board td {
+    background: #fff;
+    text-align: left;
+    vertical-align: middle;
+}
+.board-basic .tbl_board tr:last-child td { border-bottom: none; }
+.board-basic .tbl_board .check-col {
+    width: 72px;
+    text-align: center;
+}
+.board-basic .tbl_board .num {
+    width: 70px;
+    text-align: center;
+    font-weight: 700;
+    color: #4b5563;
+}
+.board-basic .tbl_board .author,
+.board-basic .tbl_board .date {
+    width: 160px;
+    text-align: center;
+    color: #4b5563;
+    white-space: nowrap;
+    font-weight: 600;
+}
+.board-basic .tbl_board .title a {
+    font-size: 17px;
+    font-weight: 800;
+    color: #0f1115;
+    line-height: 1.5;
+}
+.board-basic .tbl_board tbody tr:hover td {
+    background: #fafafa;
+}
+.board-basic .tbl_board td.board-empty {
+    width: auto;
+    font-size: 17px;
+    font-weight: 700;
+    text-align: center;
+    padding: 60px 16px;
+    min-height: 0;
+    background: #fff;
+    white-space: normal;
+    vertical-align: middle;
+    display: table-cell;
+}
+.board-basic .tbl_board .check-col {
+    position: relative;
+    text-align: center;
+}
+.board-basic .tbl_board .card-check {
+    position: static;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+}
+.board-basic .tbl_board .card-check .box {
+    width: 18px;
+    height: 18px;
+}
+.board .list-check-all.is-checked .box,
+.board .list-check-all.is-indeterminate .box {
+    border-color: #5b8fdd;
+    background: #5b8fdd;
+    box-shadow: none;
+}
+.board .list-check-all.is-checked .box::after,
+.board .list-check-all.is-indeterminate .box::after {
+    opacity: 1;
+}
+
+@media (max-width: 640px) {
+    .board-basic .tbl_board th,
+    .board-basic .tbl_board td {
+        padding: 12px 10px;
+        font-size: 15px;
+    }
+    .board-basic .tbl_board .author,
+    .board-basic .tbl_board .date {
+        width: 120px;
+        font-size: 14px;
+    }
+    .board-basic .tbl_board .title a {
+        font-size: 16px;
+    }
+}
