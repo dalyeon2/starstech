@@ -1,5 +1,5 @@
 /**
- * sub0501 contact form interactions (jQuery)
+ * sub0501 contact form interactions
  */
 (function ($) {
     'use strict';

@@ -1,5 +1,5 @@
 /**
- * sub0303 tabs
+ * sub0303 awards tabs
  */
 (function ($) {
     'use strict';

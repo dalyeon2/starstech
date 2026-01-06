@@ -1,123 +1,157 @@
 /**
- * Products (sub02) interactions
+ * sub02 Section 1-2 content reveal
  */
-(function ($) {
-    var isBoundWin = false;
-    var isBoundLoco = false;
-    var $section, $left, $right;
-    var startY = 0, maxShift = 0, headerH = 0;
-    var lastShift = -1;
+(function ($, w) {
+    'use strict';
+    if (!$) return;
 
-    function isDesktop() {
-        return window.innerWidth > 1024;
+    var cont1Bound = false;
+    var cont2Bound = false;
+
+    function prefersReducedMotion() {
+        return !!(w.matchMedia && w.matchMedia('(prefers-reduced-motion: reduce)').matches);
     }
 
-    function getScrollY() {
-        if (window.scrollInstance?.__isLoco) {
-            return window.scrollInstance?.scroll?.instance?.scroll?.y || 0;
+    function scrollerEl() {
+        if (w.scrollInstance && w.scrollInstance.__isLoco) {
+            return $('[data-scroll-container]').get(0) || w;
         }
-        return window.scrollY || 0;
+        return w;
     }
 
-    function recalc() {
-        if (!$section || !$section.length) return;
-        headerH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--header-height')) || 0;
-        var rightTop = $right.offset().top;
-        var rightH = $right.outerHeight();
-        var leftH = $left.outerHeight();
-        startY = rightTop - headerH - 10;
-        maxShift = Math.max(0, rightH - leftH);
-    }
-
-    function apply(y) {
-        if (!$left) return;
-        if (!isDesktop()) {
-            $left.css('transform', 'translate3d(0,0,0)');
-            lastShift = 0;
-            return;
+    function refreshScroll() {
+        if (w.ScrollTrigger && w.ScrollTrigger.refresh) {
+            w.ScrollTrigger.refresh();
         }
-        var delta = y - startY;
-        var shift = Math.max(0, Math.min(delta, maxShift));
-        if (shift === lastShift) return;
-        lastShift = shift;
-        $left.css('transform', 'translate3d(0,' + shift + 'px,0)');
+        if (w.scrollInstance && typeof w.scrollInstance.update === 'function') {
+            w.scrollInstance.update();
+        }
     }
 
-    function bindScroll() {
-        if (window.scrollInstance?.__isLoco) {
-            if (isBoundLoco) return;
-            isBoundLoco = true;
-            window.scrollInstance.on('scroll', function (e) {
-                apply((e && e.scroll && e.scroll.y) || 0);
-            });
-            apply(getScrollY());
-            return;
+    function initCont1() {
+        var $section = $('.cont1');
+        if (!$section.length || cont1Bound) return;
+        cont1Bound = true;
+
+        var $head = $section.find('.head');
+        var $headItems = $head.find('.tag, .title');
+        if (!$headItems.length) {
+            $headItems = $head.children();
         }
-        if (isBoundWin) return;
-        isBoundWin = true;
-        $(window).on('scroll.productHeadline', function () {
-            apply(getScrollY());
+        var $items = $section.find('.list .item');
+
+        if (!$head.length || !$items.length) return;
+        if (typeof w.gsap === 'undefined' || typeof w.ScrollTrigger === 'undefined') return;
+
+        w.gsap.registerPlugin(w.ScrollTrigger);
+        if (prefersReducedMotion()) return;
+
+        w.gsap.set($headItems, { autoAlpha: 0, y: 22 });
+        w.gsap.set($items, { autoAlpha: 0, y: 30 });
+
+        w.gsap.timeline({
+            defaults: { ease: 'power3.out' },
+            scrollTrigger: {
+                trigger: $section.get(0),
+                scroller: scrollerEl(),
+                start: 'top 75%',
+                toggleActions: 'play none none none'
+            }
+        })
+            .to($headItems.toArray(), {
+                autoAlpha: 1,
+                y: 0,
+                duration: 0.75,
+                stagger: 0.12
+            })
+            .to($items.toArray(), {
+                autoAlpha: 1,
+                y: 0,
+                duration: 0.85,
+                stagger: 0.18
+            }, '-=0.15');
+
+        w.addEventListener('load', function () {
+            setTimeout(refreshScroll, 120);
+        }, { once: true });
+    }
+
+    function groupItemsByRow($items) {
+        var rows = [];
+        var threshold = 4;
+        $items.each(function () {
+            var top = this.offsetTop || 0;
+            var matched = false;
+            for (var i = 0; i < rows.length; i += 1) {
+                if (Math.abs(rows[i].top - top) <= threshold) {
+                    rows[i].items.push(this);
+                    matched = true;
+                    break;
+                }
+            }
+            if (!matched) {
+                rows.push({ top: top, items: [this] });
+            }
         });
-        apply(getScrollY());
+        rows.sort(function (a, b) { return a.top - b.top; });
+        return rows.map(function (row) { return row.items; });
     }
 
-    function initProductHeadline() {
-        if ((document.body.dataset.category || '').toLowerCase() !== 'products') return;
-        $section = $('.cont1');
-        $left = $section.find('.left');
-        $right = $section.find('.right .list');
-        if (!$left.length || !$right.length) return;
+    function initCont2() {
+        var $section = $('.cont2');
+        if (!$section.length || cont2Bound) return;
+        cont2Bound = true;
 
-        // reset transform
-        $left.css('transform', 'translate3d(0,0,0)');
-        lastShift = 0;
-
-        var refreshLayout = function () {
-            recalc();
-            apply(getScrollY());
-        };
-
-        // wait for images to settle to avoid jump
-        if ($section.imagesLoaded) {
-            $section.imagesLoaded(refreshLayout);
-        } else {
-            refreshLayout();
+        var $head = $section.find('.head');
+        var $headItems = $head.find('.tag, .title, .total');
+        if (!$headItems.length) {
+            $headItems = $head.children();
         }
+        var $items = $section.find('.list .item');
 
-        bindScroll();
-        applyRevealClasses();
+        if (!$head.length || !$items.length) return;
+        if (typeof w.gsap === 'undefined' || typeof w.ScrollTrigger === 'undefined') return;
+
+        w.gsap.registerPlugin(w.ScrollTrigger);
+        if (prefersReducedMotion()) return;
+
+        var rows = groupItemsByRow($items);
+
+        w.gsap.set($headItems, { autoAlpha: 0, y: 22 });
+        w.gsap.set($items, { autoAlpha: 0, y: 30 });
+
+        var tl = w.gsap.timeline({
+            defaults: { ease: 'power3.out' },
+            scrollTrigger: {
+                trigger: $section.get(0),
+                scroller: scrollerEl(),
+                start: 'top 75%',
+                toggleActions: 'play none none none'
+            }
+        });
+
+        tl.to($headItems.toArray(), {
+            autoAlpha: 1,
+            y: 0,
+            duration: 0.6,
+            stagger: 0.1
+        });
+
+        rows.forEach(function (rowItems, index) {
+            tl.to(rowItems, {
+                autoAlpha: 1,
+                y: 0,
+                duration: 0.7
+            }, index === 0 ? '-=0.05' : '>');
+        });
+
+        w.addEventListener('load', function () {
+            setTimeout(refreshScroll, 120);
+        }, { once: true });
     }
 
-    function applyRevealClasses() {
-        if ((document.body.dataset.category || '').toLowerCase() !== 'products') return;
-        var $cont = $('.cont1');
-        if (!$cont.length) return;
-        // remove reveal classes to avoid scroll jank on fast scroll
-        $cont.find('.reveal-up, .reveal-group, .reveal-item')
-            .removeClass('reveal-up reveal-group reveal-item');
-    }
-
-    $(document).on('components:ready', function () {
-        initProductHeadline();
-        applyRevealClasses();
-    });
-
-    $(document).on('scrollengine:ready', function () {
-        recalc();
-        apply(getScrollY());
-        bindScroll();
-        applyRevealClasses();
-    });
-
-    $(window).on('resize', function () {
-        recalc();
-        apply(getScrollY());
-        applyRevealClasses();
-    });
-
-    // run once on load in case components:ready already fired
-    $(function () {
-        initProductHeadline();
-        applyRevealClasses();
-    });
-})(jQuery);
+    $(initCont1);
+    $(initCont2);
+    $(document).on('scrollengine:ready', initCont1);
+    $(document).on('scrollengine:ready', initCont2);
+})(window.jQuery, window);
