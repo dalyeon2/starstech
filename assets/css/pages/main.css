@@ -1427,7 +1427,6 @@
     font-size: var(--font-4xl);
     font-weight: 600;
     line-height: 1.6;
-    font-variant-numeric: tabular-nums;
     transition: color 0.4s ease;
 }
 

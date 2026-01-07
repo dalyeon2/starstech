@@ -1,14 +1,14 @@
 <?php
 if (!defined('_GNUBOARD_')) exit;
 
-$sidepanel_theme_url = defined('G5_THEME_URL') ? G5_THEME_URL : (G5_URL . '/theme/sidepanel');
+$theme_url = defined('G5_THEME_URL') ? G5_THEME_URL : (G5_URL . '/theme/sidepanel');
 if (function_exists('add_stylesheet')) {
-    add_stylesheet('<link rel="stylesheet" href="' . $sidepanel_theme_url . '/style.css">', 0);
-    add_stylesheet('<link rel="stylesheet" href="' . $sidepanel_theme_url . '/skin/board/product/style.css">', 1);
+    add_stylesheet('<link rel="stylesheet" href="' . $theme_url . '/style.css">', 0);
+    add_stylesheet('<link rel="stylesheet" href="' . $theme_url . '/skin/board/product/style.css">', 1);
 }
 
-$sidepanel_product_placeholder = 'https://via.placeholder.com/480x360/ededed/1f1f1f?text=No+Image';
-$sidepanel_product_allow_write = (bool)$write_href;
+$product_placeholder = G5_URL . '/img/default-image.jpg';
+$product_allow_write = (bool)$write_href;
 
 if (!function_exists('sidepanel_product_is_image_ext')) {
     function sidepanel_product_is_image_ext($name) {
@@ -40,10 +40,10 @@ if (!function_exists('sidepanel_product_thumb')) {
 }
 ?>
 
-<link rel="stylesheet" href="<?php echo $sidepanel_theme_url; ?>/style.css">
-<link rel="stylesheet" href="<?php echo $sidepanel_theme_url; ?>/skin/board/product/style.css">
+<link rel="stylesheet" href="<?php echo $theme_url; ?>/style.css">
+<link rel="stylesheet" href="<?php echo $theme_url; ?>/skin/board/product/style.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-<script src="<?php echo $sidepanel_theme_url; ?>/theme.js" defer></script>
+<script src="<?php echo $theme_url; ?>/theme.js" defer></script>
 <script>document.addEventListener('DOMContentLoaded', function(){ document.body.classList.add('theme-sidepanel'); });</script>
 
 <form name="fboardlist" id="fboardlist" action="<?php echo G5_BBS_URL; ?>/board_list_update.php" method="post"<?php echo $is_checkbox ? ' onsubmit="return fboardlist_submit(this);"' : ''; ?>>
@@ -73,7 +73,7 @@ if (!function_exists('sidepanel_product_thumb')) {
             <?php } ?>
         </div>
         <div class="top-actions">
-            <?php if ($sidepanel_product_allow_write) { ?><a class="btn-minimal" href="<?php echo $write_href; ?>"><i class="fa-solid fa-pen"></i> 글쓰기</a><?php } ?>
+            <?php if ($product_allow_write) { ?><a class="btn-minimal" href="<?php echo $write_href; ?>"><i class="fa-solid fa-pen"></i> 글쓰기</a><?php } ?>
             <?php if ($is_checkbox) { ?><button type="submit" name="btn_submit" value="선택삭제" onclick="document.pressed=this.value;" class="btn-minimal"><i class="fa-solid fa-trash"></i> 선택삭제</button><?php } ?>
             <?php if ($is_checkbox) { ?><button type="submit" name="btn_submit" value="선택복사" onclick="document.pressed=this.value;" class="btn-minimal"><i class="fa-solid fa-copy"></i> 선택복사</button><?php } ?>
             <?php if ($is_checkbox) { ?><button type="submit" name="btn_submit" value="선택이동" onclick="document.pressed=this.value;" class="btn-minimal"><i class="fa-solid fa-arrow-right-arrow-left"></i> 선택이동</button><?php } ?>
@@ -85,7 +85,7 @@ if (!function_exists('sidepanel_product_thumb')) {
         <?php if ($list && count($list)) { $i = 0; ?>
             <?php foreach ($list as $item) {
                 $thumb = sidepanel_product_thumb($bo_table, $item['wr_id']);
-                $thumb_src = $thumb ?: $sidepanel_product_placeholder;
+                $thumb_src = $thumb ?: $product_placeholder;
             ?>
             <li class="product-card">
                 <?php if ($is_checkbox) { ?>
@@ -95,14 +95,14 @@ if (!function_exists('sidepanel_product_thumb')) {
                     </label>
                 <?php } ?>
                 <a class="thumb" href="<?php echo $item['href']; ?>">
-                    <img src="<?php echo $thumb_src; ?>" loading="lazy" alt="" onerror="this.onerror=null;this.style.display='none';">
+                    <img src="<?php echo $thumb_src; ?>" loading="lazy" alt="" onerror="this.onerror=null;this.src='<?php echo $product_placeholder; ?>';">
                 </a>
                 <div class="body">
                     <a class="title" href="<?php echo $item['href']; ?>">
                         <?php echo $item['subject']; ?>
                     </a>
                     <div class="meta">
-                        <span><i class="fa-solid fa-user"></i><?php echo get_text($item['name']); ?></span>
+                        <span><i class="fa-solid fa-user"></i><?php echo get_text(strip_tags($item['name'])); ?></span>
                         <span><i class="fa-solid fa-calendar"></i><?php echo date('Y.m.d', strtotime($item['wr_datetime'])); ?></span>
                         <span><i class="fa-solid fa-eye"></i><?php echo number_format($item['wr_hit']); ?></span>
                     </div>
@@ -122,7 +122,7 @@ if (!function_exists('sidepanel_product_thumb')) {
     <?php } ?>
 
     <div class="board-actions" style="justify-content: flex-end;">
-        <?php if ($sidepanel_product_allow_write) { ?><a class="btn-minimal" href="<?php echo $write_href; ?>"><i class="fa-solid fa-pen"></i> 글쓰기</a><?php } ?>
+        <?php if ($product_allow_write) { ?><a class="btn-minimal" href="<?php echo $write_href; ?>"><i class="fa-solid fa-pen"></i> 글쓰기</a><?php } ?>
     </div>
 </div>
 </form>

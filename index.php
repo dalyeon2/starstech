@@ -2,6 +2,11 @@
 include_once('./_common.php');
 
 define('_INDEX_', true);
+$redirect_target = rtrim(G5_URL, '/') . '/fr/';
+if (!headers_sent()) {
+    header('Location: ' . $redirect_target, true, 302);
+    exit;
+}
 if (!defined('_GNUBOARD_')) exit; // 개별 페이지 접근 불가
 
 if(defined('G5_THEME_PATH')) {

@@ -1,5 +1,5 @@
         <footer class="theme-footer">
-            &copy; Genebiotehch. All rights reserved.
+            &copy; STARSTECH. All rights reserved.
         </footer>
         </main>
     </div> <!-- /.panel-layout -->

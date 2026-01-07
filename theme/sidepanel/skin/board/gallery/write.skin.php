@@ -6,56 +6,49 @@ if (function_exists('add_stylesheet') && defined('G5_THEME_URL')) {
     add_stylesheet('<link rel="stylesheet" href="' . G5_THEME_URL . '/skin/board/gallery/style.css">', 1);
 }
 
-$sidepanel_gallery_placeholder = 'https://via.placeholder.com/360x240/ededed/1f1f1f?text=No+Image';
-$sidepanel_is_video_board = isset($bo_table) && $bo_table === 'video';
-$sidepanel_media_label = $sidepanel_is_video_board ? '비디오' : '이미지';
-$sidepanel_accept_types = $sidepanel_is_video_board ? 'video/*' : 'image/*';
-$sidepanel_file_count = 1;
-if (!$sidepanel_is_video_board) {
-    $sidepanel_file_count = isset($board['bo_upload_count']) ? (int)$board['bo_upload_count'] : 1;
-    if ($sidepanel_file_count < 1) $sidepanel_file_count = 1;
-    if ($sidepanel_file_count > 3) $sidepanel_file_count = 3;
-}
-$sidepanel_show_link = isset($bo_table) && $bo_table === 'pr';
-$sidepanel_show_source = isset($bo_table) && $bo_table === 'news';
-$sidepanel_can_sort = false;
-$sidepanel_lang_codes = ['ko', 'en', 'ja', 'fr', 'mn'];
-$sidepanel_lang_options = [];
+$gallery_placeholder = 'https://via.placeholder.com/360x240/ededed/1f1f1f?text=No+Image';
+$file_count = isset($board['bo_upload_count']) ? (int)$board['bo_upload_count'] : 1;
+if ($file_count < 3) $file_count = 3;
+if ($file_count > 3) $file_count = 3;
+$show_link = isset($bo_table) && $bo_table === 'pr';
+$show_source = isset($bo_table) && $bo_table === 'news';
+$can_sort = false;
+$lang_codes = ['ko', 'en', 'ja', 'fr', 'mn'];
+$lang_options = [];
 if (!empty($board['bo_category_list'])) {
     $raw_categories = array_map('trim', explode('|', $board['bo_category_list']));
     foreach ($raw_categories as $cat) {
         if ($cat === '') continue;
         $lower = strtolower($cat);
-        if (in_array($lower, $sidepanel_lang_codes, true)) {
-            $sidepanel_lang_options[$lower] = $cat;
+        if (in_array($lower, $lang_codes, true)) {
+            $lang_options[$lower] = $cat;
         }
     }
 }
-$sidepanel_use_lang_filter = !empty($sidepanel_lang_options);
-$sidepanel_has_existing_file = false;
+$use_lang_filter = !empty($lang_options);
+$default_category = $ca_name ?? '';
+if (!$default_category && $lang_options) {
+    $values = array_values($lang_options);
+    $default_category = $values[0] ?? '';
+}
+$has_existing_file = false;
 if ($w === 'u' && !empty($file) && is_array($file)) {
     foreach ($file as $file_item) {
         if (!empty($file_item['file'])) {
-            $sidepanel_has_existing_file = true;
+            $has_existing_file = true;
             break;
         }
     }
 }
 
-if (!function_exists('sidepanel_gallery_is_video_file')) {
-    function sidepanel_gallery_is_video_file($file) {
-        $name = '';
-        if (is_array($file)) {
-            if (!empty($file['file'])) {
-                $name = $file['file'];
-            } elseif (!empty($file['source'])) {
-                $name = $file['source'];
-            }
-        }
-        $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
-        return in_array($ext, ['mp4', 'webm', 'mkv', 'mov', 'avi', 'm4v', 'ogv'], true);
+if (!function_exists('sidepanel_gallery_is_youtube_link')) {
+    function sidepanel_gallery_is_youtube_link($url) {
+        if (!$url) return false;
+        return (bool)preg_match('~(?:youtu\.be/|youtube\.com/(?:watch\\?v=|embed/|shorts/))([A-Za-z0-9_-]{6,})~', $url);
     }
 }
+
+$pr_youtube = $show_link && !empty($write['wr_link1']) && sidepanel_gallery_is_youtube_link($write['wr_link1']);
 ?>
 
 <div class="section board board-gallery board-write">
@@ -80,56 +73,81 @@ if (!function_exists('sidepanel_gallery_is_video_file')) {
         <input type="hidden" name="page" value="<?php echo $page; ?>">
         <div class="board-form">
             <?php if ($is_category) { ?>
-                <div class="board-field">
-                    <label for="ca_name">언어</label>
-                    <select name="ca_name" id="ca_name" required>
-                        <option value="">선택</option>
-                        <?php if ($sidepanel_use_lang_filter) { ?>
-                            <?php foreach ($sidepanel_lang_options as $lang_value) {
-                                $selected = ($ca_name === $lang_value) ? ' selected' : '';
+                <?php if ($use_lang_filter) { ?>
+                    <div class="board-field category-tabs">
+                        <label>언어</label>
+                        <div class="category-list" role="tablist" aria-label="언어 선택">
+                            <?php $is_first = true; foreach ($lang_options as $lang_value) {
+                                $is_active = ($ca_name === $lang_value) || (!$ca_name && $is_first);
                             ?>
-                                <option value="<?php echo htmlspecialchars($lang_value, ENT_QUOTES); ?>"<?php echo $selected; ?>><?php echo htmlspecialchars($lang_value, ENT_QUOTES); ?></option>
-                            <?php } ?>
-                        <?php } else { ?>
+                                <button type="button" class="category-tab<?php echo $is_active ? ' is-active' : ''; ?>" data-category="<?php echo htmlspecialchars($lang_value, ENT_QUOTES); ?>" role="tab" aria-selected="<?php echo $is_active ? 'true' : 'false'; ?>">
+                                    <?php echo htmlspecialchars($lang_value, ENT_QUOTES); ?>
+                                </button>
+                            <?php $is_first = false; } ?>
+                        </div>
+                        <input type="hidden" name="ca_name" id="ca_name" value="<?php echo htmlspecialchars($default_category, ENT_QUOTES); ?>" required>
+                    </div>
+                <?php } else { ?>
+                    <div class="board-field">
+                        <label for="ca_name">언어</label>
+                        <select name="ca_name" id="ca_name" required>
+                            <option value="">선택</option>
                             <?php echo $category_option; ?>
-                        <?php } ?>
-                    </select>
-                </div>
+                        </select>
+                    </div>
+                <?php } ?>
             <?php } ?>
 
+            <?php if ($show_link) { ?>
+                <div class="board-field pr-type">
+                    <label>PR 유형</label>
+                    <div class="pr-type-options" role="radiogroup" aria-label="PR 유형 선택">
+                        <label class="pr-type-option">
+                            <input type="radio" name="pr_type" value="image"<?php echo $pr_youtube ? '' : ' checked'; ?>>
+                            <span>이미지</span>
+                        </label>
+                        <label class="pr-type-option">
+                            <input type="radio" name="pr_type" value="youtube"<?php echo $pr_youtube ? ' checked' : ''; ?>>
+                            <span>유튜브</span>
+                        </label>
+                    </div>
+                </div>
+            <?php } ?>
             <div class="board-field">
                 <label for="wr_subject">제목</label>
                 <input type="text" name="wr_subject" id="wr_subject" value="<?php echo $subject; ?>" required>
             </div>
-            <?php if ($sidepanel_show_link) { ?>
+            <?php if ($show_link) { ?>
                 <div class="board-field link-field">
                     <label for="wr_link1">외부 링크</label>
                     <div class="link-input">
                         <i class="fa-solid fa-link" aria-hidden="true"></i>
                         <input type="url" name="wr_link1" id="wr_link1" value="<?php echo htmlspecialchars($write['wr_link1'] ?? '', ENT_QUOTES); ?>" placeholder="https://">
                     </div>
-                    <p class="link-help">입력하면 리스트에서 바로 외부 링크로 이동합니다.</p>
+                    <div class="link-preview" data-link-preview aria-live="polite"></div>
+                    <p class="form-help">유튜브 링크를 넣으면 상세 페이지에 썸네일/설명이 표시됩니다.</p>
                 </div>
             <?php } ?>
             <?php if ($is_file) { ?>
                 <?php
-                $sidepanel_visible_slots = 1;
+                $visible_slots = 1;
                 if ($w === 'u' && !empty($file) && is_array($file)) {
                     foreach ($file as $idx => $file_item) {
                         if (!empty($file_item['file'])) {
-                            $sidepanel_visible_slots = max($sidepanel_visible_slots, $idx + 1);
+                            $visible_slots = max($visible_slots, $idx + 1);
                         }
                     }
                 }
-                if ($sidepanel_visible_slots > $sidepanel_file_count) {
-                    $sidepanel_visible_slots = $sidepanel_file_count;
+                if ($visible_slots > $file_count) {
+                    $visible_slots = $file_count;
                 }
+                $has_file_controls = ($file_count > 1);
                 ?>
                 <div class="board-field file-group">
                     <label>이미지</label>
-                    <div class="file-field-list" data-max="<?php echo $sidepanel_file_count; ?>">
-                        <div class="file-insert-note">텍스트 사이에 이미지를 넣을 때 아래 삽입 코드를 내용에 추가하세요.</div>
-                    <?php for ($i=0; $i<$sidepanel_file_count; $i++) {
+                    <div class="form-help">텍스트 사이에 이미지를 넣을 때 아래 삽입 코드를 내용에 추가하세요.</div>
+                    <div class="file-field-list<?php echo $has_file_controls ? ' has-controls' : ''; ?>" data-max="<?php echo $file_count; ?>">
+                    <?php for ($i=0; $i<$file_count; $i++) {
                         $existing_file = $file[$i] ?? [];
                         $existing_src = '';
                         if (!empty($existing_file['path']) && !empty($existing_file['file'])) {
@@ -137,7 +155,6 @@ if (!function_exists('sidepanel_gallery_is_video_file')) {
                     } elseif (!empty($existing_file['href'])) {
                         $existing_src = $existing_file['href'];
                     }
-                    $existing_is_video = $sidepanel_is_video_board && sidepanel_gallery_is_video_file($existing_file);
                     $existing_content_raw = '';
                     $existing_caption = '';
                     if (!empty($existing_file['bf_content'])) {
@@ -150,7 +167,7 @@ if (!function_exists('sidepanel_gallery_is_video_file')) {
                             $existing_caption = trim($parts[0]);
                         }
                         $has_existing_file = ($w == 'u' && !empty($existing_file['file']));
-                        $is_hidden = ($i >= $sidepanel_visible_slots);
+                        $is_hidden = ($i >= $visible_slots);
                     ?>
                     <div class="board-field file-field<?php echo $has_existing_file ? ' has-file' : ''; ?><?php echo $is_hidden && !$has_existing_file ? ' is-hidden' : ''; ?>">
                         <div class="file-box">
@@ -158,13 +175,9 @@ if (!function_exists('sidepanel_gallery_is_video_file')) {
                                 <div class="file-existing">
                                     <div class="thumb">
                                         <?php if ($existing_src) { ?>
-                                            <?php if ($existing_is_video) { ?>
-                                                <video src="<?php echo $existing_src; ?>" controls preload="metadata" style="width:100%;height:100%;object-fit:cover;display:block;background:#000;"></video>
-                                            <?php } else { ?>
-                                                <img src="<?php echo $existing_src; ?>" alt="<?php echo get_text($existing_file['source']); ?>" onerror="this.src='<?php echo $sidepanel_gallery_placeholder; ?>';">
-                                            <?php } ?>
+                                            <img src="<?php echo $existing_src; ?>" alt="<?php echo get_text($existing_file['source']); ?>" onerror="this.src='<?php echo $gallery_placeholder; ?>';">
                                         <?php } else { ?>
-                                            <img src="<?php echo $sidepanel_gallery_placeholder; ?>" alt="">
+                                            <img src="<?php echo $gallery_placeholder; ?>" alt="">
                                         <?php } ?>
                                     </div>
                                     <div class="file-meta">
@@ -178,7 +191,7 @@ if (!function_exists('sidepanel_gallery_is_video_file')) {
                                     </label>
                                 </div>
                             <?php } ?>
-                            <input type="file" name="bf_file[]" id="bf_file_<?php echo $i; ?>" class="file-input" accept="<?php echo $sidepanel_accept_types; ?>"<?php echo $sidepanel_is_video_board ? ' multiple' : ''; ?> aria-label="이미지 파일">
+                            <input type="file" name="bf_file[]" id="bf_file_<?php echo $i; ?>" class="file-input" accept="image/*" aria-label="이미지 파일">
                             <div class="file-meta-fields">
                                 <input type="text" id="bf_caption_<?php echo $i; ?>" data-caption value="<?php echo htmlspecialchars($existing_caption, ENT_QUOTES); ?>" placeholder="캡션 (선택)">
                                 <div class="file-insert">
@@ -186,28 +199,40 @@ if (!function_exists('sidepanel_gallery_is_video_file')) {
                                     <span class="insert-code">[media:<?php echo $i + 1; ?>]</span>
                                 </div>
                             </div>
-                            <input type="hidden" name="bf_content[]" id="bf_content_<?php echo $i; ?>" value="<?php echo htmlspecialchars($existing_content_raw, ENT_QUOTES); ?>">
+                        <input type="hidden" name="bf_content[]" id="bf_content_<?php echo $i; ?>" value="<?php echo htmlspecialchars($existing_content_raw, ENT_QUOTES); ?>">
                         </div>
                     </div>
                     <?php } ?>
+                        <?php if ($has_file_controls) { ?>
+                            <div class="file-controls">
+                                <button type="button" class="file-add icon-btn" aria-label="이미지 추가" title="이미지 추가"><i class="fa-solid fa-plus"></i></button>
+                                <button type="button" class="file-remove icon-btn" aria-label="이미지 삭제" title="이미지 삭제"><i class="fa-solid fa-minus"></i></button>
+                            </div>
+                        <?php } ?>
                     </div>
-                    <?php if ($sidepanel_file_count > 1 && !$sidepanel_is_video_board) { ?>
-                        <div class="file-controls">
-                            <button type="button" class="file-add">이미지 추가</button>
-                            <button type="button" class="file-remove">이미지 삭제</button>
-                        </div>
-                    <?php } ?>
                 </div>
             <?php } ?>
 
             <div class="board-field">
                 <label for="wr_content">내용</label>
-                <div class="editor-wrap">
-                    <?php echo $editor_html; ?>
+                <div class="editor-preview" data-preview-wrap>
+                    <div class="editor-pane">
+                        <div class="editor-wrap">
+                            <?php echo $editor_html; ?>
+                        </div>
+                        <button type="button" class="preview-toggle" data-preview-toggle aria-label="미리보기 열기" title="미리보기 열기">
+                            <i class="fa-solid fa-eye" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                    <div class="preview-pane">
+                        <div class="preview-box" id="sidepanel_preview" hidden>
+                            <div class="preview-empty">미리보기에서 이미지 위치를 확인할 수 있습니다.</div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <?php if ($sidepanel_show_source) { ?>
+            <?php if ($show_source) { ?>
                 <div class="board-field source-field">
                     <label for="wr_1">출처</label>
                     <div class="source-inputs">
@@ -216,7 +241,6 @@ if (!function_exists('sidepanel_gallery_is_video_file')) {
                             <input type="url" name="wr_2" id="wr_2" value="<?php echo htmlspecialchars($wr_2 ?? ($write['wr_2'] ?? ''), ENT_QUOTES); ?>" placeholder="https://">
                         </div>
                     </div>
-                    <p class="source-help">텍스트만, 링크만, 텍스트+링크 모두 가능합니다.</p>
                 </div>
             <?php } ?>
 
@@ -244,169 +268,6 @@ if (!function_exists('sidepanel_gallery_is_video_file')) {
 <?php if ($is_dhtml_editor) echo $editor_js; ?>
 <?php echo $captcha_js; ?>
 <script>
-var sidepanelVideoBoard = <?php echo $sidepanel_is_video_board ? 'true' : 'false'; ?>;
-var sidepanelVideoThumbSize = { width: 1170, height: 780 };
-
-function sidepanelBuildThumbName(filename) {
-    var base = (filename || 'video').replace(/\.[^.]+$/, '');
-    return 'thumb-' + base + '_1170x780.jpg';
-}
-
-function sidepanelCalcCoverRect(srcW, srcH, destW, destH) {
-    if (!srcW || !srcH || !destW || !destH) {
-        return { sx: 0, sy: 0, sw: srcW, sh: srcH };
-    }
-    var srcRatio = srcW / srcH;
-    var destRatio = destW / destH;
-    var sw = srcW;
-    var sh = srcH;
-    var sx = 0;
-    var sy = 0;
-    if (srcRatio > destRatio) {
-        sh = srcH;
-        sw = srcH * destRatio;
-        sx = (srcW - sw) / 2;
-    } else {
-        sw = srcW;
-        sh = srcW / destRatio;
-        sy = (srcH - sh) / 2;
-    }
-    return { sx: sx, sy: sy, sw: sw, sh: sh };
-}
-
-function sidepanelCanvasToBlob(canvas) {
-    return new Promise(function (resolve, reject) {
-        if (canvas.toBlob) {
-            canvas.toBlob(function (blob) {
-                if (blob) {
-                    resolve(blob);
-                } else {
-                    reject(new Error('blob_failed'));
-                }
-            }, 'image/jpeg', 0.9);
-            return;
-        }
-        try {
-            var dataUrl = canvas.toDataURL('image/jpeg', 0.9);
-            var parts = dataUrl.split(',');
-            var mimeMatch = parts[0] ? parts[0].match(/:(.*?);/) : null;
-            var mime = (mimeMatch && mimeMatch[1]) ? mimeMatch[1] : 'image/jpeg';
-            var binary = atob(parts[1] || '');
-            var len = binary.length;
-            var arr = new Uint8Array(len);
-            for (var i = 0; i < len; i++) {
-                arr[i] = binary.charCodeAt(i);
-            }
-            resolve(new Blob([arr], { type: mime }));
-        } catch (e) {
-            reject(e);
-        }
-    });
-}
-
-function sidepanelCaptureFirstFrame(file) {
-    return new Promise(function (resolve, reject) {
-        var video = document.createElement('video');
-        var objectUrl = URL.createObjectURL(file);
-        var cleaned = false;
-        var timeoutId = setTimeout(function () {
-            fail('capture_timeout');
-        }, 12000);
-        var cleanup = function () {
-            if (cleaned) return;
-            cleaned = true;
-            clearTimeout(timeoutId);
-            try { URL.revokeObjectURL(objectUrl); } catch (e) {}
-            video.removeAttribute('src');
-            video.load();
-            video.remove();
-        };
-
-        video.preload = 'metadata';
-        video.muted = true;
-        video.playsInline = true;
-        video.src = objectUrl;
-
-        var fail = function (msg) {
-            cleanup();
-            reject(new Error(msg || 'capture_failed'));
-        };
-
-        video.addEventListener('error', function () { fail('video_error'); });
-
-        video.addEventListener('loadedmetadata', function () {
-            try {
-                var seekTo = Math.min(Math.max(0.05, (video.duration || 1) * 0.02), Math.max(0.05, (video.duration || 1) - 0.1));
-                video.currentTime = seekTo;
-            } catch (e) {
-                fail('metadata_seek_failed');
-            }
-        });
-
-        video.addEventListener('seeked', function () {
-            try {
-                var targetW = sidepanelVideoThumbSize.width;
-                var targetH = sidepanelVideoThumbSize.height;
-                var canvas = document.createElement('canvas');
-                canvas.width = targetW;
-                canvas.height = targetH;
-                var ctx = canvas.getContext('2d');
-                var rect = sidepanelCalcCoverRect(video.videoWidth, video.videoHeight, targetW, targetH);
-                ctx.drawImage(video, rect.sx, rect.sy, rect.sw, rect.sh, 0, 0, targetW, targetH);
-                sidepanelCanvasToBlob(canvas).then(function (blob) {
-                    cleanup();
-                    resolve(blob);
-                }).catch(function () {
-                    fail('blob_failed');
-                });
-            } catch (e) {
-                fail('draw_failed');
-            }
-        });
-    });
-}
-
-function sidepanelCreateThumbFile(videoFile) {
-    return sidepanelCaptureFirstFrame(videoFile).then(function (blob) {
-        var name = sidepanelBuildThumbName(videoFile && videoFile.name ? videoFile.name : 'video');
-        try {
-            return new File([blob], name, { type: blob.type || 'image/jpeg' });
-        } catch (e) {
-            blob.name = name;
-            return blob;
-        }
-    });
-}
-
-function sidepanelAttachThumbFiles(form, originalFiles, thumbFile) {
-    var fileInput = form.querySelector("input[type='file'][name='bf_file[]']");
-    if (!fileInput || typeof DataTransfer === 'undefined') return false;
-    if (!fileInput.multiple) fileInput.multiple = true;
-
-    var dt = new DataTransfer();
-    for (var i = 0; i < originalFiles.length; i++) {
-        dt.items.add(originalFiles[i]);
-    }
-    dt.items.add(thumbFile);
-    fileInput.files = dt.files;
-    return true;
-}
-
-function sidepanelToggleSubmitState(form, disabled) {
-    var submitBtn = form.querySelector('.btn-submit');
-    if (!submitBtn) return;
-    if (disabled) {
-        submitBtn.dataset.originalText = submitBtn.dataset.originalText || submitBtn.textContent;
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Generating thumbnail...';
-    } else {
-        if (submitBtn.dataset.originalText) {
-            submitBtn.textContent = submitBtn.dataset.originalText;
-        }
-        submitBtn.disabled = false;
-    }
-}
-
 function sidepanelCollectSelectedFiles(form) {
     var inputs = form.querySelectorAll("input[type='file'][name='bf_file[]']");
     var files = [];
@@ -422,11 +283,69 @@ function sidepanelSyncFileMeta(form) {
     var blocks = form.querySelectorAll('.file-meta-fields');
     for (var i = 0; i < blocks.length; i++) {
         var captionInput = blocks[i].querySelector('[data-caption]');
-        var hiddenInput = blocks[i].querySelector("input[name='bf_content[]']");
+        var field = blocks[i].closest('.file-field');
+        var hiddenInput = field ? field.querySelector("input[name='bf_content[]']") : null;
         if (!hiddenInput) continue;
         var caption = captionInput ? captionInput.value.trim() : '';
         hiddenInput.value = caption;
     }
+}
+
+function sidepanelGetEditorContent(form) {
+    if (window.oEditors && oEditors.getById && oEditors.getById['wr_content']) {
+        return oEditors.getById['wr_content'].getIR();
+    }
+    if (window.CKEDITOR && CKEDITOR.instances && CKEDITOR.instances.wr_content) {
+        return CKEDITOR.instances.wr_content.getData();
+    }
+    if (typeof get_editor_wr_content === 'function') {
+        return get_editor_wr_content();
+    }
+    return (form && form.wr_content) ? (form.wr_content.value || '') : '';
+}
+
+function sidepanelSetEditorContent(form, value) {
+    if (window.oEditors && oEditors.getById && oEditors.getById['wr_content']) {
+        oEditors.getById['wr_content'].exec('SET_IR', [value]);
+        return;
+    }
+    if (window.CKEDITOR && CKEDITOR.instances && CKEDITOR.instances.wr_content) {
+        CKEDITOR.instances.wr_content.setData(value);
+        return;
+    }
+    if (typeof put_editor_wr_content === 'function') {
+        put_editor_wr_content(value);
+        return;
+    }
+    if (form && form.wr_content) form.wr_content.value = value;
+}
+
+function sidepanelCleanMediaTokens(form) {
+    var deleteChecks = form.querySelectorAll("input[name^='bf_file_del']");
+    if (!deleteChecks.length) return;
+    var targets = [];
+    for (var i = 0; i < deleteChecks.length; i++) {
+        var input = deleteChecks[i];
+        if (!input.checked) continue;
+        var match = input.name.match(/\[(\d+)\]/);
+        if (!match) continue;
+        var idx = parseInt(match[1], 10);
+        if (!isNaN(idx)) targets.push(idx + 1);
+    }
+    if (!targets.length) return;
+
+    var content = sidepanelGetEditorContent(form);
+    if (!content) return;
+
+    var updated = content;
+    for (var j = 0; j < targets.length; j++) {
+        var token = targets[j];
+        var re = new RegExp('\\[(?:media|image):\\s*' + token + '\\]', 'gi');
+        updated = updated.replace(re, '');
+    }
+    if (updated === content) return;
+
+    sidepanelSetEditorContent(form, updated);
 }
 
 function sidepanelInsertToken(token) {
@@ -460,6 +379,153 @@ function sidepanelInsertToken(token) {
         textarea.value = value + token;
     }
     textarea.focus();
+    sidepanelSchedulePreviewUpdate();
+}
+
+var sidepanelPreviewTimer = null;
+var sidepanelPreviewCache = {};
+
+function sidepanelSyncPreviewHeight() {
+    var wrap = document.querySelector('[data-preview-wrap]');
+    var preview = document.getElementById('sidepanel_preview');
+    if (!wrap || !preview || !wrap.classList.contains('is-preview-open')) {
+        var editorPane = wrap ? wrap.querySelector('.editor-pane') : null;
+        if (editorPane) editorPane.style.minHeight = '';
+        if (preview) preview.style.minHeight = '';
+        return;
+    }
+    if (preview.hasAttribute('hidden')) return;
+    var editorPane = wrap.querySelector('.editor-pane');
+    if (!editorPane) return;
+    editorPane.style.minHeight = '';
+    preview.style.minHeight = '';
+    var target = Math.max(editorPane.offsetHeight, preview.offsetHeight);
+    if (target > 0) {
+        editorPane.style.minHeight = target + 'px';
+        preview.style.minHeight = target + 'px';
+    }
+}
+
+function sidepanelGetPreviewUrl(input) {
+    if (!input || !input.files || !input.files.length) {
+        if (input && input.dataset.previewUrl) {
+            URL.revokeObjectURL(input.dataset.previewUrl);
+            input.dataset.previewUrl = '';
+            input.dataset.previewKey = '';
+        }
+        return '';
+    }
+    var file = input.files[0];
+    var key = [file.name, file.size, file.lastModified].join('_');
+    if (input.dataset.previewKey !== key) {
+        if (input.dataset.previewUrl) {
+            URL.revokeObjectURL(input.dataset.previewUrl);
+        }
+        input.dataset.previewUrl = URL.createObjectURL(file);
+        input.dataset.previewKey = key;
+    }
+    return input.dataset.previewUrl || '';
+}
+
+function sidepanelBuildMediaMap(form) {
+    var map = {};
+    var fields = form.querySelectorAll('.file-field');
+    for (var i = 0; i < fields.length; i++) {
+        var field = fields[i];
+        var index = i + 1;
+        var captionInput = field.querySelector('[data-caption]');
+        var caption = captionInput ? captionInput.value.trim() : '';
+        var input = field.querySelector("input[type='file'][name='bf_file[]']");
+        var src = '';
+        if (input && input.files && input.files.length) {
+            src = sidepanelGetPreviewUrl(input);
+        } else {
+            var existing = field.querySelector('.file-existing img');
+            if (existing) {
+                src = existing.getAttribute('src') || '';
+            }
+        }
+        if (src) {
+            map[index] = { src: src, caption: caption };
+        }
+    }
+    return map;
+}
+
+function sidepanelUpdatePreview() {
+    var preview = document.getElementById('sidepanel_preview');
+    var form = document.getElementById('fwrite');
+    if (!preview || !form) return;
+
+    var raw = sidepanelGetEditorContent(form) || '';
+    var hasToken = /\[(?:media|image)\s*:\s*\d+\]/i.test(raw);
+    var plain = raw.replace(/<[^>]+>/g, '').trim();
+    if (!plain && !hasToken) {
+        preview.innerHTML = '<div class="preview-empty">미리보기에서 이미지 위치를 확인할 수 있습니다.</div>';
+        return;
+    }
+
+    var html = raw;
+    if (!/<[a-z][\s\S]*>/i.test(html)) {
+        html = html.replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/\r?\n/g, '<br>');
+    }
+    html = html.replace(/\[(?:media|image)\s*:\s*(\d+)\]/gi, function (_, index) {
+        return '<span class="media-token" data-index="' + index + '"></span>';
+    });
+
+    preview.innerHTML = '<div class="preview-text">' + html + '</div>';
+    var container = preview.querySelector('.preview-text');
+    var map = sidepanelBuildMediaMap(form);
+    var tokens = container.querySelectorAll('[data-index]');
+    tokens.forEach(function (token) {
+        var index = token.getAttribute('data-index');
+        var media = map[index];
+        if (!media) {
+            token.remove();
+            return;
+        }
+        var fig = document.createElement('figure');
+        fig.className = 'preview-media';
+        var frame = document.createElement('div');
+        frame.className = 'media-frame';
+        var img = document.createElement('img');
+        img.src = media.src;
+        img.alt = '';
+        frame.appendChild(img);
+        fig.appendChild(frame);
+        if (media.caption) {
+            var cap = document.createElement('figcaption');
+            cap.textContent = media.caption;
+            fig.appendChild(cap);
+        }
+        token.replaceWith(fig);
+    });
+    sidepanelSyncPreviewHeight();
+}
+
+function sidepanelSchedulePreviewUpdate() {
+    if (sidepanelPreviewTimer) return;
+    sidepanelPreviewTimer = setTimeout(function () {
+        sidepanelPreviewTimer = null;
+        sidepanelUpdatePreview();
+    }, 200);
+}
+
+function sidepanelStartPreviewWatch() {
+    var form = document.getElementById('fwrite');
+    var preview = document.getElementById('sidepanel_preview');
+    if (!form || !preview) return;
+    var last = '';
+    setInterval(function () {
+        var current = sidepanelGetEditorContent(form) || '';
+        if (current !== last) {
+            last = current;
+            sidepanelSchedulePreviewUpdate();
+        }
+    }, 800);
 }
 
 document.addEventListener('click', function (event) {
@@ -467,7 +533,284 @@ document.addEventListener('click', function (event) {
     if (!btn) return;
     event.preventDefault();
     sidepanelInsertToken(btn.getAttribute('data-insert'));
+    sidepanelSchedulePreviewUpdate();
 });
+
+function sidepanelInitCategoryTabs() {
+    var wrap = document.querySelector('.category-tabs');
+    if (!wrap) return;
+    var input = document.getElementById('ca_name');
+    var tabs = wrap.querySelectorAll('.category-tab');
+    if (!tabs.length || !input) return;
+
+    function setActive(value) {
+        tabs.forEach(function (tab) {
+            var active = tab.getAttribute('data-category') === value;
+            tab.classList.toggle('is-active', active);
+            tab.setAttribute('aria-selected', active ? 'true' : 'false');
+        });
+        input.value = value;
+    }
+
+    tabs.forEach(function (tab) {
+        tab.addEventListener('click', function () {
+            setActive(tab.getAttribute('data-category'));
+        });
+    });
+
+    if (!input.value) {
+        setActive(tabs[0].getAttribute('data-category'));
+    }
+}
+
+function sidepanelIsYoutubeLink(url) {
+    if (!url) return false;
+    return /(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([A-Za-z0-9_-]{6,})/i.test(url);
+}
+
+var sidepanelYoutubeMetaEndpoint = "<?php echo G5_URL; ?>/api/youtube_meta.php?url=";
+
+function sidepanelFetchYoutubeMeta(url, done) {
+    if (!url || !window.fetch) {
+        if (done) done(null);
+        return;
+    }
+    var endpoint = sidepanelYoutubeMetaEndpoint + encodeURIComponent(url);
+    fetch(endpoint).then(function (res) {
+        if (!res.ok) throw new Error('youtube_meta_failed');
+        return res.json();
+    }).then(function (data) {
+        if (!data || !data.success) {
+            if (done) done(null);
+            return;
+        }
+        if (done) done(data);
+    }).catch(function () {
+        if (done) done(null);
+    });
+}
+
+function sidepanelInitPrControls() {
+    var isPr = <?php echo $show_link ? 'true' : 'false'; ?>;
+    if (!isPr) return;
+    var form = document.getElementById('fwrite');
+    var wrap = form ? form.closest('.board-write') : null;
+    var linkInput = document.getElementById('wr_link1');
+    var subjectInput = document.getElementById('wr_subject');
+    var preview = document.querySelector('[data-link-preview]');
+    var previewWrap = document.querySelector('[data-preview-wrap]');
+    var previewBox = document.getElementById('sidepanel_preview');
+    var previewToggle = document.querySelector('[data-preview-toggle]');
+    var radios = document.querySelectorAll('input[name="pr_type"]');
+    var currentMode = null;
+    var youtubeRequestId = 0;
+    var isInit = true;
+
+    function getSelectedMode() {
+        for (var i = 0; i < radios.length; i++) {
+            if (radios[i].checked) return radios[i].value;
+        }
+        return 'image';
+    }
+
+    function getPlainContent() {
+        var raw = sidepanelGetEditorContent(form) || '';
+        return raw.replace(/<[^>]+>/g, '').trim();
+    }
+
+    function hasDirtyState() {
+        if (getPlainContent()) return true;
+        if (subjectInput && subjectInput.value.trim()) return true;
+        if (linkInput && linkInput.value.trim()) return true;
+        var fields = form.querySelectorAll('.file-field');
+        for (var i = 0; i < fields.length; i++) {
+            var field = fields[i];
+            var input = field.querySelector("input[type='file'][name='bf_file[]']");
+            if (input && input.files && input.files.length) return true;
+            var caption = field.querySelector('[data-caption]');
+            if (caption && caption.value.trim()) return true;
+            var existing = field.querySelector('.file-existing');
+            if (existing) {
+                var delInput = field.querySelector("input[name^='bf_file_del']");
+                if (!delInput || !delInput.checked) return true;
+            }
+        }
+        return false;
+    }
+
+    function confirmTabChange(nextMode) {
+        if (currentMode && nextMode === currentMode) return true;
+        if (!hasDirtyState()) return true;
+        return confirm('작성 중인 내용이 있습니다. \n탭을 변경하면 내용/제목/첨부 이미지가 초기화됩니다. \n계속하시겠습니까?');
+    }
+
+    function clearContent() {
+        sidepanelSetEditorContent(form, '');
+        if (subjectInput) {
+            subjectInput.value = '';
+            subjectInput.dataset.auto = '0';
+        }
+        if (linkInput) {
+            linkInput.value = '';
+            updatePreview(null);
+        }
+        var fileInputs = form.querySelectorAll("input[type='file'][name='bf_file[]']");
+        for (var fi = 0; fi < fileInputs.length; fi++) {
+            fileInputs[fi].value = '';
+        }
+        var captions = form.querySelectorAll('[data-caption]');
+        for (var ci = 0; ci < captions.length; ci++) {
+            captions[ci].value = '';
+        }
+        var hiddenContents = form.querySelectorAll("input[name='bf_content[]']");
+        for (var hi = 0; hi < hiddenContents.length; hi++) {
+            hiddenContents[hi].value = '';
+        }
+        var deleteChecks = form.querySelectorAll("input[name^='bf_file_del']");
+        for (var di = 0; di < deleteChecks.length; di++) {
+            deleteChecks[di].checked = true;
+        }
+        var fileFields = form.querySelectorAll('.file-field');
+        for (var ff = 0; ff < fileFields.length; ff++) {
+            fileFields[ff].classList.remove('has-file');
+        }
+        var existingBlocks = form.querySelectorAll('.file-existing');
+        for (var eb = 0; eb < existingBlocks.length; eb++) {
+            existingBlocks[eb].style.display = 'none';
+        }
+        sidepanelSchedulePreviewUpdate();
+    }
+
+    function setMode(mode, options) {
+        var opts = options || {};
+        if (!opts.skipConfirm && !confirmTabChange(mode)) {
+            for (var i = 0; i < radios.length; i++) {
+                if (radios[i].value === currentMode) {
+                    radios[i].checked = true;
+                }
+            }
+            return false;
+        }
+        if (!opts.skipConfirm && currentMode && mode !== currentMode && hasDirtyState()) {
+            clearContent();
+        }
+        if (wrap) {
+            wrap.classList.toggle('is-pr-youtube', mode === 'youtube');
+            wrap.classList.toggle('is-pr-image', mode === 'image');
+        }
+        for (var i = 0; i < radios.length; i++) {
+            if (radios[i].value === mode) {
+                radios[i].checked = true;
+            }
+        }
+        if (mode === 'image' && linkInput && linkInput.value) {
+            linkInput.value = '';
+            updatePreview(null);
+        }
+        if (mode === 'youtube') {
+            closeEditorPreview();
+        }
+        if (mode !== 'youtube') {
+            youtubeRequestId += 1;
+        }
+        currentMode = mode;
+        return true;
+    }
+
+    function closeEditorPreview() {
+        if (!previewBox) return;
+        previewBox.setAttribute('hidden', '');
+        if (previewWrap) previewWrap.classList.remove('is-preview-open');
+        if (previewToggle) {
+            var icon = previewToggle.querySelector('i');
+            if (icon) {
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+        sidepanelSyncPreviewHeight();
+    }
+
+    function updatePreview(meta) {
+        if (!preview) return;
+        if (!meta || !meta.title) {
+            preview.textContent = '';
+            return;
+        }
+        preview.innerHTML = '<div class="link-title">' + meta.title + '</div><div class="link-sub">YouTube 자동 제목</div>';
+    }
+
+    function escapeHtml(value) {
+        return String(value || '').replace(/[&<>"']/g, function (char) {
+            return ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            })[char] || char;
+        });
+    }
+
+    function updateContent(desc) {
+        if (!desc) return;
+        if (getPlainContent()) return;
+        var safe = escapeHtml(desc);
+        sidepanelSetEditorContent(form, safe);
+    }
+
+    function updateSubject(title) {
+        if (!subjectInput || !title) return;
+        if (!subjectInput.value.trim() || subjectInput.dataset.auto === '1') {
+            subjectInput.value = title;
+            subjectInput.dataset.auto = '1';
+        }
+    }
+
+    function syncFromLink() {
+        if (!linkInput) return;
+        var url = linkInput.value.trim();
+        var selected = getSelectedMode();
+        if (selected === 'youtube' && sidepanelIsYoutubeLink(url)) {
+            if (!setMode('youtube', { skipConfirm: isInit })) return;
+            var requestId = ++youtubeRequestId;
+            sidepanelFetchYoutubeMeta(url, function (meta) {
+                if (requestId !== youtubeRequestId) return;
+                if (getSelectedMode() !== 'youtube') return;
+                if (!linkInput || linkInput.value.trim() !== url) return;
+                if (meta && meta.title) {
+                    updatePreview(meta);
+                    updateSubject(meta.title);
+                    updateContent(meta.description || '');
+                }
+            });
+            return;
+        }
+        updatePreview(null);
+        setMode(selected, { skipConfirm: isInit });
+    }
+
+    if (subjectInput) {
+        subjectInput.addEventListener('input', function () {
+            subjectInput.dataset.auto = '0';
+        });
+    }
+
+    for (var j = 0; j < radios.length; j++) {
+        radios[j].addEventListener('change', function () {
+            setMode(this.value);
+        });
+    }
+
+    if (linkInput) {
+        linkInput.addEventListener('blur', syncFromLink);
+        linkInput.addEventListener('change', syncFromLink);
+    }
+
+    currentMode = getSelectedMode();
+    syncFromLink();
+    isInit = false;
+}
 
 document.addEventListener('change', function (event) {
     var input = event.target;
@@ -484,6 +827,7 @@ document.addEventListener('change', function (event) {
     if (!field.querySelector('.file-existing')) {
         field.classList.remove('has-file');
     }
+    sidepanelSchedulePreviewUpdate();
 });
 
 function sidepanelInitFileControls() {
@@ -554,63 +898,139 @@ function sidepanelInitFileControls() {
     updateControls();
 }
 
+document.addEventListener('DOMContentLoaded', sidepanelInitCategoryTabs);
 document.addEventListener('DOMContentLoaded', sidepanelInitFileControls);
+document.addEventListener('DOMContentLoaded', sidepanelInitPrControls);
+document.addEventListener('DOMContentLoaded', sidepanelUpdatePreview);
+document.addEventListener('DOMContentLoaded', sidepanelStartPreviewWatch);
+
+document.addEventListener('click', function (event) {
+    var btn = event.target.closest('[data-preview-toggle]');
+    if (!btn) return;
+    var preview = document.getElementById('sidepanel_preview');
+    if (!preview) return;
+    var wrap = btn.closest('[data-preview-wrap]');
+    var isHidden = preview.hasAttribute('hidden');
+    if (isHidden) {
+        preview.removeAttribute('hidden');
+        if (wrap) wrap.classList.add('is-preview-open');
+        btn.setAttribute('aria-label', '미리보기 닫기');
+        btn.setAttribute('title', '미리보기 닫기');
+        var icon = btn.querySelector('i');
+        if (icon) {
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        }
+        sidepanelUpdatePreview();
+    } else {
+        preview.setAttribute('hidden', '');
+        if (wrap) wrap.classList.remove('is-preview-open');
+        btn.setAttribute('aria-label', '미리보기 열기');
+        btn.setAttribute('title', '미리보기 열기');
+        var icon = btn.querySelector('i');
+        if (icon) {
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+        sidepanelSyncPreviewHeight();
+    }
+});
+document.addEventListener('input', function (event) {
+    if (!event.target) return;
+    if (event.target.matches('[data-caption]') || event.target.id === 'wr_content') {
+        sidepanelSchedulePreviewUpdate();
+    }
+});
 
 function fwrite_submit(f) {
     sidepanelSyncFileMeta(f);
+    sidepanelCleanMediaTokens(f);
+    var categoryInput = f.querySelector('#ca_name');
+    if (categoryInput && !categoryInput.value) {
+        alert('언어를 선택해주세요.');
+        return false;
+    }
     var autoSubject = "<?php echo addslashes($auto_subject); ?>";
     if (!f.wr_subject.value.trim()) {
         f.wr_subject.value = autoSubject;
     }
     var isNew = "<?php echo $w; ?>" === '';
-    var hasExistingFile = <?php echo $sidepanel_has_existing_file ? 'true' : 'false'; ?>;
+    var hasExistingFile = <?php echo $has_existing_file ? 'true' : 'false'; ?>;
+    var existingNodes = f.querySelectorAll('.file-existing');
+    if (!hasExistingFile && existingNodes.length) {
+        hasExistingFile = true;
+    }
+    if (hasExistingFile && existingNodes.length) {
+        var remaining = 0;
+        for (var r = 0; r < existingNodes.length; r++) {
+            var delInput = existingNodes[r].closest('.file-field').querySelector("input[name^='bf_file_del']");
+            if (!delInput || !delInput.checked) {
+                remaining++;
+            }
+        }
+        if (!remaining) {
+            hasExistingFile = false;
+        }
+    }
     var selectedFiles = sidepanelCollectSelectedFiles(f);
     var hasSelectedFile = selectedFiles.length > 0;
     var fileInput = f.querySelector("input[type='file'][name='bf_file[]']");
+    var linkInput = f.querySelector('#wr_link1');
+    var isPr = <?php echo $show_link ? 'true' : 'false'; ?>;
+    var isYoutube = isPr && linkInput && sidepanelIsYoutubeLink(linkInput.value.trim());
+    var prTypeInput = f.querySelector('input[name="pr_type"]:checked');
+    var prType = prTypeInput ? prTypeInput.value : '';
 
-    if (isNew && !hasSelectedFile) {
-        alert('이미지를 반드시 첨부해주세요.');
-        if (fileInput) fileInput.focus();
+    if (isPr && prType === 'youtube' && !isYoutube) {
+        alert('유튜브 링크를 입력해주세요.');
+        if (linkInput) linkInput.focus();
         return false;
     }
-    if (!isNew && !hasExistingFile && !hasSelectedFile) {
-        alert('이미지를 첨부해주세요.');
-        if (fileInput) fileInput.focus();
-        return false;
+
+    var rawContent = sidepanelGetEditorContent(f) || '';
+    var hasMediaToken = /\[(?:media|image)\s*:\s*\d+\]/i.test(rawContent);
+    var discardFiles = false;
+    if (!isYoutube && (hasSelectedFile || hasExistingFile) && !hasMediaToken) {
+        if (!confirm('내용에 이미지 삽입 코드가 없습니다. 이대로 작성하면 첨부한 이미지 파일이 저장되지 않습니다. 계속하시겠습니까?')) {
+            return false;
+        }
+        discardFiles = true;
+        var fileInputs = f.querySelectorAll("input[type='file'][name='bf_file[]']");
+        for (var fi = 0; fi < fileInputs.length; fi++) {
+            fileInputs[fi].value = '';
+        }
+        var deleteInputs = f.querySelectorAll("input[name^='bf_file_del']");
+        for (var di = 0; di < deleteInputs.length; di++) {
+            deleteInputs[di].checked = true;
+        }
+        var fileFields = f.querySelectorAll('.file-field');
+        for (var ff = 0; ff < fileFields.length; ff++) {
+            fileFields[ff].classList.remove('has-file');
+        }
+        hasSelectedFile = false;
+        hasExistingFile = false;
     }
-    var plainContent = (f.wr_content && f.wr_content.value) ? f.wr_content.value.replace(/<[^>]+>/g, '').trim() : '';
-    if (!plainContent) {
+
+    var hasDeleteChecked = !!f.querySelector("input[name^='bf_file_del']:checked");
+    if (!discardFiles) {
+        if (isNew && !hasSelectedFile && !isYoutube) {
+            alert('이미지를 반드시 첨부해주세요.');
+            if (fileInput) fileInput.focus();
+            return false;
+        }
+        if (!isNew && !hasExistingFile && !hasSelectedFile && !isYoutube && !hasDeleteChecked) {
+            alert('이미지를 첨부해주세요.');
+            if (fileInput) fileInput.focus();
+            return false;
+        }
+    }
+
+    var plainContent = rawContent ? rawContent.replace(/<[^>]+>/g, '').trim() : '';
+    if (!plainContent && !isYoutube) {
         alert('내용을 입력해주세요.');
         return false;
     }
     <?php if ($is_dhtml_editor) echo chk_editor_js('wr_content'); ?>
-
-    if (sidepanelVideoBoard && hasSelectedFile) {
-        var nonVideoFiles = selectedFiles.filter(function (file) {
-            return !(file && file.type && file.type.indexOf('video/') === 0);
-        });
-        if (nonVideoFiles.length) {
-            alert('프로모션 비디오는 동영상 파일만 등록할 수 있습니다.');
-            return false;
-        }
-
-        sidepanelToggleSubmitState(f, true);
-        sidepanelCreateThumbFile(selectedFiles[0]).then(function (thumbFile) {
-            var attached = sidepanelAttachThumbFiles(f, selectedFiles, thumbFile);
-            sidepanelToggleSubmitState(f, false);
-            if (!attached) {
-                alert('Unable to attach the generated thumbnail automatically in this browser.');
-                return;
-            }
-            f.submit();
-        }).catch(function (err) {
-            console.error('[sidepanel] video thumbnail generation failed', err);
-            sidepanelToggleSubmitState(f, false);
-            alert('Failed to generate a thumbnail from the video. Please try again.');
-        });
-        return false;
-    }
-
     return true;
 }
 </script>

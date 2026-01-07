@@ -57,12 +57,15 @@
 }
 .board-basic .tbl_board td.board-empty {
     width: auto;
-    font-size: 17px;
-    font-weight: 700;
+    font-size: 16px;
+    font-weight: 600;
     text-align: center;
     padding: 60px 16px;
-    min-height: 0;
+    min-height: 500px;
+    height: 500px;
+    border-radius: 16px;
     background: #fff;
+    color: var(--muted);
     white-space: normal;
     vertical-align: middle;
     display: table-cell;

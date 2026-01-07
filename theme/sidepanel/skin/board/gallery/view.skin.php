@@ -1,28 +1,22 @@
 <?php
 if (!defined('_GNUBOARD_')) exit;
 
-$sidepanel_theme_url = defined('G5_THEME_URL') ? G5_THEME_URL : (G5_URL . '/theme/sidepanel');
+$theme_url = defined('G5_THEME_URL') ? G5_THEME_URL : (G5_URL . '/theme/sidepanel');
 if (function_exists('add_stylesheet')) {
-    add_stylesheet('<link rel="stylesheet" href="' . $sidepanel_theme_url . '/style.css">', 0);
-    add_stylesheet('<link rel="stylesheet" href="' . $sidepanel_theme_url . '/skin/board/gallery/style.css">', 1);
+    add_stylesheet('<link rel="stylesheet" href="' . $theme_url . '/style.css">', 0);
+    add_stylesheet('<link rel="stylesheet" href="' . $theme_url . '/skin/board/gallery/style.css">', 1);
 }
-$sidepanel_gallery_placeholder = 'https://via.placeholder.com/360x240/ededed/1f1f1f?text=No+Image';
-$sidepanel_is_video_board = isset($bo_table) && $bo_table === 'video';
-$sidepanel_show_source = isset($bo_table) && $bo_table === 'news';
-$sidepanel_hide_file_source = isset($bo_table) && in_array($bo_table, ['news', 'pr'], true);
+$gallery_placeholder = 'https://via.placeholder.com/360x240/ededed/1f1f1f?text=No+Image';
+$show_source = isset($bo_table) && $bo_table === 'news';
+$hide_file_source = isset($bo_table) && in_array($bo_table, ['news', 'pr'], true);
 
-if (!function_exists('sidepanel_gallery_is_video_file')) {
-    function sidepanel_gallery_is_video_file($file) {
-        $name = '';
-        if (is_array($file)) {
-            if (!empty($file['file'])) {
-                $name = $file['file'];
-            } elseif (!empty($file['source'])) {
-                $name = $file['source'];
-            }
+if (!function_exists('sidepanel_gallery_youtube_id')) {
+    function sidepanel_gallery_youtube_id($url) {
+        if (!$url) return '';
+        if (preg_match('~(?:youtu\.be/|youtube\.com/(?:watch\?v=|embed/|shorts/))([A-Za-z0-9_-]{6,})~', $url, $m)) {
+            return $m[1];
         }
-        $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
-        return in_array($ext, ['mp4', 'webm', 'mkv', 'mov', 'avi', 'm4v', 'ogv'], true);
+        return '';
     }
 }
 
@@ -34,7 +28,6 @@ if (!function_exists('sidepanel_gallery_render_media')) {
         } elseif (!empty($file['href'])) {
             $media_src = $file['href'];
         }
-        $render_video = sidepanel_gallery_is_video_file($file) && $media_src !== $placeholder;
         $caption_text = '';
         $source_text = '';
         $content_raw = '';
@@ -48,9 +41,6 @@ if (!function_exists('sidepanel_gallery_render_media')) {
             $caption_text = trim($parts[0]);
             if (isset($parts[1])) $source_text = trim($parts[1]);
         }
-        if (!$caption_text && !$source_text && !empty($file['source'])) {
-            $caption_text = $file['source'];
-        }
         if ($hide_source) {
             $source_text = '';
         }
@@ -59,13 +49,7 @@ if (!function_exists('sidepanel_gallery_render_media')) {
         ?>
         <figure class="content-media">
             <div class="media-frame">
-                <?php if ($render_video) { ?>
-                    <video class="view-video" src="<?php echo $media_src; ?>" controls preload="metadata">
-                        Your browser does not support the video tag.
-                    </video>
-                <?php } else { ?>
-                    <img src="<?php echo $media_src; ?>" alt="<?php echo get_text($file['source']); ?>" onerror="this.onerror=null;this.src='<?php echo $placeholder; ?>';">
-                <?php } ?>
+                <img src="<?php echo $media_src; ?>" alt="<?php echo get_text($file['source']); ?>" onerror="this.onerror=null;this.src='<?php echo $placeholder; ?>';">
             </div>
             <?php if ($caption_text || $source_text) { ?>
             <figcaption>
@@ -116,19 +100,29 @@ function sidepanel_gallery_body($view, $write) {
     }
     return '';
 }
+
+$pr_youtube_url = '';
+$pr_youtube_id = '';
+if (isset($bo_table) && $bo_table === 'pr') {
+    $pr_youtube_url = trim($view['link'][1] ?? ($view['wr_link1'] ?? ($write['wr_link1'] ?? '')));
+    $pr_youtube_id = sidepanel_gallery_youtube_id($pr_youtube_url);
+}
+
+$view_title_raw = $view['subject'] ?? $write['wr_subject'];
+$view_title = get_text($view_title_raw);
 ?>
 
-<link rel="stylesheet" href="<?php echo $sidepanel_theme_url; ?>/style.css">
-<link rel="stylesheet" href="<?php echo $sidepanel_theme_url; ?>/skin/board/gallery/style.css">
+<link rel="stylesheet" href="<?php echo $theme_url; ?>/style.css">
+<link rel="stylesheet" href="<?php echo $theme_url; ?>/skin/board/gallery/style.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-<script src="<?php echo $sidepanel_theme_url; ?>/theme.js" defer></script>
+<script src="<?php echo $theme_url; ?>/theme.js" defer></script>
 <script>document.addEventListener('DOMContentLoaded', function(){ document.body.classList.add('theme-sidepanel'); });</script>
 
 <div class="section board board-view gallery-view">
     <div class="view-header">
         <div>
             <div class="eyebrow"><?php echo $board['bo_subject']; ?></div>
-            <h1 class="title"><?php echo get_text($view['subject'] ?? $write['wr_subject']); ?></h1>
+            <h1 class="title"><?php echo $view_title; ?></h1>
             <div class="meta">
                 <span><i class="fa-solid fa-user"></i><?php echo $view['name'] ?? $write['wr_name']; ?></span>
                 <span><i class="fa-solid fa-eye"></i><?php echo number_format($view['wr_hit'] ?? $write['wr_hit']); ?></span>
@@ -143,114 +137,63 @@ function sidepanel_gallery_body($view, $write) {
         </div>
     </div>
 
-    <?php
-    $sidepanel_view_files = [];
-    if (!empty($view['file']) && is_array($view['file'])) {
-        foreach ($view['file'] as $file) {
-            if (empty($file['source'])) continue;
-            $sidepanel_view_files[] = $file;
-        }
-    }
-
-    if ($sidepanel_is_video_board && $sidepanel_view_files) {
-        $videos_only = array_values(array_filter($sidepanel_view_files, 'sidepanel_gallery_is_video_file'));
-        if (!empty($videos_only)) {
-            $sidepanel_view_files = [$videos_only[0]]; // only show the actual video
-        } else {
-            $non_thumb = array_values(array_filter($sidepanel_view_files, function ($f) {
-                $name = '';
-                if (!empty($f['file'])) $name = $f['file'];
-                elseif (!empty($f['source'])) $name = $f['source'];
-                return stripos($name, 'thumb-') !== 0;
-            }));
-            if (!empty($non_thumb)) {
-                $sidepanel_view_files = [$non_thumb[0]];
-            } else {
-                $sidepanel_view_files = [reset($sidepanel_view_files)];
-            }
-        }
-    }
-
-    $sidepanel_content = sidepanel_gallery_body($view, $write);
-    $sidepanel_used_files = [];
-    $sidepanel_content = sidepanel_gallery_inject_media($sidepanel_content, $sidepanel_view_files, $sidepanel_gallery_placeholder, $sidepanel_used_files, $sidepanel_hide_file_source);
-    $sidepanel_inline_media = !empty($sidepanel_used_files);
-    $sidepanel_unused_files = [];
-    if (!empty($sidepanel_view_files)) {
-        foreach ($sidepanel_view_files as $idx => $file) {
-            if (!$sidepanel_inline_media || !isset($sidepanel_used_files[$idx])) {
-                $sidepanel_unused_files[] = $file;
-            }
-        }
-    }
+    <?php if ($pr_youtube_id) {
+        $yt_thumb = 'https://img.youtube.com/vi/' . $pr_youtube_id . '/hqdefault.jpg';
+        $yt_title = $view_title;
     ?>
-    <?php if (!empty($sidepanel_unused_files)) { ?>
-        <div class="view-media">
+        <div class="view-media youtube-block">
             <div class="media-head">
-                <span class="pill">첨부 이미지</span>
-                <?php if ($sidepanel_inline_media) { ?><span class="hint">내용에 삽입되지 않은 이미지</span><?php } ?>
+                <span class="pill">YouTube</span>
+                <span class="hint">클릭하면 영상으로 이동</span>
             </div>
-            <div class="view-images">
-            <?php foreach ($sidepanel_unused_files as $file) {
-                $media_src = $sidepanel_gallery_placeholder;
-                if (!empty($file['path']) && !empty($file['file'])) {
-                    $media_src = rtrim($file['path'], '/') . '/' . rawurlencode($file['file']);
-                } elseif (!empty($file['href'])) {
-                    $media_src = $file['href'];
-                }
-                $render_video = sidepanel_gallery_is_video_file($file) && $media_src !== $sidepanel_gallery_placeholder;
-                $caption_text = '';
-                $source_text = '';
-                $content_raw = '';
-                if (!empty($file['bf_content'])) {
-                    $content_raw = $file['bf_content'];
-                } elseif (!empty($file['content'])) {
-                    $content_raw = $file['content'];
-                }
-                if ($content_raw !== '') {
-                    $parts = explode('||', $content_raw, 2);
-                    $caption_text = trim($parts[0]);
-                    if (isset($parts[1])) $source_text = trim($parts[1]);
-                }
-                if (!$caption_text && !$source_text && !empty($file['source'])) {
-                    $caption_text = $file['source'];
-                }
-                if ($sidepanel_hide_file_source) {
-                    $source_text = '';
-                }
-            ?>
-                    <figure class="view-image">
-                        <div class="media-frame">
-                            <?php if ($render_video) { ?>
-                                <video class="view-video" src="<?php echo $media_src; ?>" controls preload="metadata">
-                                    Your browser does not support the video tag.
-                                </video>
-                            <?php } else { ?>
-                                <img src="<?php echo $media_src; ?>" alt="<?php echo get_text($file['source']); ?>" onerror="this.onerror=null;this.src='<?php echo $sidepanel_gallery_placeholder; ?>';">
-                            <?php } ?>
-                        </div>
-                        <?php if ($caption_text || $source_text) { ?>
-                        <figcaption>
-                            <?php if ($caption_text) { ?><div class="title"><?php echo get_text($caption_text); ?></div><?php } ?>
-                            <?php if ($source_text) { ?><div class="meta">출처: <?php echo get_text($source_text); ?></div><?php } ?>
-                        </figcaption>
-                        <?php } ?>
-                    </figure>
-            <?php } ?>
+            <a class="youtube-thumb" href="<?php echo htmlspecialchars($pr_youtube_url, ENT_QUOTES); ?>" target="_blank" rel="noopener">
+                <img src="<?php echo htmlspecialchars($yt_thumb, ENT_QUOTES); ?>" alt="<?php echo htmlspecialchars($view_title_raw, ENT_QUOTES); ?>">
+                <span class="play" aria-hidden="true">▶</span>
+            </a>
+            <div class="youtube-meta">
+                <div class="title"><?php echo $yt_title; ?></div>
             </div>
         </div>
     <?php } ?>
+
+    <?php
+    $view_files = [];
+    if (!empty($view['file']) && is_array($view['file'])) {
+        foreach ($view['file'] as $file) {
+            if (empty($file['source'])) continue;
+            $view_files[] = $file;
+        }
+    }
+
+    $content = sidepanel_gallery_body($view, $write);
+    $used_files = [];
+    $content = sidepanel_gallery_inject_media($content, $view_files, $gallery_placeholder, $used_files, $hide_file_source);
+    $inline_media = !empty($used_files);
+    $unused_files = [];
+    if (!empty($view_files)) {
+        foreach ($view_files as $idx => $file) {
+            if (!$inline_media || !isset($used_files[$idx])) {
+                $unused_files[] = $file;
+            }
+        }
+    }
+    if (!empty($unused_files)) {
+        foreach ($unused_files as $file) {
+            $content .= sidepanel_gallery_render_media($file, $gallery_placeholder, $hide_file_source);
+        }
+    }
+    ?>
 
     <div class="content panel">
         <div class="panel-head">
             <span class="pill">내용</span>
         </div>
-        <div class="content-body"><?php echo $sidepanel_content; ?></div>
+        <div class="content-body"><?php echo $content; ?></div>
         <?php
         $news_source_text = trim($view['wr_1'] ?? ($write['wr_1'] ?? ''));
         $news_source_link = trim($view['wr_2'] ?? ($write['wr_2'] ?? ''));
         ?>
-        <?php if ($sidepanel_show_source && ($news_source_text || $news_source_link)) { ?>
+        <?php if ($show_source && ($news_source_text || $news_source_link)) { ?>
             <div class="source-block">
                 <div class="label">출처</div>
                 <div class="value">
@@ -265,7 +208,7 @@ function sidepanel_gallery_body($view, $write) {
         <?php } ?>
     </div>
 
-    <?php if (!empty($view['link']) && is_array($view['link'])) { ?>
+    <?php if (!$pr_youtube_id && !empty($view['link']) && is_array($view['link'])) { ?>
         <div class="link-list">
             <?php for ($i=1; $i<=count($view['link']); $i++) { if (!$view['link'][$i]) continue; ?>
                 <div class="row">

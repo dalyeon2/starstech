@@ -2,23 +2,23 @@
 if (!defined('_GNUBOARD_')) exit;
 
 if (function_exists('add_stylesheet')) {
-    $sidepanel_theme_url = defined('G5_THEME_URL') ? G5_THEME_URL : (G5_URL . '/theme/sidepanel');
-    add_stylesheet('<link rel="stylesheet" href="' . $sidepanel_theme_url . '/style.css">', 0);
-    add_stylesheet('<link rel="stylesheet" href="' . $sidepanel_theme_url . '/skin/board/gallery/style.css">', 1);
+    $theme_url = defined('G5_THEME_URL') ? G5_THEME_URL : (G5_URL . '/theme/sidepanel');
+    add_stylesheet('<link rel="stylesheet" href="' . $theme_url . '/style.css">', 0);
+    add_stylesheet('<link rel="stylesheet" href="' . $theme_url . '/skin/board/gallery/style.css">', 1);
 }
 
-$sidepanel_gallery_placeholder = '';
-$sidepanel_gallery_readonly = ['gallery', 'video_all'];
-$sidepanel_gallery_allow_write = $write_href && !in_array($bo_table, $sidepanel_gallery_readonly, true);
-$sidepanel_is_pr = isset($bo_table) && $bo_table === 'pr';
-$sidepanel_lang_codes = ['ko', 'en', 'ja', 'fr', 'mn'];
-$sidepanel_use_lang_filter = false;
+$gallery_placeholder = G5_URL . '/img/default-image.jpg';
+$gallery_readonly = ['gallery'];
+$gallery_allow_write = $write_href && !in_array($bo_table, $gallery_readonly, true);
+$is_pr = isset($bo_table) && $bo_table === 'pr';
+$lang_codes = ['ko', 'en', 'ja', 'fr', 'mn'];
+$use_lang_filter = false;
 if (!empty($board['bo_category_list'])) {
     $raw_categories = array_map('trim', explode('|', $board['bo_category_list']));
     foreach ($raw_categories as $cat) {
         if ($cat === '') continue;
-        if (in_array(strtolower($cat), $sidepanel_lang_codes, true)) {
-            $sidepanel_use_lang_filter = true;
+        if (in_array(strtolower($cat), $lang_codes, true)) {
+            $use_lang_filter = true;
             break;
         }
     }
@@ -40,13 +40,6 @@ if (!function_exists('sidepanel_filter_lang_categories')) {
             }
         }
         return $items ? implode("\n", $items) : $category_option;
-    }
-}
-
-if (!function_exists('sidepanel_gallery_is_video_ext')) {
-    function sidepanel_gallery_is_video_ext($name) {
-        $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
-        return in_array($ext, ['mp4','webm','mkv','mov','avi','m4v','ogv'], true);
     }
 }
 
@@ -84,11 +77,7 @@ if (!function_exists('sidepanel_gallery_existing_thumb')) {
 
         foreach ($candidates as $cand) {
             $url = $dir . '/' . rawurlencode($cand);
-            if ($fs_dir) {
-                if (@is_file($fs_dir . '/' . $cand)) {
-                    return $url;
-                }
-            } else {
+            if ($fs_dir && @is_file($fs_dir . '/' . $cand)) {
                 return $url;
             }
         }
@@ -101,47 +90,30 @@ if (!function_exists('sidepanel_gallery_existing_thumb')) {
             }
         }
 
-        return $dir . '/' . rawurlencode($candidates[0]);
+        return '';
     }
 }
 
 function sidepanel_gallery_thumb($bo_table, $wr_id, $item = null) {
-    global $sidepanel_gallery_placeholder;
+    global $gallery_placeholder, $is_pr;
 
     $table = $bo_table;
     if (is_array($item) && !empty($item['board'])) {
         $table = $item['board'];
     }
-    $is_video_table = ($table === 'video');
 
-    // For video board: use the first non-video uploaded image directly, no thumb prefix/generation.
-    if ($is_video_table && function_exists('get_file')) {
-        $files = get_file($table, $wr_id);
-        if (!empty($files) && is_array($files)) {
-            foreach ($files as $f) {
-                $fname = $f['file'] ?? ($f['source'] ?? '');
-                if ($fname && sidepanel_gallery_is_video_ext($fname)) continue;
-                if (!empty($f['path']) && !empty($f['file'])) {
-                    return rtrim($f['path'], '/') . '/' . rawurlencode($fname);
-                }
-            }
-        }
-        return $sidepanel_gallery_placeholder;
-    }
-
+    $direct_src = '';
     if (function_exists('get_file')) {
         $files = get_file($table, $wr_id);
         if (!empty($files) && is_array($files)) {
             foreach ($files as $f) {
                 $fname = $f['file'] ?? ($f['source'] ?? '');
-                if ($fname && sidepanel_gallery_is_video_ext($fname)) continue;
                 if (!empty($f['path']) && !empty($f['file'])) {
+                    if (!$direct_src) {
+                        $direct_src = rtrim($f['path'], '/') . '/' . rawurlencode($fname);
+                    }
                     $pre_thumb = sidepanel_gallery_existing_thumb($f['path'], $fname);
                     if ($pre_thumb) return $pre_thumb;
-                    if ($is_video_table) {
-                        $direct = rtrim($f['path'], '/') . '/' . rawurlencode($fname);
-                        if ($direct) return $direct;
-                    }
                 }
             }
         }
@@ -159,7 +131,6 @@ function sidepanel_gallery_thumb($bo_table, $wr_id, $item = null) {
         if (!empty($files) && is_array($files)) {
             foreach ($files as $idx => $f) {
                 $fname = $f['file'] ?? ($f['source'] ?? '');
-                if ($fname && sidepanel_gallery_is_video_ext($fname)) continue;
                 if (!empty($f['path']) && !empty($f['file'])) {
                     $filepath = rtrim($f['path'], '/');
                     $tname = function_exists('thumbnail') ? thumbnail($fname, $filepath, $filepath, 240, 160, true, true, 'center', true, '80/0.5/3') : '';
@@ -171,7 +142,16 @@ function sidepanel_gallery_thumb($bo_table, $wr_id, $item = null) {
         }
     }
 
-    return $sidepanel_gallery_placeholder;
+    if ($direct_src) {
+        return $direct_src;
+    }
+
+    if ($is_pr && is_array($item) && !empty($item['wr_link1'])) {
+        $youtube_thumb = sidepanel_gallery_youtube_thumb($item['wr_link1']);
+        if ($youtube_thumb) return $youtube_thumb;
+    }
+
+    return $gallery_placeholder;
 }
 
 function sidepanel_gallery_excerpt($item) {
@@ -195,20 +175,22 @@ function sidepanel_gallery_excerpt($item) {
             }
         }
     }
+    if ($raw) {
+        $raw = preg_replace('/\\[(?:media|image)\\s*:\\s*\\d+\\]/i', '', $raw);
+    }
     $text = cut_str(strip_tags($raw), 200, '...');
     return $cache[$cacheKey] = $text;
 }
 
-$sidepanel_gallery_sources_photo = ['company', 'factories', 'warehouse', 'event'];
-$sidepanel_gallery_sources_video = ['video'];
+$gallery_sources_photo = ['company', 'factories', 'warehouse', 'event'];
 
-if (in_array($bo_table, ['gallery', 'video_all'], true)) {
-    $sources = $bo_table === 'gallery' ? $sidepanel_gallery_sources_photo : $sidepanel_gallery_sources_video;
+if ($bo_table === 'gallery') {
+    $sources = $gallery_sources_photo;
     $page_rows = isset($board['bo_page_rows']) ? (int)$board['bo_page_rows'] : 15;
     $page_rows = $page_rows > 0 ? $page_rows : 15;
     $page = isset($page) && $page > 0 ? (int)$page : 1;
     $total_count = 0;
-    $sidepanel_total_override = 0;
+    $total_override = 0;
     $list = [];
 
     if (!empty($g5['board_table']) && function_exists('sql_fetch') && function_exists('sql_query')) {
@@ -221,7 +203,7 @@ if (in_array($bo_table, ['gallery', 'video_all'], true)) {
         }
 
         if (!empty($union_sql)) {
-            $sidepanel_total_override = $total_count;
+            $total_override = $total_count;
             $total_page = $page_rows ? (int)ceil($total_count / $page_rows) : 1;
             $page = max(1, min($page, max($total_page, 1)));
             $from = ($page - 1) * $page_rows;
@@ -297,10 +279,10 @@ if (in_array($bo_table, ['gallery', 'video_all'], true)) {
 }
 ?>
 
-<link rel="stylesheet" href="<?php echo $sidepanel_theme_url; ?>/style.css">
-<link rel="stylesheet" href="<?php echo $sidepanel_theme_url; ?>/skin/board/gallery/style.css">
+<link rel="stylesheet" href="<?php echo $theme_url; ?>/style.css">
+<link rel="stylesheet" href="<?php echo $theme_url; ?>/skin/board/gallery/style.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-<script src="<?php echo $sidepanel_theme_url; ?>/theme.js" defer></script>
+<script src="<?php echo $theme_url; ?>/theme.js" defer></script>
 <script>document.addEventListener('DOMContentLoaded',function(){document.body.classList.add('theme-sidepanel');});</script>
 
 <form name="fboardlist" id="fboardlist" action="<?php echo G5_BBS_URL; ?>/board_list_update.php" method="post"<?php echo $is_checkbox ? ' onsubmit="return fboardlist_submit(this);"' : ''; ?>>
@@ -320,7 +302,7 @@ if (in_array($bo_table, ['gallery', 'video_all'], true)) {
     </div>
     <div class="search-row">
         <div class="meta-count">
-            <span>Total <?php echo number_format(isset($sidepanel_total_override) && $sidepanel_total_override ? $sidepanel_total_override : ($total_count ?? 0)); ?></span>
+            <span>Total <?php echo number_format(isset($total_override) && $total_override ? $total_override : ($total_count ?? 0)); ?></span>
             <?php if ($is_checkbox) { ?>
             <label class="card-check check-all list-check-all" for="chkall">
                 <input type="checkbox" id="chkall">
@@ -330,7 +312,7 @@ if (in_array($bo_table, ['gallery', 'video_all'], true)) {
             <?php } ?>
         </div>
         <div class="top-actions">
-            <?php if ($sidepanel_gallery_allow_write) { ?><a class="btn-minimal" href="<?php echo $write_href; ?>"><i class="fa-solid fa-pen"></i> 글쓰기</a><?php } ?>
+            <?php if ($gallery_allow_write) { ?><a class="btn-minimal" href="<?php echo $write_href; ?>"><i class="fa-solid fa-pen"></i> 글쓰기</a><?php } ?>
             <?php if ($is_checkbox) { ?><button type="submit" name="btn_submit" value="선택삭제" onclick="document.pressed=this.value;" class="btn-minimal"><i class="fa-solid fa-trash"></i> 선택삭제</button><?php } ?>
             <?php if ($is_checkbox) { ?><button type="submit" name="btn_submit" value="선택복사" onclick="document.pressed=this.value;" class="btn-minimal"><i class="fa-solid fa-copy"></i> 선택복사</button><?php } ?>
             <?php if ($is_checkbox) { ?><button type="submit" name="btn_submit" value="선택이동" onclick="document.pressed=this.value;" class="btn-minimal"><i class="fa-solid fa-arrow-right-arrow-left"></i> 선택이동</button><?php } ?>
@@ -341,7 +323,7 @@ if (in_array($bo_table, ['gallery', 'video_all'], true)) {
     <?php if ($is_category) { ?>
         <nav id="bo_cate" class="category-tabs" aria-label="Category">
             <ul id="bo_cate_ul" class="category-list">
-                <?php echo $sidepanel_use_lang_filter ? sidepanel_filter_lang_categories($category_option, $sidepanel_lang_codes) : $category_option; ?>
+                <?php echo $use_lang_filter ? sidepanel_filter_lang_categories($category_option, $lang_codes) : $category_option; ?>
             </ul>
         </nav>
     <?php } ?>
@@ -350,13 +332,9 @@ if (in_array($bo_table, ['gallery', 'video_all'], true)) {
         <?php if ($list && count($list)) { $i = 0; ?>
             <?php foreach ($list as $item) { 
                 $thumb = sidepanel_gallery_thumb($bo_table, $item['wr_id'], $item);
-                $thumb_src = $thumb ?: $sidepanel_gallery_placeholder;
+                $thumb_src = $thumb ?: $gallery_placeholder;
                 $link_href = $item['href'];
                 $link_attrs = '';
-                if ($sidepanel_is_pr && !empty($item['wr_link1'])) {
-                    $link_href = $item['wr_link1'];
-                    $link_attrs = ' target="_blank" rel="noopener"';
-                }
             ?>
                 <li class="card">
                     <?php if ($is_checkbox) { ?>
@@ -366,7 +344,7 @@ if (in_array($bo_table, ['gallery', 'video_all'], true)) {
                         </label>
                     <?php } ?>
                     <a class="thumb" href="<?php echo $link_href; ?>"<?php echo $link_attrs; ?>>
-                        <img src="<?php echo $thumb_src; ?>" loading="lazy" alt="" onerror="this.onerror=null;this.style.display='none';">
+                        <img src="<?php echo $thumb_src; ?>" loading="lazy" alt="" onerror="this.onerror=null;this.src='<?php echo $gallery_placeholder; ?>';">
                     </a>
                     <div class="card-body">
                         <a class="title" href="<?php echo $link_href; ?>"<?php echo $link_attrs; ?>>
@@ -374,7 +352,7 @@ if (in_array($bo_table, ['gallery', 'video_all'], true)) {
                         </a>
                         <p class="excerpt"><?php echo sidepanel_gallery_excerpt($item); ?></p>
                         <div class="meta">
-                            <span><i class="fa-solid fa-user"></i><?php echo get_text($item['wr_name']); ?></span>
+                            <span><i class="fa-solid fa-user"></i><?php echo get_text(strip_tags($item['wr_name'])); ?></span>
                             <span><i class="fa-solid fa-calendar"></i><?php echo date('m-d', strtotime($item['wr_datetime'])); ?></span>
                             <span><i class="fa-solid fa-eye"></i><?php echo number_format($item['wr_hit']); ?></span>
                         </div>
@@ -396,7 +374,7 @@ if (in_array($bo_table, ['gallery', 'video_all'], true)) {
     <?php } ?>
 
     <div class="board-actions" style="justify-content: flex-end;">
-        <?php if ($sidepanel_gallery_allow_write) { ?><a class="btn-minimal" href="<?php echo $write_href; ?>"><i class="fa-solid fa-pen"></i> 글쓰기</a><?php } ?>
+        <?php if ($gallery_allow_write) { ?><a class="btn-minimal" href="<?php echo $write_href; ?>"><i class="fa-solid fa-pen"></i> 글쓰기</a><?php } ?>
     </div>
 </div>
 </form>
