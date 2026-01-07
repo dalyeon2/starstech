@@ -30,6 +30,28 @@ foreach ($product_manual_langs as $idx => $lang_key) {
     $product_manual_map[$lang_key] = $product_manual_start + $idx;
 }
 
+$product_wr_id = $view['wr_id'] ?? ($write['wr_id'] ?? ($wr_id ?? 0));
+$product_hit_default = $view['wr_hit'] ?? ($write['wr_hit'] ?? 0);
+if (!function_exists('sidepanel_view_hit')) {
+    function sidepanel_view_hit($bo_table, $wr_id, $fallback)
+    {
+        if (!function_exists('sql_fetch')) {
+            return $fallback;
+        }
+        if (!$bo_table || !$wr_id) {
+            return $fallback;
+        }
+        $prefix = defined('G5_WRITE_PREFIX')
+            ? G5_WRITE_PREFIX
+            : (defined('G5_TABLE_PREFIX') ? G5_TABLE_PREFIX . 'write_' : 'g5_write_');
+        $write_table = $prefix . $bo_table;
+        $wr_id = (int)$wr_id;
+        $row = sql_fetch("SELECT wr_hit FROM `{$write_table}` WHERE wr_id = {$wr_id}");
+        return isset($row['wr_hit']) ? (int)$row['wr_hit'] : $fallback;
+    }
+}
+$product_hit = sidepanel_view_hit($bo_table ?? '', $product_wr_id, $product_hit_default);
+
 $product_data = [];
 $product_raw = $view['wr_content'] ?? ($write['wr_content'] ?? '');
 if ($product_raw) {
@@ -160,7 +182,7 @@ foreach ($product_langs as $lang_key => $lang_label) {
             <h1 class="title"><?php echo get_text($view['subject'] ?? $write['wr_subject']); ?></h1>
             <div class="meta">
                 <span><i class="fa-solid fa-user"></i><?php echo $view['name'] ?? $write['wr_name']; ?></span>
-                <span><i class="fa-solid fa-eye"></i><?php echo number_format($view['wr_hit'] ?? $write['wr_hit']); ?></span>
+                <span><i class="fa-solid fa-eye"></i><?php echo number_format($product_hit); ?></span>
                 <span><i class="fa-solid fa-clock"></i><?php echo date('Y.m.d H:i', strtotime($view['wr_datetime'] ?? $write['wr_datetime'])); ?></span>
             </div>
         </div>
@@ -203,16 +225,16 @@ foreach ($product_langs as $lang_key => $lang_label) {
                                     <div class="value"><?php echo htmlspecialchars($price, ENT_QUOTES); ?></div>
                                 </div>
                             <?php } ?>
-                            <?php if ($desc !== '') { ?>
-                                <div class="info-row full">
-                                    <div class="label">설명</div>
-                                    <div class="value"><?php echo nl2br(htmlspecialchars($desc, ENT_QUOTES)); ?></div>
-                                </div>
-                            <?php } ?>
                             <?php if ($buy !== '') { ?>
                                 <div class="info-row full">
                                     <div class="label">구매방법</div>
                                     <div class="value"><?php echo htmlspecialchars($buy, ENT_QUOTES); ?></div>
+                                </div>
+                            <?php } ?>
+                            <?php if ($desc !== '') { ?>
+                                <div class="info-row full">
+                                    <div class="label">설명</div>
+                                    <div class="value"><?php echo nl2br(htmlspecialchars($desc, ENT_QUOTES)); ?></div>
                                 </div>
                             <?php } ?>
                         </div>

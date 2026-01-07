@@ -276,7 +276,7 @@
     position: relative;
 }
 .board-write .file-field-list.has-controls {
-    padding-top: 56px;
+    padding-top: 64px;
 }
 .board-write.is-pr-youtube .file-group {
     display: none;
@@ -353,11 +353,26 @@
 .board-write .file-controls {
     position: absolute;
     top: 12px;
+    left: 12px;
     right: 12px;
     display: flex;
-    gap: 8px;
-    justify-content: flex-end;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
     margin-top: 0;
+}
+.board-write .file-controls .file-help {
+    font-size: 13px;
+    color: #4b5563;
+    line-height: 1.5;
+    flex: 1;
+    min-width: 0;
+}
+.board-write .file-controls .file-control-buttons {
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+    flex-shrink: 0;
 }
 .board-write .file-controls button {
     border: 1px solid #d7dbe8;

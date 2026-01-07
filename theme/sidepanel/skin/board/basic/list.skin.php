@@ -58,7 +58,7 @@ $sidepanel_basic_disable_move = isset($bo_table) && $bo_table === 'inquiry';
                     <?php } ?>
                     <th>번호</th>
                     <th>제목</th>
-                    <th>글쓴이</th>
+                    <th>작성자</th>
                     <th>등록일</th>
                 </tr>
             </thead>

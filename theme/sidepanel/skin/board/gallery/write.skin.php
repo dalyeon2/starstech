@@ -145,7 +145,6 @@ $pr_youtube = $show_link && !empty($write['wr_link1']) && sidepanel_gallery_is_y
                 ?>
                 <div class="board-field file-group">
                     <label>이미지</label>
-                    <div class="form-help">텍스트 사이에 이미지를 넣을 때 아래 삽입 코드를 내용에 추가하세요.</div>
                     <div class="file-field-list<?php echo $has_file_controls ? ' has-controls' : ''; ?>" data-max="<?php echo $file_count; ?>">
                     <?php for ($i=0; $i<$file_count; $i++) {
                         $existing_file = $file[$i] ?? [];
@@ -205,8 +204,11 @@ $pr_youtube = $show_link && !empty($write['wr_link1']) && sidepanel_gallery_is_y
                     <?php } ?>
                         <?php if ($has_file_controls) { ?>
                             <div class="file-controls">
-                                <button type="button" class="file-add icon-btn" aria-label="이미지 추가" title="이미지 추가"><i class="fa-solid fa-plus"></i></button>
-                                <button type="button" class="file-remove icon-btn" aria-label="이미지 삭제" title="이미지 삭제"><i class="fa-solid fa-minus"></i></button>
+                                <span class="file-help">본문에 이미지를 넣으려면 이미지 추가 후 아래 삽입 코드를 원하는 위치에 붙여 넣어 주세요.</span>
+                                <div class="file-control-buttons">
+                                    <button type="button" class="file-add icon-btn" aria-label="이미지 추가" title="이미지 추가"><i class="fa-solid fa-plus"></i></button>
+                                    <button type="button" class="file-remove icon-btn" aria-label="이미지 삭제" title="이미지 삭제"><i class="fa-solid fa-minus"></i></button>
+                                </div>
                             </div>
                         <?php } ?>
                     </div>

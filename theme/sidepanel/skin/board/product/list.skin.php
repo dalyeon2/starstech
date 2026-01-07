@@ -103,7 +103,7 @@ if (!function_exists('sidepanel_product_thumb')) {
                     </a>
                     <div class="meta">
                         <span><i class="fa-solid fa-user"></i><?php echo get_text(strip_tags($item['name'])); ?></span>
-                        <span><i class="fa-solid fa-calendar"></i><?php echo date('Y.m.d', strtotime($item['wr_datetime'])); ?></span>
+                        <span><i class="fa-solid fa-calendar"></i><?php echo date('m-d', strtotime($item['wr_datetime'])); ?></span>
                         <span><i class="fa-solid fa-eye"></i><?php echo number_format($item['wr_hit']); ?></span>
                     </div>
                 </div>

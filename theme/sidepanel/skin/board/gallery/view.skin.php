@@ -6,6 +6,27 @@ if (function_exists('add_stylesheet')) {
     add_stylesheet('<link rel="stylesheet" href="' . $theme_url . '/style.css">', 0);
     add_stylesheet('<link rel="stylesheet" href="' . $theme_url . '/skin/board/gallery/style.css">', 1);
 }
+$gallery_wr_id = $view['wr_id'] ?? ($write['wr_id'] ?? ($wr_id ?? 0));
+$gallery_hit_default = $view['wr_hit'] ?? ($write['wr_hit'] ?? 0);
+if (!function_exists('sidepanel_view_hit')) {
+    function sidepanel_view_hit($bo_table, $wr_id, $fallback)
+    {
+        if (!function_exists('sql_fetch')) {
+            return $fallback;
+        }
+        if (!$bo_table || !$wr_id) {
+            return $fallback;
+        }
+        $prefix = defined('G5_WRITE_PREFIX')
+            ? G5_WRITE_PREFIX
+            : (defined('G5_TABLE_PREFIX') ? G5_TABLE_PREFIX . 'write_' : 'g5_write_');
+        $write_table = $prefix . $bo_table;
+        $wr_id = (int)$wr_id;
+        $row = sql_fetch("SELECT wr_hit FROM `{$write_table}` WHERE wr_id = {$wr_id}");
+        return isset($row['wr_hit']) ? (int)$row['wr_hit'] : $fallback;
+    }
+}
+$gallery_hit = sidepanel_view_hit($bo_table ?? '', $gallery_wr_id, $gallery_hit_default);
 $gallery_placeholder = 'https://via.placeholder.com/360x240/ededed/1f1f1f?text=No+Image';
 $show_source = isset($bo_table) && $bo_table === 'news';
 $hide_file_source = isset($bo_table) && in_array($bo_table, ['news', 'pr'], true);
@@ -125,7 +146,7 @@ $view_title = get_text($view_title_raw);
             <h1 class="title"><?php echo $view_title; ?></h1>
             <div class="meta">
                 <span><i class="fa-solid fa-user"></i><?php echo $view['name'] ?? $write['wr_name']; ?></span>
-                <span><i class="fa-solid fa-eye"></i><?php echo number_format($view['wr_hit'] ?? $write['wr_hit']); ?></span>
+                <span><i class="fa-solid fa-eye"></i><?php echo number_format($gallery_hit); ?></span>
                 <span><i class="fa-solid fa-clock"></i><?php echo date('Y.m.d H:i', strtotime($view['wr_datetime'] ?? $write['wr_datetime'])); ?></span>
             </div>
         </div>

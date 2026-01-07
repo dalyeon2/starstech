@@ -260,7 +260,7 @@ if (!function_exists('sidepanel_product_items_text')) {
                                             <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
                                         </button>
                                         <input type="text" data-field="feature-title" data-lang="<?php echo $lang_key; ?>" value="<?php echo htmlspecialchars($set_title, ENT_QUOTES); ?>" placeholder="카테고리명을 입력해 주세요.">
-                                        <textarea data-field="feature-items" data-lang="<?php echo $lang_key; ?>" placeholder="줄바꿈으로 구분해 내용을 입력해 주세요."><?php echo htmlspecialchars(sidepanel_product_items_text($set_items), ENT_QUOTES); ?></textarea>
+                                        <textarea data-field="feature-items" data-lang="<?php echo $lang_key; ?>" placeholder="내용을 줄바꿈으로 구분해 입력해 주세요."><?php echo htmlspecialchars(sidepanel_product_items_text($set_items), ENT_QUOTES); ?></textarea>
                                     </div>
                                 <?php } ?>
                             </div>
