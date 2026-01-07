@@ -66,7 +66,7 @@ if (!$standalone) {
             <div class="nav-group">
                 <div class="nav-title">홍보센터</div>
                 <ul>
-                    <li><a href="/bbs/board.php?bo_table=news"><span class="icon"><i class="fa-solid fa-newspaper"></i></span><span class="label">뉴스룸</span></a></li>
+                    <li><a href="/bbs/board.php?bo_table=news"><span class="icon"><i class="fa-solid fa-newspaper"></i></span><span class="label">Newsroom</span></a></li>
                     <li><a href="/bbs/board.php?bo_table=pr"><span class="icon"><i class="fa-solid fa-bullhorn"></i></span><span class="label">PR</span></a></li>
                 </ul>
             </div>
@@ -74,7 +74,7 @@ if (!$standalone) {
             <div class="nav-group">
                 <div class="nav-title">고객지원</div>
                 <ul>
-                    <li><a href="/bbs/board.php?bo_table=inquiry"><span class="icon"><i class="fa-solid fa-envelope-open-text"></i></span><span class="label">문의 관리</span></a></li>
+                    <li><a href="/bbs/board.php?bo_table=inquiry"><span class="icon"><i class="fa-solid fa-envelope-open-text"></i></span><span class="label">Contact</span></a></li>
                 </ul>
             </div>
 

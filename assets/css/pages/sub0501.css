@@ -906,6 +906,7 @@
     font-size: var(--font-md);
     font-weight: 600;
     line-height: 28.8px;
+    white-space: pre-line;
 }
 
 .cont3 .btn {

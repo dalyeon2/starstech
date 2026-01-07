@@ -554,7 +554,7 @@ function applyCleanDisplayFromMap(htmlToClean) {
 
 function normalizeCleanUrls($root) {
     if (!$root || !$root.length) return;
-    const $links = $root.find('.panel a.link[href]');
+    const $links = $root.find('.panel a.link[href], .panel a.title[href], .header .contact[href]');
     if (!$links.length) return;
 
     const lang = resolveFooterLang();

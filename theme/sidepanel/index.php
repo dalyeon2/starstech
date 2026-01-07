@@ -215,7 +215,7 @@ $sections = [
         'title' => '홍보센터',
         'icon' => 'fa-bullhorn',
         'boards' => [
-            ['table' => 'news', 'label' => '뉴스룸', 'icon' => 'fa-newspaper'],
+            ['table' => 'news', 'label' => 'Newsroom', 'icon' => 'fa-newspaper'],
             ['table' => 'pr', 'label' => 'PR', 'icon' => 'fa-bullhorn'],
         ],
     ],
@@ -223,7 +223,7 @@ $sections = [
         'title' => '고객지원',
         'icon' => 'fa-headset',
         'boards' => [
-            ['table' => 'inquiry', 'label' => '문의관리', 'icon' => 'fa-envelope-open-text'],
+            ['table' => 'inquiry', 'label' => 'Contact', 'icon' => 'fa-envelope-open-text'],
         ],
     ],
 ];
@@ -258,9 +258,9 @@ $quick_buttons = [
     ['label' => 'ECO-ST', 'icon' => 'fa-snowflake', 'href' => dash_board_list_url('eco_st')],
     ['label' => 'Fertilizer', 'icon' => 'fa-seedling', 'href' => dash_board_list_url('fertilizer')],
     ['label' => 'Labope', 'icon' => 'fa-flask', 'href' => dash_board_list_url('labope')],
-    ['label' => '뉴스룸', 'icon' => 'fa-newspaper', 'href' => dash_board_list_url('news')],
+    ['label' => 'Newsroom', 'icon' => 'fa-newspaper', 'href' => dash_board_list_url('news')],
     ['label' => 'PR', 'icon' => 'fa-bullhorn', 'href' => dash_board_list_url('pr')],
-    ['label' => '문의관리', 'icon' => 'fa-envelope-open-text', 'href' => dash_board_list_url('inquiry')],
+    ['label' => 'Contact', 'icon' => 'fa-envelope-open-text', 'href' => dash_board_list_url('inquiry')],
 ];
 ?>
 
