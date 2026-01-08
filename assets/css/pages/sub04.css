@@ -133,6 +133,7 @@
 }
 
 .cont1 .right {
+    width: 100%;
     flex: 1.15;
     display: flex;
     flex-direction: column;
@@ -140,6 +141,7 @@
 }
 
 .cont1 .content {
+    width: 100%;
     display: flex;
     flex-direction: column;
     gap: 24px;
