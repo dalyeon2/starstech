@@ -496,13 +496,13 @@
 .gallery-view .pill {
     display: inline-flex;
     align-items: center;
-    padding: 6px 12px;
+    padding: 4px 10px;
     border-radius: 999px;
-    background: #274472;
-    color: #fff;
-    font-weight: 800;
+    background: #e9edf7;
+    color: #4f5b6b;
+    font-weight: 700;
     font-size: 13px;
-    letter-spacing: 0.02em;
+    letter-spacing: 0;
 }
 .gallery-view .hint {
     color: #6b7280;
@@ -578,13 +578,13 @@
 .gallery-view .source-block .label {
     display: inline-flex;
     align-items: center;
-    padding: 6px 12px;
+    padding: 4px 10px;
     border-radius: 999px;
-    background: #274472;
-    color: #fff;
-    font-weight: 800;
+    background: #e9edf7;
+    color: #4f5b6b;
+    font-weight: 700;
     font-size: 13px;
-    letter-spacing: 0.02em;
+    letter-spacing: 0;
     width: fit-content;
 }
 .gallery-view .source-block .value {

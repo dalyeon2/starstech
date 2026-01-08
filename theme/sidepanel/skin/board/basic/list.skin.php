@@ -65,6 +65,12 @@ $sidepanel_basic_disable_move = isset($bo_table) && $bo_table === 'inquiry';
             <tbody>
                 <?php if ($list && count($list)) { $i = 0; ?>
                     <?php foreach ($list as $item) { ?>
+                        <?php
+                            $display_num = $item['num'];
+                            if (isset($bo_table) && $bo_table === 'inquiry' && is_numeric($display_num)) {
+                                $display_num = (int)$display_num + 1;
+                            }
+                        ?>
                         <tr>
                             <?php if ($is_checkbox) { ?>
                                 <td class="check-col">
@@ -74,7 +80,7 @@ $sidepanel_basic_disable_move = isset($bo_table) && $bo_table === 'inquiry';
                                     </label>
                                 </td>
                             <?php } ?>
-                            <td class="num"><?php echo $item['num']; ?></td>
+                            <td class="num"><?php echo $display_num; ?></td>
                             <td class="title">
                                 <a href="<?php echo $item['href']; ?>">
                                     <?php echo $item['subject']; ?>

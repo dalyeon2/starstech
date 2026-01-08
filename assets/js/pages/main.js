@@ -2,8 +2,30 @@
  * Main Page
  */
 (function ($, w, d) {
+    const NEWS_ENDPOINT = '../api/news.php';
+    const NEWS_PLACEHOLDER_IMG = '../assets/img/common/default-image.jpg';
+
     function prefersReducedMotion() {
         return w.matchMedia && w.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    }
+
+    function resolveLang() {
+        const match = w.location.pathname.match(/\/(ko|en|ja|fr|mn)\//i);
+        return match ? match[1].toLowerCase() : '';
+    }
+
+    function buildNewsEndpoint(limit) {
+        if (!NEWS_ENDPOINT) return '';
+        const params = [];
+        const lang = resolveLang();
+        if (lang) params.push('lang=' + encodeURIComponent(lang));
+        if (typeof limit === 'number' && limit > 0) params.push('limit=' + limit);
+        if (!params.length) return NEWS_ENDPOINT;
+        return NEWS_ENDPOINT + '?' + params.join('&');
+    }
+
+    function getDetailBase() {
+        return /\/pages\//i.test(w.location.pathname) ? './sub-detail.html' : './pages/sub-detail.html';
     }
 
     /* Section 1: intro splash */
@@ -379,6 +401,53 @@
     }
 
     /* Section 7: news */
+    function initNewsFeed() {
+        const $section = $('.cont7');
+        if (!$section.length || !w.fetch) return;
+
+        const $track = $section.find('.cards');
+        if (!$track.length) return;
+
+        const endpoint = buildNewsEndpoint(8);
+        if (!endpoint) return;
+
+        const renderCards = (items) => {
+            const detailBase = getDetailBase();
+            $track.empty();
+            items.forEach((item, idx) => {
+                const cover = item.thumb || (item.images && item.images[0] ? item.images[0].src : NEWS_PLACEHOLDER_IMG);
+                const href = detailBase + '#news/' + idx;
+                const $card = $('<a/>', { 'class': 'card', href });
+                const $img = $('<img/>', { 'class': 'photo', src: cover, alt: item.title || '' });
+                const $content = $('<div/>', { 'class': 'content' });
+                const $meta = $('<div/>', { 'class': 'meta' });
+                const $date = $('<span/>', { 'class': 'date', text: item.date || '' });
+                const $title = $('<p/>', { 'class': 'title', text: item.title || '' });
+                const $badge = $('<span/>', { 'class': 'badge', text: 'Newsroom' });
+                const $more = $('<i/>', { 'class': 'more', 'aria-hidden': 'true' });
+
+                $meta.append($date, $title);
+                $content.append($meta, $badge);
+                $card.append($img, $content, $more);
+                $track.append($card);
+            });
+            initNewsCards();
+        };
+
+        w.fetch(endpoint)
+            .then((resp) => {
+                if (!resp.ok) throw new Error('network');
+                return resp.json();
+            })
+            .then((data) => {
+                if (!data || !Array.isArray(data.items) || !data.items.length) return;
+                renderCards(data.items);
+            })
+            .catch(() => {
+                // Keep static cards when fetch fails.
+            });
+    }
+
     function initNewsCards() {
         const $section = $('.cont7');
         if (!$section.length) return;
@@ -584,6 +653,7 @@
         initAbout();
         initExports();
         initNewsCards();
+        initNewsFeed();
         initNews();
         initContact();
     });

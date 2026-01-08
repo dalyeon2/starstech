@@ -7,24 +7,24 @@
 .cont1 .container {
     display: flex;
     flex-direction: column;
-    gap: 80px;
+    gap: 30px;
 }
 
 .cont1 .list {
     display: flex;
     flex-direction: column;
-    gap: 120px;
+    gap: 80px;
 }
 
 .cont1 .item {
     display: flex;
-    gap: 252px;
+    gap: 150px;
     padding-top: 30px;
     border-top: 1px solid var(--black-600);
 }
 
 .cont1 .profile {
-    width: 120px;
+    flex: 1;
     padding-top: 12px;
     display: flex;
     flex-direction: column;
@@ -45,12 +45,22 @@
 }
 
 .cont1 .detail {
-    flex: 1;
+    flex: 5;
     padding: 20px 0 20px 50px;
     border-left: 1px dotted var(--black-500);
     display: flex;
     flex-direction: column;
     gap: 30px;
+}
+
+.cont1 .line .block {
+    padding-bottom: 30px;
+    border-bottom: 1px solid var(--black-400);
+}
+
+.cont1 .line .block:last-child {
+    padding-bottom: 0;
+    border-bottom: none;
 }
 
 .cont1 .block {

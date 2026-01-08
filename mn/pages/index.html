@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="mn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex">
+    <title>Redirecting...</title>
+    <style>
+        body {
+            font-family: "Segoe UI", Arial, sans-serif;
+            margin: 0;
+            padding: 2rem;
+            color: #222;
+        }
+    </style>
+</head>
+<body>
+    <noscript>This page requires JavaScript to redirect.</noscript>
+    <script>
+        (function () {
+            function slugifyLabel(text) {
+                if (!text) return '';
+                var raw = String(text).trim().toLowerCase();
+                if (!raw) return '';
+                var normalized = raw.normalize ? raw.normalize('NFKD') : raw;
+                var noApos = normalized.replace(/['\u2019]/g, '');
+                var noDiacritics = noApos.replace(/[\u0300-\u036f]/g, '');
+                return noDiacritics
+                    .replace(/[^a-z0-9]+/g, '-')
+                    .replace(/^-+|-+$/g, '');
+            }
+
+            function getSlug() {
+                var hash = window.location.hash || '';
+                if (hash.indexOf('#') === 0) hash = hash.slice(1);
+                if (hash.indexOf('/') === 0) hash = hash.slice(1);
+                if (hash) {
+                    return decodeURIComponent(hash.split('?')[0]);
+                }
+                var params = new URLSearchParams(window.location.search);
+                return params.get('p') || params.get('page') || '';
+            }
+
+            function normalizeSlug(raw) {
+                var cleaned = String(raw || '').trim();
+                if (!cleaned) return '';
+                cleaned = cleaned.replace(/^\/+|\/+$/g, '');
+                cleaned = cleaned.replace(/\.html$/i, '');
+                var slug = slugifyLabel(cleaned);
+                return slug || cleaned.toLowerCase();
+            }
+
+            function redirectTo(url) {
+                window.location.replace(url);
+            }
+
+            function routeHome() {
+                redirectTo(new URL('../index.html', window.location.href).href);
+            }
+
+            var slug = getSlug();
+            if (!slug) {
+                routeHome();
+                return;
+            }
+
+            var normalized = normalizeSlug(slug);
+            if (!normalized) {
+                routeHome();
+                return;
+            }
+
+            if (/^sub\d+$/i.test(normalized)) {
+                redirectTo(new URL(normalized + '.html', window.location.href).href);
+                return;
+            }
+
+            var headerUrl = new URL('../../components/header.html', window.location.href);
+            fetch(headerUrl)
+                .then(function (res) {
+                    if (!res.ok) throw new Error('Header fetch failed');
+                    return res.text();
+                })
+                .then(function (html) {
+                    var doc = new DOMParser().parseFromString(html, 'text/html');
+                    var links = doc.querySelectorAll('.panel a.link[href]');
+                    var map = new Map();
+
+                    links.forEach(function (link) {
+                        var text = link.textContent || '';
+                        var slugValue = slugifyLabel(text);
+                        if (!slugValue || map.has(slugValue)) return;
+                        var href = link.getAttribute('href') || '';
+                        if (!href) return;
+                        try {
+                            var target = new URL(href, window.location.href).href;
+                            map.set(slugValue, target);
+                        } catch (e) {
+                        }
+                    });
+
+                    var targetUrl = map.get(normalized);
+                    if (!targetUrl) {
+                        var fallback = slugifyLabel(normalized);
+                        targetUrl = map.get(fallback);
+                    }
+
+                    if (targetUrl) {
+                        redirectTo(targetUrl);
+                    } else {
+                        routeHome();
+                    }
+                })
+                .catch(routeHome);
+        })();
+    </script>
+</body>
+</html>

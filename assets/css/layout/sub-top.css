@@ -50,7 +50,7 @@
 }
 
 .subtop .copy .title {
-    font-size: 68px;
+    font-size: var(--font-title68);
     font-weight: 700;
     line-height: 1.4;
     white-space: pre-line;
@@ -119,7 +119,7 @@
 }
 
 .subtop.text-only .copy .title {
-    color: var(--black); 
+    color: var(--black);
     font-family: var(--font-en);
     font-size: 120px;
     line-height: 1.2;
@@ -137,6 +137,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+
     .subtop .title,
     .subtop .desc {
         opacity: 1;
@@ -268,6 +269,11 @@
 }
 
 @media (max-width: 1440px) {
+    .subtop .copy .title {
+        font-size: var(--font-title62);
+        line-height: 1.35;
+    }
+
     .subtop.duo .layout {
         min-height: 800px;
     }
@@ -280,17 +286,21 @@
         max-width: 520px;
     }
 
-    .subtop.duo .copy .title {
-        font-size: 58px;
-        line-height: 1.35;
-    }
-
     .subtop.duo .right {
         min-height: 800px;
     }
 }
 
 @media (max-width: 1280px) {
+    .subtop .container {
+        min-height: 820px;
+        padding: 140px 32px 120px;
+    }
+
+    .subtop .copy .title {
+        font-size: var(--font-title52);
+    }
+
     .subtop.duo .layout {
         min-height: 740px;
     }
@@ -304,10 +314,6 @@
         line-height: 22px;
     }
 
-    .subtop.duo .copy .title {
-        font-size: 52px;
-    }
-
     .subtop.duo .actions {
         margin-top: 28px;
     }
@@ -315,9 +321,38 @@
     .subtop.duo .right {
         min-height: 740px;
     }
+
+    .subtop.text-only .container {
+        min-height: 520px;
+        padding-top: 140px;
+        padding-bottom: 70px;
+    }
+
+    .subtop.text-only .copy {
+        gap: 32px;
+    }
 }
 
 @media (max-width: 1024px) {
+    .subtop .container {
+        min-height: 680px;
+        padding: 120px 28px 100px;
+    }
+
+    .subtop .copy {
+        gap: 16px;
+    }
+
+    .subtop .copy .title {
+        font-size: 44px;
+        line-height: 1.3;
+    }
+
+    .subtop .copy .desc {
+        font-size: var(--font-base);
+        line-height: 1.6;
+    }
+
     .subtop.duo .layout {
         min-height: auto;
         grid-template-columns: 1fr;
@@ -332,7 +367,7 @@
     }
 
     .subtop.duo .copy .title {
-        font-size: 44px;
+        font-size: var(--font-headline46);
     }
 
     .subtop.duo .scroll {
@@ -342,9 +377,45 @@
     .subtop.duo .right {
         min-height: 360px;
     }
+
+    .subtop.text-only .container {
+        min-height: 480px;
+        padding-top: 120px;
+        padding-bottom: 70px;
+    }
+
+    .subtop.text-only .copy {
+        gap: 28px;
+    }
 }
 
 @media (max-width: 768px) {
+    .subtop .container {
+        min-height: 560px;
+        padding: 100px 20px 80px;
+    }
+
+    .subtop .copy {
+        gap: 14px;
+    }
+
+    .subtop .eyebrow {
+        font-size: var(--font-base);
+        line-height: 1.4;
+    }
+
+    .subtop .copy .title {
+        font-size: var(--font-headline36);
+    }
+
+    .subtop .scroll {
+        font-size: var(--font-sm);
+    }
+
+    .subtop .scroll::after {
+        height: 32px;
+    }
+
     .subtop.duo .left {
         padding: 80px 28px 0;
     }
@@ -355,6 +426,10 @@
 
     .subtop.duo .copy .title {
         font-size: 36px;
+    }
+
+    .subtop .copy .desc {
+        white-space: normal;
     }
 
     .subtop.duo .actions {
@@ -375,9 +450,37 @@
     .subtop.duo .right {
         min-height: 280px;
     }
+
+    .subtop.text-only .container {
+        min-height: 420px;
+        padding-top: 100px;
+        padding-bottom: 60px;
+    }
+
+    .subtop.text-only .copy {
+        gap: 24px;
+    }
+
+    .subtop.text-only .copy .desc {
+        font-size: var(--font-base);
+        line-height: 1.6;
+    }
 }
 
 @media (max-width: 480px) {
+    .subtop .container {
+        min-height: 460px;
+        padding: 84px 16px 64px;
+    }
+
+    .subtop .copy .title {
+        font-size: var(--font-4xl);
+    }
+
+    .subtop .copy .desc {
+        font-size: var(--font-sm);
+    }
+
     .subtop.duo .left {
         padding: 60px 20px 0;
     }
@@ -404,126 +507,7 @@
     .subtop.duo .right {
         min-height: 220px;
     }
-}
 
-@media (max-width: 1280px) {
-    .subtop .container {
-        min-height: 820px;
-        padding: 140px 32px 120px;
-    }
-
-    .subtop .copy .title {
-        font-size: 56px;
-    }
-}
-
-@media (max-width: 1024px) {
-    .subtop .container {
-        min-height: 680px;
-        padding: 120px 28px 100px;
-    }
-
-    .subtop .copy {
-        gap: 16px;
-    }
-
-    .subtop .copy .title {
-        font-size: 44px;
-        line-height: 1.3;
-    }
-
-    .subtop .copy .desc {
-        font-size: var(--font-base);
-        line-height: 1.6;
-    }
-}
-
-@media (max-width: 768px) {
-    .subtop .container {
-        min-height: 560px;
-        padding: 100px 20px 80px;
-    }
-
-    .subtop .copy {
-        gap: 14px;
-    }
-
-    .subtop .eyebrow {
-        font-size: var(--font-base);
-        line-height: 1.4;
-    }
-
-    .subtop .copy .title {
-        font-size: 34px;
-    }
-
-    .subtop .scroll {
-        bottom: 16px;
-        font-size: var(--font-sm);
-    }
-
-    .subtop .scroll::after {
-        height: 32px;
-    }
-}
-
-@media (max-width: 480px) {
-    .subtop .container {
-        min-height: 460px;
-        padding: 84px 16px 64px;
-    }
-
-    .subtop .copy .title {
-        font-size: 28px;
-    }
-
-    .subtop .copy .desc {
-        font-size: var(--font-sm);
-    }
-}
-
-@media (max-width: 1280px) {
-    .subtop.text-only .container {
-        min-height: 520px;
-        padding-top: 140px;
-        padding-bottom: 70px;
-    }
-
-    .subtop.text-only .copy {
-        gap: 32px;
-    }
-}
-
-@media (max-width: 1024px) {
-    .subtop.text-only .container {
-        min-height: 480px;
-        padding-top: 120px;
-        padding-bottom: 70px;
-    }
-
-    .subtop.text-only .copy {
-        gap: 28px;
-    }
-}
-
-@media (max-width: 768px) {
-    .subtop.text-only .container {
-        min-height: 420px;
-        padding-top: 100px;
-        padding-bottom: 60px;
-    }
-
-    .subtop.text-only .copy {
-        gap: 24px;
-    }
-
-    .subtop.text-only .copy .desc {
-        font-size: var(--font-base);
-        line-height: 1.6;
-    }
-}
-
-@media (max-width: 480px) {
     .subtop.text-only .container {
         min-height: 360px;
         padding-top: 84px;

@@ -52,7 +52,7 @@ function sidepanel_basic_files($view) {
         <div class="view-actions top-actions">
             <?php if ($list_href) { ?><a class="btn-minimal" href="<?php echo $list_href; ?>"><i class="fa-solid fa-list"></i> 목록</a><?php } ?>
             <?php if ($sidepanel_basic_allow_write) { ?><a class="btn-minimal" href="<?php echo $write_href; ?>"><i class="fa-solid fa-pen"></i> 글쓰기</a><?php } ?>
-            <?php if ($update_href) { ?><a class="btn-minimal" href="<?php echo $update_href; ?>"><i class="fa-solid fa-pen-to-square"></i> 수정</a><?php } ?>
+            <?php if ($update_href && (!isset($bo_table) || $bo_table !== 'inquiry')) { ?><a class="btn-minimal" href="<?php echo $update_href; ?>"><i class="fa-solid fa-pen-to-square"></i> 수정</a><?php } ?>
             <?php if ($delete_href) { ?><a class="btn-minimal" href="<?php echo $delete_href; ?>" onclick="del(this.href); return false;"><i class="fa-solid fa-trash"></i> 삭제</a><?php } ?>
         </div>
     </div>
@@ -113,29 +113,31 @@ function sidepanel_basic_files($view) {
         if (empty($content_body)) { $content_body = trim(implode("\n", $others)); }
         if (empty($content_body)) { $content_body = $post_raw; }
     ?>
-        <div class="content inquiry-view">
-            <div class="inquiry-grid">
-                <div class="inquiry-left">
-                    <dl class="inquiry-meta">
-                        <?php if (!empty($fields['문의 유형'])): ?><div class="row"><dt>문의 유형</dt><dd><?php echo htmlspecialchars($fields['문의 유형'], ENT_QUOTES, 'UTF-8'); ?></dd></div><?php endif; ?>
-                        <?php if (!empty($fields['기업/소속'])): ?><div class="row"><dt>기업/소속</dt><dd><?php echo htmlspecialchars($fields['기업/소속'], ENT_QUOTES, 'UTF-8'); ?></dd></div><?php endif; ?>
-                        <?php if (!empty($fields['담당자'])): ?><div class="row"><dt>담당자</dt><dd><?php echo htmlspecialchars($fields['담당자'], ENT_QUOTES, 'UTF-8'); ?></dd></div><?php endif; ?>
-                        <?php if (!empty($fields['국가'])): ?><div class="row"><dt>국가</dt><dd><?php echo htmlspecialchars($fields['국가'], ENT_QUOTES, 'UTF-8'); ?></dd></div><?php endif; ?>
-                        <?php if (!empty($fields['이메일'])): ?><div class="row"><dt>이메일</dt><dd><a href="mailto:<?php echo htmlspecialchars($fields['이메일'], ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($fields['이메일'], ENT_QUOTES, 'UTF-8'); ?></a></dd></div><?php endif; ?>
-                    </dl>
-                </div>
-                <div class="inquiry-right">
-                    <?php if (!empty($attachments)): ?><div class="attachments"><strong>첨부파일</strong><ul><?php foreach($attachments as $att) { ?><li><a href="<?php echo htmlspecialchars($att, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener"><?php echo htmlspecialchars(basename(parse_url($att, PHP_URL_PATH)), ENT_QUOTES, 'UTF-8'); ?></a></li><?php } ?></ul></div><?php endif; ?>
+        <div class="inquiry-layout">
+            <div class="content inquiry-view">
+                <div class="inquiry-grid">
+                    <div class="inquiry-left">
+                        <dl class="inquiry-meta">
+                            <?php if (!empty($fields['문의 유형'])): ?><div class="row"><dt>문의 유형</dt><dd><?php echo htmlspecialchars($fields['문의 유형'], ENT_QUOTES, 'UTF-8'); ?></dd></div><?php endif; ?>
+                            <?php if (!empty($fields['기업/소속'])): ?><div class="row"><dt>기업/소속</dt><dd><?php echo htmlspecialchars($fields['기업/소속'], ENT_QUOTES, 'UTF-8'); ?></dd></div><?php endif; ?>
+                            <?php if (!empty($fields['담당자'])): ?><div class="row"><dt>담당자</dt><dd><?php echo htmlspecialchars($fields['담당자'], ENT_QUOTES, 'UTF-8'); ?></dd></div><?php endif; ?>
+                            <?php if (!empty($fields['국가'])): ?><div class="row"><dt>국가</dt><dd><?php echo htmlspecialchars($fields['국가'], ENT_QUOTES, 'UTF-8'); ?></dd></div><?php endif; ?>
+                            <?php if (!empty($fields['이메일'])): ?><div class="row"><dt>이메일</dt><dd><a href="mailto:<?php echo htmlspecialchars($fields['이메일'], ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($fields['이메일'], ENT_QUOTES, 'UTF-8'); ?></a></dd></div><?php endif; ?>
+                        </dl>
+                    </div>
+                    <div class="inquiry-right">
+                        <?php if (!empty($attachments)): ?><div class="attachments"><strong>첨부파일</strong><ul><?php foreach($attachments as $att) { ?><li><a href="<?php echo htmlspecialchars($att, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener"><?php echo htmlspecialchars(basename(parse_url($att, PHP_URL_PATH)), ENT_QUOTES, 'UTF-8'); ?></a></li><?php } ?></ul></div><?php endif; ?>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="inquiry-details">
-            <div class="inquiry-title"><strong>제목</strong>
-                <div class="t-subject"><?php echo get_text($view['subject'] ?? $write['wr_subject']); ?></div>
-            </div>
-            <div class="inquiry-full-content"><strong>내용</strong>
-                <div class="content-body-text"><?php echo nl2br(htmlspecialchars($content_body, ENT_QUOTES, 'UTF-8')); ?></div>
+            <div class="inquiry-details">
+                <div class="inquiry-title"><strong>제목</strong>
+                    <div class="t-subject"><?php echo get_text($view['subject'] ?? $write['wr_subject']); ?></div>
+                </div>
+                <div class="inquiry-full-content"><strong>내용</strong>
+                    <div class="content-body-text"><?php echo nl2br(htmlspecialchars($content_body, ENT_QUOTES, 'UTF-8')); ?></div>
+                </div>
             </div>
         </div>
 

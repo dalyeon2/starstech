@@ -24,9 +24,14 @@
     var $summary = $left.find('.summary').first();
 
     var observer = null;
+    var itemObserver = null;
+    var enterOnceObserver = null;
+    var enterOnceTrigger = null;
+    var hasEntered = false;
     var groupTriggers = [];
     var scrollSync = null;
     var tabOffset = 0;
+    var triggerOffset = 0;
     var activeId = '';
     var hasInitialized = false;
     var resizeTimer = null;
@@ -87,6 +92,20 @@
         return Number.isFinite(num) ? num : 0;
     }
 
+    function historyHeadGap() {
+        if (!$section.length) return 0;
+        var value = w.getComputedStyle($section.get(0)).getPropertyValue('--history-head-gap') || '0';
+        var num = parseFloat(value);
+        return Number.isFinite(num) ? num : 0;
+    }
+
+    function historyTriggerAdvance() {
+        if (!$section.length) return 0;
+        var value = w.getComputedStyle($section.get(0)).getPropertyValue('--history-trigger-advance') || '0';
+        var num = parseFloat(value);
+        return Number.isFinite(num) ? num : 0;
+    }
+
     function setGroupGaps() {
         $groups.each(function () {
             var count = $(this).find('.item').length;
@@ -107,7 +126,8 @@
         var headEl = $section.find('.head').get(0);
         var headHeight = headEl ? headEl.getBoundingClientRect().height : 0;
         $section.get(0).style.setProperty('--history-head-height', headHeight + 'px');
-        tabOffset = headerOffset() + headHeight + historyOffset();
+        tabOffset = headerOffset() + headHeight + historyOffset() + historyHeadGap();
+        triggerOffset = Math.max(0, Math.round(tabOffset + historyTriggerAdvance()));
 
         var leftEl = $left.get(0);
         var viewport = w.innerHeight || d.documentElement.clientHeight || 0;
@@ -165,6 +185,18 @@
             observer.disconnect();
             observer = null;
         }
+        if (itemObserver) {
+            itemObserver.disconnect();
+            itemObserver = null;
+        }
+        if (enterOnceObserver) {
+            enterOnceObserver.disconnect();
+            enterOnceObserver = null;
+        }
+        if (enterOnceTrigger && typeof enterOnceTrigger.kill === 'function') {
+            enterOnceTrigger.kill();
+            enterOnceTrigger = null;
+        }
         if (groupTriggers.length) {
             groupTriggers.forEach(function (trigger) {
                 if (trigger && typeof trigger.kill === 'function') {
@@ -192,7 +224,7 @@
         var rootEl = (root && root.nodeType === 1 && root !== d.body && root !== d.documentElement && root !== d.scrollingElement)
             ? root
             : null;
-        var marginTop = Math.round(tabOffset);
+        var marginTop = Math.round(triggerOffset);
         var margin = '-' + marginTop + 'px 0px -45% 0px';
         observer = new IntersectionObserver(function (entries) {
             var best = null;
@@ -212,10 +244,106 @@
         });
     }
 
+    function setupItemObserver() {
+        var $items = $track.find('.item');
+        if (!$items.length) return;
+
+        $section.addClass('has-scroll-reveal');
+
+        if (prefersReducedMotion()) {
+            $items.addClass('is-visible');
+            return;
+        }
+
+        if (!('IntersectionObserver' in w)) {
+            $items.addClass('is-visible');
+            return;
+        }
+
+        var root = scrollRootEl();
+        var rootEl = (root && root.nodeType === 1 && root !== d.body && root !== d.documentElement && root !== d.scrollingElement)
+            ? root
+            : null;
+        var marginTop = Math.max(0, Math.round(triggerOffset));
+        var margin = '-' + marginTop + 'px 0px -20% 0px';
+
+        itemObserver = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (!entry.isIntersecting) return;
+                entry.target.classList.add('is-visible');
+                if (itemObserver) {
+                    itemObserver.unobserve(entry.target);
+                }
+            });
+        }, { root: rootEl, rootMargin: margin, threshold: 0.15 });
+
+        $items.each(function () {
+            itemObserver.observe(this);
+        });
+    }
+
+    function applyLeftEnterOnce() {
+        if (hasEntered) return;
+        hasEntered = true;
+        $section.addClass('is-entered');
+        if (enterOnceObserver) {
+            enterOnceObserver.disconnect();
+            enterOnceObserver = null;
+        }
+        if (enterOnceTrigger && typeof enterOnceTrigger.kill === 'function') {
+            enterOnceTrigger.kill();
+            enterOnceTrigger = null;
+        }
+    }
+
+    function setupLeftEnterOnce(scroller) {
+        if (!$left.length || hasEntered) return;
+
+        if (prefersReducedMotion()) {
+            applyLeftEnterOnce();
+            return;
+        }
+
+        if (w.gsap && w.ScrollTrigger && scroller) {
+            enterOnceTrigger = w.ScrollTrigger.create({
+                trigger: $section.get(0),
+                scroller: scroller,
+                start: function () { return 'top top+=' + Math.round(tabOffset); },
+                onEnter: applyLeftEnterOnce,
+                onEnterBack: applyLeftEnterOnce
+            });
+            return;
+        }
+
+        if (!('IntersectionObserver' in w)) {
+            applyLeftEnterOnce();
+            return;
+        }
+
+        var root = scrollRootEl();
+        var rootEl = (root && root.nodeType === 1 && root !== d.body && root !== d.documentElement && root !== d.scrollingElement)
+            ? root
+            : null;
+        var marginTop = Math.max(0, Math.round(tabOffset));
+        var margin = '-' + marginTop + 'px 0px 0px 0px';
+
+        enterOnceObserver = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    applyLeftEnterOnce();
+                }
+            });
+        }, { root: rootEl, rootMargin: margin, threshold: 0 });
+
+        enterOnceObserver.observe($section.get(0));
+    }
+
     function build() {
         cleanup();
         measure();
+        setupItemObserver();
         if (!(w.gsap && w.ScrollTrigger)) {
+            setupLeftEnterOnce();
             createObserver();
             return;
         }
@@ -227,15 +355,15 @@
         }
 
         var scroller = scrollerEl();
+        setupLeftEnterOnce(scroller);
         groupTriggers = $groups.map(function (_, el) {
             var $group = $(el);
-            var firstItem = $group.find('.item').first().get(0) || el;
             return w.ScrollTrigger.create({
-                trigger: firstItem,
+                trigger: el,
                 endTrigger: el,
                 scroller: scroller,
-                start: function () { return 'top top+=' + Math.round(tabOffset); },
-                end: function () { return 'bottom top+=' + Math.round(tabOffset); },
+                start: function () { return 'top top+=' + Math.round(triggerOffset); },
+                end: function () { return 'bottom top+=' + Math.round(triggerOffset); },
                 onEnter: function () {
                     applyGroup($group);
                 },

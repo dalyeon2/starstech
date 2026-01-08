@@ -3,15 +3,19 @@
  * list + detail
  */
 (function () {
-    var NEWS_ENDPOINT = '../../assets/data/newsroom.json';
+    var NEWS_ENDPOINT = '../../api/news.php';
+    var PR_ENDPOINT = '../../api/pr.php';
+    var NEWS_BOARD = 'news';
+    var PR_BOARD = 'pr';
     var NEWS_LIST_URL = './sub0401.html';
     var NEWS_KEY = 'news';
-    var BOARD_ENDPOINT = '../../assets/data/prboard.json';
+    var PR_KEY = 'pr';
     var BOARD_LIST_URL = './sub0402.html';
     var NOTICE_KEY = 'notice';
     var NEWS_PLACEHOLDER_IMG = '../../assets/img/common/default-image.jpg';
-    var NEWS_STORAGE_KEY = 'newsroom-items-v1';
-    var BOARD_STORAGE_KEY = 'prboard-items-v1';
+    var LANG = resolveLang();
+    var NEWS_STORAGE_KEY = 'newsroom-items-v1' + (LANG ? '-' + LANG : '');
+    var BOARD_STORAGE_KEY = 'prboard-items-v1' + (LANG ? '-' + LANG : '');
     var newsCache = null;
     var boardCache = null;
     var lastDetailSignature = '';
@@ -21,8 +25,28 @@
         return /sub-detail\.html/i.test(location.pathname);
     }
 
+    function resolveLang() {
+        var match = location.pathname.match(/\/(ko|en|ja|fr|mn)\//i);
+        return match ? match[1].toLowerCase() : '';
+    }
+
+    function buildApiUrl(board, options) {
+        var base = board === PR_BOARD ? PR_ENDPOINT : NEWS_ENDPOINT;
+        if (!base) return '';
+        var params = [];
+        if (LANG) params.push('lang=' + encodeURIComponent(LANG));
+        if (options && typeof options.limit === 'number') params.push('limit=' + options.limit);
+        if (options && typeof options.offset === 'number' && options.offset > 0) params.push('offset=' + options.offset);
+        if (!params.length) return base;
+        return base + (base.indexOf('?') !== -1 ? '&' : '?') + params.join('&');
+    }
+
     function normalizeKey(key) {
         return (key || '').toLowerCase();
+    }
+
+    function getBoardType(item) {
+        return normalizeKey(item && item.type) === NOTICE_KEY ? NOTICE_KEY : PR_KEY;
     }
 
     function parseHash() {
@@ -100,6 +124,7 @@
                 id: (item && item.id) || ('news-' + idx),
                 title: (item && item.title) || 'Untitled',
                 date: (item && item.date) || '',
+                datetime: (item && item.datetime) || '',
                 thumb: thumb,
                 images: images,
                 content: (item && item.content) || '',
@@ -124,6 +149,7 @@
                 label: (item && item.label) || (type === NOTICE_KEY ? '공지사항' : '홍보자료'),
                 title: (item && item.title) || 'Untitled',
                 date: (item && item.date) || '',
+                datetime: (item && item.datetime) || '',
                 thumb: thumb,
                 images: images,
                 content: (item && item.content) || '',
@@ -133,9 +159,17 @@
         });
     }
 
+    function getSortValue(item) {
+        if (item && item.datetime) {
+            var parsed = Date.parse(item.datetime);
+            if (!isNaN(parsed)) return parsed;
+        }
+        return parseNewsDate(item && item.date ? item.date : item);
+    }
+
     function sortNewsItems(items) {
         return items.slice().sort(function (a, b) {
-            return parseNewsDate(b.date) - parseNewsDate(a.date);
+            return getSortValue(b) - getSortValue(a);
         });
     }
 
@@ -193,10 +227,15 @@
         return buildDetailUrl(NOTICE_KEY, idx);
     }
 
+    function buildPrDetailUrl(idx) {
+        return buildDetailUrl(PR_KEY, idx);
+    }
+
     function fetchNewsData() {
         if (newsCache) return newsCache;
-        if (!NEWS_ENDPOINT) return Promise.resolve(null);
-        newsCache = fetch(NEWS_ENDPOINT)
+        var endpoint = buildApiUrl(NEWS_BOARD);
+        if (!endpoint) return Promise.resolve(null);
+        newsCache = fetch(endpoint)
             .then(function (resp) {
                 if (!resp.ok) throw new Error('network');
                 return resp.json();
@@ -207,7 +246,7 @@
             })
             .catch(function (err) {
                 console.warn('[sub04] News data load failed.', {
-                    endpoint: NEWS_ENDPOINT,
+                    endpoint: endpoint,
                     message: err && err.message ? err.message : err
                 });
                 return null;
@@ -217,8 +256,9 @@
 
     function fetchBoardData() {
         if (boardCache) return boardCache;
-        if (!BOARD_ENDPOINT) return Promise.resolve(null);
-        boardCache = fetch(BOARD_ENDPOINT)
+        var endpoint = buildApiUrl(PR_BOARD);
+        if (!endpoint) return Promise.resolve(null);
+        boardCache = fetch(endpoint)
             .then(function (resp) {
                 if (!resp.ok) throw new Error('network');
                 return resp.json();
@@ -229,7 +269,7 @@
             })
             .catch(function (err) {
                 console.warn('[sub04] Board data load failed.', {
-                    endpoint: BOARD_ENDPOINT,
+                    endpoint: endpoint,
                     message: err && err.message ? err.message : err
                 });
                 return null;
@@ -278,7 +318,7 @@
         var $desc = $('.subtop .desc');
         if (!$title.length || !$desc.length) return;
 
-        if (key === NOTICE_KEY) {
+        if (key === NOTICE_KEY || key === PR_KEY) {
             $title.html('PR<span class="dot">.</span>');
             $desc.text('홍보자료와 공지사항을 확인하세요.');
             return;
@@ -553,19 +593,23 @@
         var currentQuery = normalizeText($searchInput.val());
         var items = [];
         var totalCount = 0;
-        var noticeIndexMap = {};
+        var typeIndexMap = {};
 
         function updateTotal(count) {
             if ($totalNum.length) $totalNum.text(String(count));
         }
 
-        function buildNoticeIndex(sortedItems) {
-            noticeIndexMap = {};
-            var noticeItems = sortedItems.filter(function (item) {
-                return item.type === NOTICE_KEY;
-            });
-            noticeItems.forEach(function (item, idx) {
-                noticeIndexMap[item.id] = idx;
+        function buildTypeIndexMap(sortedItems) {
+            typeIndexMap = {};
+            typeIndexMap[PR_KEY] = {};
+            typeIndexMap[NOTICE_KEY] = {};
+            var counters = {};
+            sortedItems.forEach(function (item) {
+                var typeKey = getBoardType(item);
+                if (!typeIndexMap[typeKey]) typeIndexMap[typeKey] = {};
+                if (!counters[typeKey]) counters[typeKey] = 0;
+                typeIndexMap[typeKey][item.id] = counters[typeKey];
+                counters[typeKey] += 1;
             });
         }
 
@@ -574,6 +618,7 @@
             if (!$highlight.length || !item) return;
 
             var $img = $highlight.find('.img');
+            var $left = $highlight.find('.left');
             var $title = $highlight.find('.title');
             var $date = $highlight.find('.date');
             var $desc = $highlight.find('.desc');
@@ -592,26 +637,32 @@
             if ($date.length) $date.text(item.date || '');
             if ($desc.length) $desc.text(summary);
 
-            if ($btn.length) {
-                var href = '';
-                var target = 'self';
-                if (item.type === NOTICE_KEY) {
-                    var noticeIdx = noticeIndexMap[item.id];
-                    href = buildNoticeDetailUrl(typeof noticeIdx === 'number' ? noticeIdx : 0);
-                } else {
-                    href = item.link || '';
-                    target = '_blank';
+            if ($left.length) {
+                $left.toggleClass('is-video', !!(getBoardType(item) === PR_KEY && item.link));
+                $left.find('.media-link').remove();
+                if (getBoardType(item) === PR_KEY && item.link) {
+                    var $link = $('<a/>', {
+                        'class': 'media-link',
+                        href: item.link,
+                        target: '_blank',
+                        rel: 'noopener',
+                        'aria-label': 'YouTube link'
+                    });
+                    $link.append($('<span/>', { 'class': 'media-play', 'aria-hidden': 'true' }));
+                    $link.append($('<span/>', { 'class': 'media-youtube', text: 'YouTube' }));
+                    $left.append($link);
                 }
+            }
 
+            if ($btn.length) {
+                var typeKey = getBoardType(item);
+                var indexMap = typeIndexMap[typeKey] || {};
+                var targetIdx = indexMap[item.id];
+                var href = buildDetailUrl(typeKey, typeof targetIdx === 'number' ? targetIdx : 0);
                 $btn.attr('data-href', href);
                 $btn.off('click.board').on('click.board', function () {
                     if (!href) return;
-                    if (target === '_blank') {
-                        var win = window.open(href, '_blank', 'noopener');
-                        if (win) win.opener = null;
-                    } else {
-                        window.location.href = href;
-                    }
+                    window.location.href = href;
                 });
             }
         }
@@ -620,14 +671,11 @@
             $list.empty();
             boardItems.forEach(function (item) {
                 var thumb = item.thumb || (item.images && item.images[0] ? item.images[0].src : NEWS_PLACEHOLDER_IMG);
-                var isNotice = item.type === NOTICE_KEY;
-                var noticeIdx = noticeIndexMap[item.id];
-                var href = isNotice ? buildNoticeDetailUrl(noticeIdx || 0) : (item.link || '#');
+                var typeKey = getBoardType(item);
+                var indexMap = typeIndexMap[typeKey] || {};
+                var targetIdx = indexMap[item.id];
+                var href = buildDetailUrl(typeKey, typeof targetIdx === 'number' ? targetIdx : 0);
                 var $card = $('<a/>', { 'class': 'card', href: href });
-                if (!isNotice) {
-                    $card.attr('target', '_blank');
-                    $card.attr('rel', 'noopener');
-                }
                 var $img = $('<img/>', { 'class': 'thumb', src: thumb, alt: item.title || '' });
                 var $media = $('<div/>', { 'class': 'media' });
                 var $meta = $('<div/>', { 'class': 'meta' });
@@ -637,6 +685,11 @@
 
                 $meta.append($label, $title, $date);
                 $media.append($img);
+                if (typeKey === PR_KEY && item.link) {
+                    $media.addClass('is-video');
+                    $media.append($('<span/>', { 'class': 'media-play', 'aria-hidden': 'true' }));
+                    $media.append($('<span/>', { 'class': 'media-youtube', text: 'YouTube' }));
+                }
                 $card.append($media, $meta);
                 $list.append($card);
             });
@@ -661,7 +714,7 @@
                 var labelText = $card.find('.label').text();
                 var title = $card.find('.title').text();
                 var date = $card.find('.date').text();
-                var type = labelText.indexOf('공지') !== -1 ? NOTICE_KEY : 'pr';
+                var type = labelText.indexOf('공지') !== -1 ? NOTICE_KEY : PR_KEY;
                 arr.push({
                     $el: $card,
                     type: type,
@@ -788,7 +841,7 @@
         fetchBoardData().then(function (boardItems) {
             if (Array.isArray(boardItems)) {
                 var sorted = sortNewsItems(boardItems);
-                buildNoticeIndex(sorted);
+                buildTypeIndexMap(sorted);
                 if (sorted.length) {
                     renderHighlight(sorted[0]);
                 }
@@ -845,6 +898,7 @@
 
                 var $media = $('<div/>', { 'class': 'media' });
                 var captions = [];
+                var isNewsContext = (cfg.key || (item && item.type)) === NEWS_KEY;
 
                 if (Array.isArray(item.images) && item.images.length) {
                     item.images.forEach(function (img, index) {
@@ -881,13 +935,26 @@
                     $media.append($('<div/>', { 'class': 'caption', text: captions.join(' ') }));
                 }
 
+                if (!isNewsContext && item && item.link) {
+                    $media.addClass('is-video');
+                    var $mediaLink = $('<a/>', {
+                        'class': 'media-link',
+                        href: item.link,
+                        target: '_blank',
+                        rel: 'noopener',
+                        'aria-label': 'YouTube link'
+                    });
+                    $mediaLink.append($('<span/>', { 'class': 'media-play', 'aria-hidden': 'true' }));
+                    $mediaLink.append($('<span/>', { 'class': 'media-youtube', text: 'YouTube' }));
+                    $media.append($mediaLink);
+                }
+
                 $content.append($media);
 
                 if (parts.after) {
                     $content.append($('<div/>', { 'class': 'text', html: formatText(parts.after) }));
                 }
 
-                var isNewsContext = (cfg.key || (item && item.type)) === NEWS_KEY;
                 var showSource = isNewsContext && item && item.source && (item.source.text || item.source.url);
                 if (showSource) {
                     var $source = $('<div/>', { 'class': 'source' });
@@ -908,6 +975,7 @@
                     }
                     $content.append($source);
                 }
+
             } else {
                 $content.append($('<div/>', { 'class': 'text', text: '게시물이 없습니다.' }));
             }
@@ -1008,7 +1076,7 @@
         });
     }
 
-    function loadNoticeDetail(hashIdx) {
+    function loadBoardDetail(typeKey, hashIdx) {
         scrollToTop();
 
         if (!detailHasLoaded && document.body) {
@@ -1018,13 +1086,13 @@
         var cached = getCachedItems(BOARD_STORAGE_KEY);
         if (cached && cached.length) {
             var cachedSorted = sortNewsItems(cached);
-            var cachedNotices = cachedSorted.filter(function (item) {
-                return item.type === NOTICE_KEY;
+            var cachedItems = cachedSorted.filter(function (item) {
+                return getBoardType(item) === typeKey;
             });
-            initNewsDetail(cachedNotices, {
-                key: NOTICE_KEY,
+            initNewsDetail(cachedItems, {
+                key: typeKey,
                 listUrl: BOARD_LIST_URL,
-                label: '공지사항',
+                label: typeKey === NOTICE_KEY ? '????' : '????',
                 idx: hashIdx
             });
             scrollToTop();
@@ -1037,13 +1105,13 @@
             if (!Array.isArray(boardItems)) return;
             var sorted = sortNewsItems(boardItems);
             setCachedItems(BOARD_STORAGE_KEY, sorted);
-            var noticeItems = sorted.filter(function (item) {
-                return item.type === NOTICE_KEY;
+            var filteredItems = sorted.filter(function (item) {
+                return getBoardType(item) === typeKey;
             });
-            initNewsDetail(noticeItems, {
-                key: NOTICE_KEY,
+            initNewsDetail(filteredItems, {
+                key: typeKey,
                 listUrl: BOARD_LIST_URL,
-                label: '공지사항',
+                label: typeKey === NOTICE_KEY ? '????' : '????',
                 idx: hashIdx
             });
             scrollToTop();
@@ -1060,10 +1128,10 @@
         var key = normalizeKey(hashInfo.key) || NEWS_KEY;
         var idx = hashInfo.idx;
 
-        updateSubtop(key === NOTICE_KEY ? NOTICE_KEY : NEWS_KEY);
+        updateSubtop(key);
 
-        if (key === NOTICE_KEY) {
-            loadNoticeDetail(idx);
+        if (key === NOTICE_KEY || key === PR_KEY) {
+            loadBoardDetail(key, idx);
             return;
         }
 

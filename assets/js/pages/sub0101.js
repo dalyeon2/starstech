@@ -5,10 +5,32 @@
     'use strict';
     if (!$) return;
 
+    var NEWS_ENDPOINT = '../../api/news.php';
+    var NEWS_PLACEHOLDER_IMG = '../../assets/img/common/default-image.jpg';
+
     var bound = false;
 
     function prefersReducedMotion() {
         return !!(w.matchMedia && w.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    }
+
+    function resolveLang() {
+        var match = w.location.pathname.match(/\/(ko|en|ja|fr|mn)\//i);
+        return match ? match[1].toLowerCase() : '';
+    }
+
+    function buildNewsEndpoint(limit) {
+        if (!NEWS_ENDPOINT) return '';
+        var params = [];
+        var lang = resolveLang();
+        if (lang) params.push('lang=' + encodeURIComponent(lang));
+        if (typeof limit === 'number' && limit > 0) params.push('limit=' + limit);
+        if (!params.length) return NEWS_ENDPOINT;
+        return NEWS_ENDPOINT + '?' + params.join('&');
+    }
+
+    function getDetailBase() {
+        return /\/pages\//i.test(w.location.pathname) ? './sub-detail.html' : './pages/sub-detail.html';
     }
 
     function scrollerEl() {
@@ -107,6 +129,53 @@
         w.addEventListener('load', function () {
             setTimeout(refreshScroll, 120);
         }, { once: true });
+    }
+
+    function initNewsFeed() {
+        var $section = $('.cont4');
+        if (!$section.length || !w.fetch) return;
+
+        var $track = $section.find('.cards');
+        if (!$track.length) return;
+
+        var endpoint = buildNewsEndpoint(8);
+        if (!endpoint) return;
+
+        function renderCards(items) {
+            var detailBase = getDetailBase();
+            $track.empty();
+            items.forEach(function (item, idx) {
+                var cover = item.thumb || (item.images && item.images[0] ? item.images[0].src : NEWS_PLACEHOLDER_IMG);
+                var href = detailBase + '#news/' + idx;
+                var $card = $('<a/>', { 'class': 'card', href: href });
+                var $img = $('<img/>', { 'class': 'photo', src: cover, alt: item.title || '' });
+                var $content = $('<div/>', { 'class': 'content' });
+                var $meta = $('<div/>', { 'class': 'meta' });
+                var $date = $('<span/>', { 'class': 'date', text: item.date || '' });
+                var $title = $('<p/>', { 'class': 'title', text: item.title || '' });
+                var $badge = $('<span/>', { 'class': 'badge', text: 'Newsroom' });
+                var $more = $('<i/>', { 'class': 'more', 'aria-hidden': 'true' });
+
+                $meta.append($date, $title);
+                $content.append($meta, $badge);
+                $card.append($img, $content, $more);
+                $track.append($card);
+            });
+            initNewsCards();
+        }
+
+        w.fetch(endpoint)
+            .then(function (resp) {
+                if (!resp.ok) throw new Error('network');
+                return resp.json();
+            })
+            .then(function (data) {
+                if (!data || !Array.isArray(data.items) || !data.items.length) return;
+                renderCards(data.items);
+            })
+            .catch(function () {
+                // Keep static cards when fetch fails.
+            });
     }
 
     function initNewsCards() {
@@ -231,5 +300,6 @@
 
     $(initCont2);
     $(initNewsCards);
+    $(initNewsFeed);
     $(document).on('scrollengine:ready', initCont2);
 })(window.jQuery, window);
