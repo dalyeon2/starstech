@@ -67,7 +67,7 @@ body.news-loading .cont1 .back {
 
 .cont1 .content {
     width: 100%;
-    padding: 80px 124px 60px;
+    padding: 80px 124px 160px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -176,7 +176,7 @@ body.news-loading .cont1 .back {
     border-bottom: 1px solid var(--black-400);
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 170px;
     background: transparent;
     text-align: left;
     cursor: pointer;
@@ -203,13 +203,14 @@ body.news-loading .cont1 .back {
 }
 
 .cont1 .btn .label .text {
-    font-size: var(--font-md);
+    color: var(--black-800);
+    font-size: var(--font-base);
     font-weight: 600;
     line-height: 1.6;
 }
 
 .cont1 .btn > .text {
-    color: var(--black-800);
+    color: var(--black-700);
     font-size: var(--font-md);
     font-weight: 500;
     line-height: 1.6;
