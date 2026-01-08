@@ -175,7 +175,7 @@ function resolveFooterLang() {
     const raw = fromBody || fromHtml || fromPath;
 
     if (!raw) return '';
-    const normalized = $.trim(String(raw)).toLowerCase().replace('_', '-');
+    const normalized = $.trim(String(raw)).toLowerCase().replace('_', '-') ;
     const base = normalized.split('-')[0];
     if (base === 'kr') return 'ko';
     return base;
@@ -521,6 +521,31 @@ function ensureCleanHashRouter() {
     window.addEventListener('hashchange', routeCleanHashToPage);
 }
 
+// Ensure header/mobile Contact links navigate when clicked from index (fixes case where only the hash changes)
+$(document).off('click.contactnav').on('click.contactnav', '.header .contact[href], .overlay-menu .contactbtn[href]', function (e) {
+    const $link = $(this);
+    const slug = ($link.data('slug') || '').toString().toLowerCase();
+    if (!slug) return;
+    const routes = window.__cleanSlugRoutes || {};
+    // If we have a mapped route for the slug, force navigation to it instead of relying on hash-only change
+    if (routes[slug]) {
+        e.preventDefault();
+        const current = (window.__htmlPath || stripBasePath(window.location.pathname || '/')).toLowerCase();
+        let targetPath = '';
+        try {
+            targetPath = stripBasePath(new URL(routes[slug], window.location.href).pathname).toLowerCase();
+        } catch (err) {
+            targetPath = stripBasePath(routes[slug]).toLowerCase();
+        }
+        if (!(current && targetPath && current === targetPath)) {
+            window.location.replace(routes[slug]);
+        } else {
+            // Already on the target page — ensure the hash is set for consistency
+            window.location.hash = '#/' + slug;
+        }
+    }
+});
+
 function applyCleanDisplayFromMap(htmlToClean) {
     const currentPath = stripBasePath(window.location.pathname || '/');
     const entry = htmlToClean && htmlToClean[currentPath];
@@ -646,25 +671,53 @@ async function loadComponents() {
         const [headerRes, footerRes, subtopRes, ctaRes] = await Promise.all([
             fetch(`${compBase}/header.html`),
             fetch(footerPath),
-            hasSubtop ? fetch(`${compBase}/sub-top.html`) : Promise.resolve({ text: async () => '' }),
-            hasCta ? fetch(`${compBase}/cta.html`) : Promise.resolve({ text: async () => '' })
+            hasSubtop ? fetch(`${compBase}/sub-top.html`) : Promise.resolve(null),
+            hasCta ? fetch(`${compBase}/cta.html`) : Promise.resolve(null)
         ]);
 
-        const headerHtml = await headerRes.text();
-        let footerHtml = await footerRes.text();
-
-        if (!footerRes.ok && footerPath !== `${compBase}/footer.html`) {
+        let headerHtml = await headerRes.text();
+        let footerHtml = '';
+        if(footerRes.ok) {
+            footerHtml = await footerRes.text();
+        } else if (footerLang !== 'ko') {
             const fallbackRes = await fetch(`${compBase}/footer.html`);
             if (fallbackRes.ok) {
                 footerHtml = await fallbackRes.text();
             }
         }
+        
+        let subtopHtml = '';
+        if(hasSubtop && subtopRes && subtopRes.ok) {
+             subtopHtml = await subtopRes.text();
+        }
+
+        let ctaHtml = '';
+        if(hasCta && ctaRes && ctaRes.ok) {
+            ctaHtml = await ctaRes.text();
+        }
+
+        // START: Path correction logic
+        const isSubPage = (window.location.pathname || '').includes('/pages/');
+        if (!isSubPage) {
+            const pathRegex = /(\s(href|src)=")\.\.\//g;
+            headerHtml = headerHtml.replace(pathRegex, '$1');
+            footerHtml = footerHtml.replace(pathRegex, '$1');
+            subtopHtml = subtopHtml.replace(pathRegex, '$1');
+            ctaHtml = ctaHtml.replace(pathRegex, '$1');
+        }
+        // END: Path correction logic
 
         $('#header-container').html(headerHtml);
         $('#footer-container').html(footerHtml);
 
-        if (hasSubtop) $('#subtop-container').html(await subtopRes.text());
-        if (hasCta) $('#cta-container').html(await ctaRes.text());
+        if (hasSubtop) $('#subtop-container').html(subtopHtml);
+        if (hasCta) $('#cta-container').html(ctaHtml);
+
+        // Fix logo root link after injection
+        const lang = resolveFooterLang();
+        const langRoot = buildLangBase(lang) + '/';
+        $('#header-container a.logo[href="/"]').attr('href', langRoot);
+
         normalizeComponentPaths();
         normalizeComponentAssets($(document.body));
         setHeaderActive();

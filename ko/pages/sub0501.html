@@ -40,7 +40,7 @@
                 <div class="layout">
                     <p class="note"><span class="mark">*</span>는 필수 입력사항입니다.</p>
 
-                    <form class="form" data-bo-table="inquiry" data-success-message="문의가 접수되었습니다.">
+                    <form class="form" data-bo-table="inquiry" data-success-message="문의가 접수되었습니다." novalidate>
                         <div class="group">
                             <div class="intro">
                                 <div class="step">01 문의유형</div>
@@ -49,27 +49,29 @@
                                     <span class="mark">*</span>
                                 </div>
                             </div>
-                            <div class="options">
-                                <label class="option">
-                                    <input type="radio" name="inquiry" value="product">
-                                    <span>제품 문의</span>
-                                </label>
-                                <label class="option">
-                                    <input type="radio" name="inquiry" value="overseas">
-                                    <span>해외 사업 문의</span>
-                                </label>
-                                <label class="option">
-                                    <input type="radio" name="inquiry" value="cosmetic">
-                                    <span>화장품 사업 문의</span>
-                                </label>
-                                <label class="option">
-                                    <input type="radio" name="inquiry" value="company">
-                                    <span>기업 문의</span>
-                                </label>
-                                <label class="option">
-                                    <input type="radio" name="inquiry" value="rnd">
-                                    <span>기업부설연구소(R&amp;D) 문의</span>
-                                </label>
+                            <div class="options-row">
+                                <div class="options">
+                                    <label class="option">
+                                        <input type="radio" name="inquiry" value="product">
+                                        <span>제품 문의</span>
+                                    </label>
+                                    <label class="option">
+                                        <input type="radio" name="inquiry" value="overseas">
+                                        <span>해외 사업 문의</span>
+                                    </label>
+                                    <label class="option">
+                                        <input type="radio" name="inquiry" value="cosmetic">
+                                        <span>화장품 사업 문의</span>
+                                    </label>
+                                    <label class="option">
+                                        <input type="radio" name="inquiry" value="company">
+                                        <span>기업 문의</span>
+                                    </label>
+                                    <label class="option">
+                                        <input type="radio" name="inquiry" value="rnd">
+                                        <span>기업부설연구소(R&amp;D) 문의</span>
+                                    </label>
+                                </div>
                             </div>
                         </div>
 
@@ -83,22 +85,30 @@
                             </div>
 
                             <div class="fields">
-                                <label class="field">
-                                    <span class="name">기업 또는 소속명</span>
-                                    <input type="text" name="company" placeholder="기업 및 소속명을 입력해주세요.">
-                                </label>
-                                <label class="field">
-                                    <span class="name">담당자 성명/직급</span>
-                                    <input type="text" name="manager" placeholder="담당자의 성명과 직급을 입력해주세요.">
-                                </label>
-                                <label class="field">
-                                    <span class="name">국가</span>
-                                    <input type="text" name="country" placeholder="국가를 입력해주세요.">
-                                </label>
-                                <label class="field">
-                                    <span class="name">이메일</span>
-                                    <input type="email" name="email" placeholder="연락을 받으실 이메일을 입력해주세요.">
-                                </label>
+                                <div class="field-row">
+                                    <label class="field">
+                                        <span class="name">기업 또는 소속명</span>
+                                        <input type="text" name="company" placeholder="기업 및 소속명을 입력해주세요.">
+                                    </label>
+                                </div>
+                                <div class="field-row">
+                                    <label class="field">
+                                        <span class="name">담당자 성명/직급</span>
+                                        <input type="text" name="manager" placeholder="담당자의 성명과 직급을 입력해주세요.">
+                                    </label>
+                                </div>
+                                <div class="field-row">
+                                    <label class="field">
+                                        <span class="name">국가</span>
+                                        <input type="text" name="country" placeholder="국가를 입력해주세요.">
+                                    </label>
+                                </div>
+                                <div class="field-row">
+                                    <label class="field">
+                                        <span class="name">이메일</span>
+                                        <input type="email" name="email" placeholder="연락을 받으실 이메일을 입력해주세요.">
+                                    </label>
+                                </div>
                             </div>
                         </div>
 
@@ -111,14 +121,18 @@
                                 </div>
                             </div>
                             <div class="fields">
-                                <label class="field">
-                                    <span class="name">제목</span>
-                                    <input type="text" name="subject" placeholder="제목을 입력해주세요.">
-                                </label>
-                                <label class="field area">
-                                    <span class="name">문의 내용</span>
-                                    <textarea name="message" placeholder="스타스테크에 문의하고 싶은 내용을 작성해주세요."></textarea>
-                                </label>
+                                <div class="field-row">
+                                    <label class="field">
+                                        <span class="name">제목</span>
+                                        <input type="text" name="subject" placeholder="제목을 입력해주세요.">
+                                    </label>
+                                </div>
+                                <div class="field-row">
+                                    <label class="field area">
+                                        <span class="name">문의 내용</span>
+                                        <textarea name="message" placeholder="스타스테크에 문의하고 싶은 내용을 작성해주세요."></textarea>
+                                    </label>
+                                </div>
                                 <div class="attach">
                                     <input class="fileinput" type="file" name="files" multiple>
                                     <button class="filebtn" type="button">
@@ -210,14 +224,14 @@
                                 <div class="label">대표메일</div>
                                 <div class="line">
                                     <i class="mail" aria-hidden="true"></i>
-                                    <div class="text">starstechad@starstech.co.kr</div>
+                                    <div class="text"><a class="contact-mail" href="mailto:starstechad@starstech.co.kr">starstechad@starstech.co.kr</a></div>
                                 </div>
                             </div>
                             <div class="block">
                                 <div class="label">대표번호</div>
                                 <div class="line">
                                     <i class="phone" aria-hidden="true"></i>
-                                    <div class="text">+82 2-6952-8260</div>
+                                    <div class="text"><a class="contact-phone" href="tel:+82269528260">+82 2-6952-8260</a></div>
                                 </div>
                             </div>
                         </div>

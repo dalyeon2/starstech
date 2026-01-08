@@ -280,6 +280,7 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
+    gap: 10px;
 }
 
 .cont2 .text {

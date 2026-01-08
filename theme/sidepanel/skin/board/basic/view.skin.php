@@ -80,9 +80,72 @@ function sidepanel_basic_files($view) {
         </div>
     <?php } ?>
 
-    <div class="content">
-        <div class="content-body"><?php echo sidepanel_basic_body($view, $write); ?></div>
-    </div>
+    <?php
+    $post_raw = trim($view['wr_content'] ?? $write['wr_content'] ?? '');
+    $is_inquiry = (isset($board['bo_table']) && $board['bo_table'] === 'inquiry') || (strpos(($view['subject'] ?? $write['wr_subject'] ?? ''), '[웹문의]') !== false);
+    if ($is_inquiry && $post_raw) {
+        $lines = preg_split('/\r\n|\n|\r/', $post_raw);
+        $fields = [];
+        $others = [];
+        foreach ($lines as $ln) {
+            $ln = trim($ln);
+            if ($ln === '') continue;
+            if (preg_match('/^([^:：]+)\s*[:：]\s*(.*)$/u', $ln, $m)) {
+                $key = trim($m[1]); $val = trim($m[2]);
+                $fields[$key] = $val;
+            } else {
+                $others[] = $ln;
+            }
+        }
+        $attachments = [];
+        if (!empty($fields['첨부'])) {
+            $attachments = array_map('trim', explode(',', $fields['첨부']));
+        } else {
+            foreach ($others as $o) {
+                if (preg_match_all('!(https?://[^\s]+)!', $o, $m)) { foreach ($m[1] as $u) $attachments[] = $u; }
+            }
+        }
+
+        $content_body = '';
+        foreach (array('문의 내용','내용','메시지','문의사항','요청사항') as $k) {
+            if (!empty($fields[$k])) { $content_body = $fields[$k]; break; }
+        }
+        if (empty($content_body)) { $content_body = trim(implode("\n", $others)); }
+        if (empty($content_body)) { $content_body = $post_raw; }
+    ?>
+        <div class="content inquiry-view">
+            <div class="inquiry-grid">
+                <div class="inquiry-left">
+                    <dl class="inquiry-meta">
+                        <?php if (!empty($fields['문의 유형'])): ?><div class="row"><dt>문의 유형</dt><dd><?php echo htmlspecialchars($fields['문의 유형'], ENT_QUOTES, 'UTF-8'); ?></dd></div><?php endif; ?>
+                        <?php if (!empty($fields['기업/소속'])): ?><div class="row"><dt>기업/소속</dt><dd><?php echo htmlspecialchars($fields['기업/소속'], ENT_QUOTES, 'UTF-8'); ?></dd></div><?php endif; ?>
+                        <?php if (!empty($fields['담당자'])): ?><div class="row"><dt>담당자</dt><dd><?php echo htmlspecialchars($fields['담당자'], ENT_QUOTES, 'UTF-8'); ?></dd></div><?php endif; ?>
+                        <?php if (!empty($fields['국가'])): ?><div class="row"><dt>국가</dt><dd><?php echo htmlspecialchars($fields['국가'], ENT_QUOTES, 'UTF-8'); ?></dd></div><?php endif; ?>
+                        <?php if (!empty($fields['이메일'])): ?><div class="row"><dt>이메일</dt><dd><a href="mailto:<?php echo htmlspecialchars($fields['이메일'], ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($fields['이메일'], ENT_QUOTES, 'UTF-8'); ?></a></dd></div><?php endif; ?>
+                    </dl>
+                </div>
+                <div class="inquiry-right">
+                    <?php if (!empty($attachments)): ?><div class="attachments"><strong>첨부파일</strong><ul><?php foreach($attachments as $att) { ?><li><a href="<?php echo htmlspecialchars($att, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener"><?php echo htmlspecialchars(basename(parse_url($att, PHP_URL_PATH)), ENT_QUOTES, 'UTF-8'); ?></a></li><?php } ?></ul></div><?php endif; ?>
+                </div>
+            </div>
+        </div>
+
+        <div class="inquiry-details">
+            <div class="inquiry-title"><strong>제목</strong>
+                <div class="t-subject"><?php echo get_text($view['subject'] ?? $write['wr_subject']); ?></div>
+            </div>
+            <div class="inquiry-full-content"><strong>내용</strong>
+                <div class="content-body-text"><?php echo nl2br(htmlspecialchars($content_body, ENT_QUOTES, 'UTF-8')); ?></div>
+            </div>
+        </div>
+
+    <?php } else { ?>
+
+        <div class="content">
+            <div class="content-body"><?php echo sidepanel_basic_body($view, $write); ?></div>
+        </div>
+
+    <?php } ?>
 
     <?php if (!empty($download_files)) { ?>
         <div class="link-list">

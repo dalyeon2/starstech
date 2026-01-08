@@ -56,6 +56,24 @@ if (!function_exists('dash_board_view_url')) {
     }
 }
 
+if (!function_exists('dash_latest_post_link')) {
+    function dash_latest_post_link($bo_table, $write_prefix)
+    {
+        if (!function_exists('sql_fetch')) {
+            return dash_board_list_url($bo_table);
+        }
+        $table = $write_prefix . $bo_table;
+        if (!dash_table_exists($table)) {
+            return dash_board_list_url($bo_table);
+        }
+        $row = sql_fetch("SELECT wr_id FROM `{$table}` WHERE wr_is_comment = 0 ORDER BY wr_datetime DESC LIMIT 1");
+        if ($row && isset($row['wr_id'])) {
+            return dash_board_view_url($bo_table, (int)$row['wr_id']);
+        }
+        return dash_board_list_url($bo_table);
+    }
+}
+
 if (!function_exists('dash_clean_text')) {
     function dash_clean_text($value)
     {
@@ -76,6 +94,19 @@ if (!function_exists('dash_cut_text')) {
             return mb_strlen($value, 'UTF-8') > $length ? mb_substr($value, 0, $length, 'UTF-8') . '...' : $value;
         }
         return strlen($value) > $length ? substr($value, 0, $length) . '...' : $value;
+    }
+}
+
+if (!function_exists('dash_youtube_thumb')) {
+    function dash_youtube_thumb($url)
+    {
+        if (!$url) {
+            return '';
+        }
+        if (preg_match('~(?:youtu\.be/|youtube\.com/(?:watch\?v=|embed/|shorts/))([A-Za-z0-9_-]{6,})~', $url, $match)) {
+            return 'https://img.youtube.com/vi/' . $match[1] . '/hqdefault.jpg';
+        }
+        return '';
     }
 }
 
@@ -115,7 +146,7 @@ if (!function_exists('dash_recent_posts')) {
             }
             $label = $board['label'];
             $bo_table = $board['table'];
-            $sql = "SELECT wr_id, wr_subject, wr_name, wr_datetime FROM `{$table}` WHERE wr_is_comment = 0 ORDER BY wr_datetime DESC LIMIT " . (int)$limit;
+            $sql = "SELECT wr_id, wr_subject, wr_name, wr_datetime, wr_link1 FROM `{$table}` WHERE wr_is_comment = 0 ORDER BY wr_datetime DESC LIMIT " . (int)$limit;
             $result = sql_query($sql);
             if (!$result) {
                 continue;
@@ -129,6 +160,7 @@ if (!function_exists('dash_recent_posts')) {
                     'title' => $subject,
                     'name' => dash_clean_text($row['wr_name'] ?? ''),
                     'date' => $row['wr_datetime'] ? date('Y-m-d', strtotime($row['wr_datetime'])) : '',
+                    'wr_link1' => $row['wr_link1'] ?? '',
                     'datetime' => $row['wr_datetime'] ?? '',
                 ];
             }
@@ -150,7 +182,7 @@ if (!function_exists('dash_recent_posts')) {
 }
 
 if (!function_exists('dash_post_thumb')) {
-    function dash_post_thumb($bo_table, $wr_id, $width = 120, $height = 90)
+    function dash_post_thumb($bo_table, $wr_id, $width = 120, $height = 90, $item = null)
     {
         global $dash_default_thumb;
         if (function_exists('get_list_thumbnail')) {
@@ -167,6 +199,12 @@ if (!function_exists('dash_post_thumb')) {
                         return rtrim($file['path'], '/') . '/' . rawurlencode($file['file']);
                     }
                 }
+            }
+        }
+        if (is_array($item) && !empty($item['wr_link1'])) {
+            $youtube_thumb = dash_youtube_thumb($item['wr_link1']);
+            if ($youtube_thumb) {
+                return $youtube_thumb;
             }
         }
         return $dash_default_thumb ?: '/img/default-image.jpg';
@@ -241,13 +279,23 @@ foreach ($sections as $key => $section) {
     foreach ($section['boards'] as $board) {
         $board['count'] = dash_count_posts($board['table'], $dash_write_prefix);
         $board['href'] = dash_board_list_url($board['table']);
+        $board['detail_href'] = dash_latest_post_link($board['table'], $dash_write_prefix);
         $section_total += $board['count'];
         $boards[] = $board;
     }
     $sections[$key]['boards'] = $boards;
     $sections[$key]['total'] = $section_total;
-    $sections[$key]['link'] = $boards ? $boards[0]['href'] : '#';
+    $list_link = $boards ? $boards[0]['href'] : '#';
+    $sections[$key]['link'] = $list_link;
     $sections[$key]['recent'] = dash_recent_posts($boards, 4, $dash_write_prefix);
+    $detail_link = $list_link;
+    if (!empty($sections[$key]['recent'])) {
+        $first_item = $sections[$key]['recent'][0];
+        $detail_link = dash_board_view_url($first_item['bo_table'], $first_item['wr_id']);
+    } elseif (!empty($boards[0]['detail_href'])) {
+        $detail_link = $boards[0]['detail_href'];
+    }
+    $sections[$key]['primary_link'] = in_array($key, ['products', 'pr'], true) ? $detail_link : $list_link;
     $totals[$key] = $section_total;
     $totals['all'] += $section_total;
 }
@@ -324,11 +372,17 @@ $quick_buttons = [
                         <span class="dash-card-label"><?php echo dash_escape($section['title']); ?></span>
                         <strong class="dash-card-count"><?php echo number_format($section['total']); ?></strong>
                     </div>
-                    <a class="dash-card-link" href="<?php echo dash_escape($section['link']); ?>">바로가기</a>
+                    <a class="dash-card-link" href="<?php echo dash_escape($section['primary_link']); ?>">바로가기</a>
                 </div>
                 <div class="dash-chip-row">
                     <?php foreach ($section['boards'] as $board) { ?>
-                        <a class="dash-chip" href="<?php echo dash_escape($board['href']); ?>">
+                        <?php
+                        $chip_href = $board['href'];
+                        if (in_array($key, ['products', 'pr'], true) && !empty($board['detail_href'])) {
+                            $chip_href = $board['detail_href'];
+                        }
+                        ?>
+                        <a class="dash-chip" href="<?php echo dash_escape($chip_href); ?>">
                             <i class="fa-solid <?php echo dash_escape($board['icon']); ?>"></i>
                             <span class="dash-chip-label"><?php echo dash_escape($board['label']); ?></span>
                             <span class="dash-chip-count"><?php echo number_format($board['count']); ?></span>
@@ -350,46 +404,30 @@ $quick_buttons = [
             <article class="dash-recent-box">
                 <div class="dash-recent-head">
                     <h3><?php echo dash_escape($section['title']); ?></h3>
-                    <a class="dash-recent-link" href="<?php echo dash_escape($section['link']); ?>">바로가기</a>
+                    <a class="dash-recent-link" href="<?php echo dash_escape($section['primary_link']); ?>">바로가기</a>
                 </div>
                 <?php if ($key === 'support') { ?>
-                    <div class="dash-table-wrap">
-                        <table class="dash-table">
-                            <thead>
-                                <tr>
-                                    <th>제목</th>
-                                    <th>작성자</th>
-                                    <th>등록일</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php if ($section['recent']) { ?>
-                                    <?php foreach ($section['recent'] as $item) { ?>
-                                        <tr>
-                                            <td>
-                                                <a class="dash-title" href="<?php echo dash_escape(dash_board_view_url($item['bo_table'], $item['wr_id'])); ?>">
-                                                    <?php echo dash_escape($item['title']); ?>
-                                                </a>
-                                            </td>
-                                            <td><?php echo dash_escape($item['name']); ?></td>
-                                            <td><?php echo dash_escape($item['date']); ?></td>
-                                        </tr>
-                                    <?php } ?>
-                                <?php } else { ?>
-                                    <tr>
-                                        <td class="dash-table-empty" colspan="3">등록된 문의가 없습니다.</td>
-                                    </tr>
-                                <?php } ?>
-                            </tbody>
-                        </table>
-                    </div>
+                    <?php if ($section['recent']) { ?>
+                        <ul class="dash-list">
+                            <?php foreach ($section['recent'] as $item) { ?>
+                                <li class="dash-item">
+                                    <a class="dash-title" href="<?php echo dash_escape(dash_board_view_url($item['bo_table'], $item['wr_id'])); ?>">
+                                        <?php echo dash_escape($item['title']); ?>
+                                    </a>
+                                    <span class="dash-meta"><?php echo dash_escape($item['date']); ?></span>
+                                </li>
+                            <?php } ?>
+                        </ul>
+                    <?php } else { ?>
+                        <div class="dash-empty">등록된 문의가 없습니다.</div>
+                    <?php } ?>
                 <?php } else { ?>
                     <div class="dash-photo-grid">
                         <?php if ($section['recent']) { ?>
                             <?php foreach ($section['recent'] as $item) { ?>
                                 <a class="dash-photo-card" href="<?php echo dash_escape(dash_board_view_url($item['bo_table'], $item['wr_id'])); ?>">
                                     <span class="dash-photo-thumb">
-                                        <img src="<?php echo dash_escape(dash_post_thumb($item['bo_table'], $item['wr_id'])); ?>" alt="">
+                                        <img src="<?php echo dash_escape(dash_post_thumb($item['bo_table'], $item['wr_id'], 120, 90, $item)); ?>" alt="">
                                     </span>
                                     <span class="dash-photo-title"><?php echo dash_escape($item['title']); ?></span>
                                     <span class="dash-photo-meta"><?php echo dash_escape($item['board_label']); ?> · <?php echo dash_escape($item['date']); ?></span>
