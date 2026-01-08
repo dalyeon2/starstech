@@ -107,6 +107,18 @@
     color: var(--black);
 }
 
+@media (max-width: 768px) {
+    .tag {
+        gap: 8px;
+        font-size: var(--font-base);
+    }
+
+    .tag::before {
+        width: 7px;
+        height: 7px;
+    }
+}
+
 /* Reveal */
 .reveal-zoomwide {
     position: relative;

@@ -133,10 +133,10 @@
         var viewport = w.innerHeight || d.documentElement.clientHeight || 0;
         var leftHeight = leftEl ? leftEl.getBoundingClientRect().height : 0;
         var available = Math.max(0, viewport - tabOffset);
-        var centerOffset = Math.max(0, (available - leftHeight) * 0.5);
+        var centerOffset = Math.max(0, (available - leftHeight) * 0.4);
         var leftNudge = parseFloat(w.getComputedStyle($section.get(0)).getPropertyValue('--history-left-nudge') || '0');
         if (!Number.isFinite(leftNudge)) leftNudge = 0;
-        var leftTop = Math.round(tabOffset + centerOffset + leftNudge);
+        var leftTop = Math.round(tabOffset + centerOffset);
         $section.get(0).style.setProperty('--history-left-top', leftTop + 'px');
     }
 

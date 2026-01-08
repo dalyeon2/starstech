@@ -474,11 +474,12 @@
     }
 
     .subtop .copy .title {
-        font-size: var(--font-4xl);
+        font-size: var(--font-headline32);
     }
 
     .subtop .copy .desc {
         font-size: var(--font-sm);
+        white-space: pre-line;
     }
 
     .subtop.duo .left {

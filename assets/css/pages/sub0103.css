@@ -33,6 +33,7 @@
 
 .cont1 .tag {
     color: white;
+    white-space: pre-line;
 }
 
 .cont1 .item {
@@ -158,9 +159,6 @@
     --history-head-height: 0px;
     --history-offset: 32px;
     --history-head-gap: 0px;
-    --history-trigger-advance: 380px;
-    --history-left-nudge: 12px;
-    --history-left-enter: 60px;
 }
 
 .cont2 .container {
@@ -230,13 +228,6 @@
     padding: 0 0 16px;
     position: sticky;
     top: var(--history-left-top);
-    transform: translateY(var(--history-left-enter));
-    transition: transform 0.6s ease;
-    will-change: transform;
-}
-
-.cont2.is-entered .left {
-    transform: translateY(0);
 }
 
 .cont2.pin .left {
