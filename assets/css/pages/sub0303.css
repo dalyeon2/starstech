@@ -260,11 +260,14 @@
     }
 
     .cont1 .list {
-        grid-template-columns: minmax(0, 1fr);
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
     }
 
     .cont1 .img {
-        height: 320px;
+        max-width: none;
+        height: 280px;
+        margin: 12px 0 0;
     }
 
     .cont1 .title {
@@ -273,6 +276,20 @@
 }
 
 @media (max-width: 480px) {
+    .cont1 .list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .cont1 .img {
+        height: 240px;
+        margin: 10px 0 0;
+    }
+
+    .cont1 .title {
+        font-size: var(--font-sm);
+    }
+
     .cont1 .total {
         font-size: var(--font-md);
     }

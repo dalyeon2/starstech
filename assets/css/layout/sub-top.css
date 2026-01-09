@@ -121,8 +121,6 @@
 .subtop.text-only .copy .title {
     color: var(--black);
     font-family: var(--font-en);
-    font-size: 120px;
-    line-height: 1.2;
 }
 
 .subtop.text-only .copy .title .dot {
@@ -131,9 +129,6 @@
 
 .subtop.text-only .copy .desc {
     color: var(--black);
-    font-size: var(--font-lg);
-    font-weight: 600;
-    line-height: 32px;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -183,7 +178,6 @@
 }
 
 .subtop.duo .copy .title {
-    font-size: var(--font-headline46);
     font-weight: 700;
     line-height: 1.4;
     white-space: pre-line;
@@ -356,10 +350,12 @@
     .subtop.duo .layout {
         min-height: auto;
         grid-template-columns: 1fr;
+        row-gap: 32px;
     }
 
     .subtop.duo .left {
-        padding: 100px 40px 0;
+        padding: 120px 40px 0;
+        gap: 40px;
     }
 
     .subtop.duo .copy {
@@ -367,7 +363,7 @@
     }
 
     .subtop.duo .copy .title {
-        font-size: var(--font-headline46);
+        font-size: 44px;
     }
 
     .subtop.duo .scroll {
@@ -375,7 +371,9 @@
     }
 
     .subtop.duo .right {
-        min-height: 360px;
+        min-height: auto;
+        aspect-ratio: 16 / 9;
+        margin-top: 12px;
     }
 
     .subtop.text-only .container {
@@ -417,7 +415,8 @@
     }
 
     .subtop.duo .left {
-        padding: 80px 28px 0;
+        padding: 96px 28px 0;
+        gap: 32px;
     }
 
     .subtop.duo .copy {
@@ -425,7 +424,7 @@
     }
 
     .subtop.duo .copy .title {
-        font-size: 36px;
+        font-size: var(--font-headline36);
     }
 
     .subtop .copy .desc {
@@ -448,7 +447,9 @@
     }
 
     .subtop.duo .right {
-        min-height: 280px;
+        min-height: auto;
+        aspect-ratio: 4 / 3;
+        margin-top: 12px;
     }
 
     .subtop.text-only .container {
@@ -483,7 +484,8 @@
     }
 
     .subtop.duo .left {
-        padding: 60px 20px 0;
+        padding: 84px 20px 0;
+        gap: 24px;
     }
 
     .subtop.duo .eyebrow {
@@ -491,7 +493,7 @@
     }
 
     .subtop.duo .copy .title {
-        font-size: 30px;
+        font-size: var(--font-headline32);
         line-height: 1.3;
     }
 
@@ -506,7 +508,9 @@
     }
 
     .subtop.duo .right {
-        min-height: 220px;
+        min-height: auto;
+        aspect-ratio: 4 / 3;
+        margin-top: 10px;
     }
 
     .subtop.text-only .container {

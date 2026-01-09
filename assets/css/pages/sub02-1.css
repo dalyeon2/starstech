@@ -33,7 +33,7 @@
 
 .cont1 .headline {
     color: var(--white);
-    font-size: var(--font-headline46);
+    font-size: var(--font-headline42);
     font-weight: 700;
     line-height: 1.5;
     word-break: keep-all;
@@ -55,7 +55,8 @@
     }
 
     .cont1 .headline {
-        font-size: var(--font-headline42);
+        font-size: var(--font-headline36);
+        line-height: 1.45;
     }
 
     .cont1 .copy .desc {
@@ -70,7 +71,8 @@
     }
 
     .cont1 .headline {
-        line-height: 1.45;
+        font-size: var(--font-headline32);
+        line-height: 1.4;
     }
 }
 
@@ -81,7 +83,7 @@
     }
 
     .cont1 .headline {
-        font-size: var(--font-headline36);
+        font-size: var(--font-4xl);
         line-height: 1.4;
     }
 
@@ -97,7 +99,7 @@
     }
 
     .cont1 .headline {
-        font-size: var(--font-headline32);
+        font-size: var(--font-4xl);
     }
 
     .cont1 .copy .desc {
@@ -134,7 +136,7 @@
 
 .cont2 .headline,
 .cont2 .title {
-    font-size: var(--font-headline36);
+    font-size: var(--font-headline42);
     font-weight: 700;
     line-height: 1.5;
     white-space: pre-line;
@@ -230,8 +232,15 @@
 
 @media (max-width: 1280px) {
     .cont2 .container {
-        padding: 80px 0;
+        padding-top: 80px;
+        padding-bottom: 80px;
         gap: 60px;
+    }
+
+    .cont2 .title,
+    .cont2 .headline {
+        font-size: var(--font-headline36);
+        line-height: 1.45;
     }
 
     .cont2 .stats {
@@ -253,13 +262,15 @@
 
 @media (max-width: 1024px) {
     .cont2 .container {
-        padding: 70px 0;
+        padding-top: 70px;
+        padding-bottom: 70px;
         gap: 50px;
     }
 
     .cont2 .title,
     .cont2 .headline {
         font-size: var(--font-headline32);
+        line-height: 1.4;
     }
 
     .cont2 .stats {
@@ -286,7 +297,8 @@
 
 @media (max-width: 768px) {
     .cont2 .container {
-        padding: 60px 0;
+        padding-top: 60px;
+        padding-bottom: 60px;
         gap: 40px;
     }
 
@@ -309,7 +321,8 @@
 
     .cont2 .title,
     .cont2 .headline {
-        line-height: 1.45;
+        font-size: var(--font-4xl);
+        line-height: 1.4;
     }
 
     .cont2 .stats .label {
@@ -332,13 +345,14 @@
 
 @media (max-width: 480px) {
     .cont2 .container {
-        padding: 50px 0;
+        padding-top: 50px;
+        padding-bottom: 50px;
         gap: 32px;
     }
 
     .cont2 .title,
     .cont2 .headline {
-        font-size: 28px;
+        font-size: var(--font-4xl);
     }
 
     .cont2 .stats .value {
@@ -384,7 +398,7 @@
 }
 
 .cont3 .headline {
-    font-size: 36px;
+    font-size: var(--font-headline42);
     font-weight: 700;
     line-height: 1.5;
     white-space: pre-line;
@@ -558,7 +572,8 @@
 
 @media (max-width: 1280px) {
     .cont3 .container {
-        padding: 80px 0 120px;
+        padding-top: 80px;
+        padding-bottom: 120px;
         gap: 70px;
     }
 
@@ -580,8 +595,9 @@
         gap: 32px;
     }
 
-    .cont3 .title {
-        font-size: 32px;
+    .cont3 .headline {
+        font-size: var(--font-headline36);
+        line-height: 1.45;
     }
 
     .cont3 .subtitle {
@@ -595,7 +611,8 @@
 
 @media (max-width: 1024px) {
     .cont3 .container {
-        padding: 70px 0 110px;
+        padding-top: 70px;
+        padding-bottom: 110px;
         gap: 60px;
     }
 
@@ -622,14 +639,16 @@
         max-width: 100%;
     }
 
-    .cont3 .title {
-        font-size: 30px;
+    .cont3 .headline {
+        font-size: var(--font-headline32);
+        line-height: 1.4;
     }
 }
 
 @media (max-width: 768px) {
     .cont3 .container {
-        padding: 60px 0 90px;
+        padding-top: 60px;
+        padding-bottom: 90px;
         gap: 50px;
     }
 
@@ -637,8 +656,8 @@
         gap: 60px;
     }
 
-    .cont3 .title {
-        font-size: 28px;
+    .cont3 .headline {
+        font-size: var(--font-4xl);
     }
 
     .cont3 .subtitle {
@@ -656,12 +675,13 @@
 
 @media (max-width: 480px) {
     .cont3 .container {
-        padding: 50px 0 80px;
+        padding-top: 50px;
+        padding-bottom: 80px;
         gap: 40px;
     }
 
-    .cont3 .title {
-        font-size: 24px;
+    .cont3 .headline {
+        font-size: var(--font-4xl);
     }
 
     .cont3 .subtitle {
@@ -692,7 +712,7 @@
 }
 
 .cont4 .headline {
-    font-size: var(--font-headline42);
+    font-size: var(--font-headline36);
     font-weight: 700;
     line-height: 1.5;
 }
@@ -788,12 +808,14 @@
 
 @media (max-width: 1280px) {
     .cont4 .container {
-        padding: 90px 0 120px;
+        padding-top: 90px;
+        padding-bottom: 120px;
         gap: 50px;
     }
 
-    .cont4 .title {
+    .cont4 .headline {
         font-size: var(--font-headline36);
+        line-height: 1.45;
     }
 
     .cont4 .body {
@@ -807,8 +829,14 @@
 
 @media (max-width: 1024px) {
     .cont4 .container {
-        padding: 80px 0 110px;
+        padding-top: 80px;
+        padding-bottom: 110px;
         gap: 44px;
+    }
+
+    .cont4 .headline {
+        font-size: var(--font-headline32);
+        line-height: 1.4;
     }
 
     .cont4 .list {
@@ -823,12 +851,13 @@
 
 @media (max-width: 768px) {
     .cont4 .container {
-        padding: 70px 0 90px;
+        padding-top: 70px;
+        padding-bottom: 90px;
         gap: 36px;
     }
 
-    .cont4 .title {
-        font-size: 32px;
+    .cont4 .headline {
+        font-size: var(--font-4xl);
     }
 
     .cont4 .name {
@@ -842,11 +871,12 @@
 
 @media (max-width: 480px) {
     .cont4 .container {
-        padding: 60px 0 80px;
+        padding-top: 60px;
+        padding-bottom: 80px;
     }
 
-    .cont4 .title {
-        font-size: 28px;
+    .cont4 .headline {
+        font-size: var(--font-4xl);
     }
 
     .cont4 .btn {
@@ -885,9 +915,9 @@
 }
 
 .cont5 .headline {
-    font-size: 58px;
+    font-size: var(--font-headline42);
     font-weight: 700;
-    line-height: 1.4;
+    line-height: 1.5;
     white-space: pre-line;
 }
 
@@ -936,33 +966,36 @@
 
 @media (max-width: 1280px) {
     .cont5 .container {
-        padding: 80px 0 100px;
+        padding-top: 80px;
+        padding-bottom: 100px;
         gap: 32px;
     }
 
     .cont5 .headline {
-        font-size: 48px;
+        font-size: var(--font-headline36);
     }
 }
 
 @media (max-width: 1024px) {
     .cont5 .container {
-        padding: 75px 0 95px;
+        padding-top: 75px;
+        padding-bottom: 95px;
         gap: 28px;
     }
 
     .cont5 .headline {
-        font-size: 42px;
+        font-size: var(--font-headline32);
     }
 }
 
 @media (max-width: 768px) {
     .cont5 .container {
-        padding: 70px 0 90px;
+        padding-top: 70px;
+        padding-bottom: 90px;
     }
 
     .cont5 .headline {
-        font-size: 36px;
+        font-size: var(--font-4xl);
     }
 
     .cont5 .desc {
@@ -972,11 +1005,12 @@
 
 @media (max-width: 480px) {
     .cont5 .container {
-        padding: 60px 0 80px;
+        padding-top: 60px;
+        padding-bottom: 80px;
     }
 
     .cont5 .headline {
-        font-size: 30px;
+        font-size: var(--font-4xl);
     }
 
     .cont5 .btn {
