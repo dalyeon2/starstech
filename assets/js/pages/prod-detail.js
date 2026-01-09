@@ -1,7 +1,7 @@
 /**
  * prod-detail thumbnail switcher
  */
-(function ($) {
+(function ($, w) {
     'use strict';
     if (!$) return;
 
@@ -49,5 +49,6 @@
         });
     }
 
+    w.initProductThumbs = initThumbs;
     $(initThumbs);
-})(window.jQuery);
+})(window.jQuery, window);

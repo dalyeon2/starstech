@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="../../assets/icons/favicon.svg" type="image/x-icon">
+
+    <link rel="stylesheet" href="../../assets/css/common.css">
+    <link rel="stylesheet" href="../../assets/css/pages/sub0501.css">
+    <title>Contact Us | STARSTECH</title>
+</head>
+
+<body>
+    <div id="header-container"></div>
+    <section class="subtop">
+        <img class="bg" src="../../assets/img/bg/bg-contact.jpg">
+        <div class="container">    
+            <div class="copy">
+                <p class="eyebrow">
+                    <strong>Contact</strong> Us<strong>.</strong>
+                </p>
+                <h1 class="title">STARSTECHとともに
+                    より良い未来へ。</h1>
+                <p class="desc">企業・ブランド・製品のご質問を
+                    お送りください。</p>
+            </div>
+            <div class="scroll">SCROLL</div>
+        </div>
+    </section>
+
+    <main class="subpage-content">
+        <!-- s: section 1 -->
+        <section class="cont1" aria-labelledby="cont1-title">
+            <div class="container">
+                <div class="tagline">
+                    <div class="tag" id="cont1-title">お問い合わせ</div>
+                </div>
+
+                <div class="layout">
+                    <p class="note"><span class="mark">*</span>は必須です。</p>
+
+                    <form class="form" data-bo-table="inquiry" data-success-message="お問い合わせを受け付けました。" novalidate>
+                        <div class="group">
+                            <div class="intro">
+                                <div class="step">01 問い合わせ種別</div>
+                                <div class="question">
+                                    <span>種別を選択してください。</span>
+                                    <span class="mark">*</span>
+                                </div>
+                            </div>
+                            <div class="options-row">
+                                <div class="options">
+                                    <label class="option">
+                                        <input type="radio" name="inquiry" value="product">
+                                        <span>製品</span>
+                                    </label>
+                                    <label class="option">
+                                        <input type="radio" name="inquiry" value="overseas">
+                                        <span>海外事業</span>
+                                    </label>
+                                    <label class="option">
+                                        <input type="radio" name="inquiry" value="cosmetic">
+                                        <span>化粧品</span>
+                                    </label>
+                                    <label class="option">
+                                        <input type="radio" name="inquiry" value="company">
+                                        <span>企業</span>
+                                    </label>
+                                    <label class="option">
+                                        <input type="radio" name="inquiry" value="rnd">
+                                        <span>R&amp;D</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="group">
+                            <div class="intro">
+                                <div class="step">02 基本情報</div>
+                                <div class="question">
+                                    <span>基本情報を入力してください。</span>
+                                    <span class="mark">*</span>
+                                </div>
+                            </div>
+
+                            <div class="fields">
+                                <div class="field-row">
+                                    <label class="field">
+                                        <span class="name">会社/所属</span>
+                                        <input type="text" name="company" placeholder="会社名">
+                                    </label>
+                                </div>
+                                <div class="field-row">
+                                    <label class="field">
+                                        <span class="name">担当者名・役職</span>
+                                        <input type="text" name="manager" placeholder="氏名と役職">
+                                    </label>
+                                </div>
+                                <div class="field-row">
+                                    <label class="field">
+                                        <span class="name">国名</span>
+                                        <input type="text" name="country" placeholder="国名">
+                                    </label>
+                                </div>
+                                <div class="field-row">
+                                    <label class="field">
+                                        <span class="name">メール</span>
+                                        <input type="email" name="email" placeholder="メールアドレス">
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="group message">
+                            <div class="intro">
+                                <div class="step">03 内容</div>
+                                <div class="question">
+                                    <span>内容を入力してください。</span>
+                                    <span class="mark">*</span>
+                                </div>
+                            </div>
+                            <div class="fields">
+                                <div class="field-row">
+                                    <label class="field">
+                                        <span class="name">件名</span>
+                                        <input type="text" name="subject" placeholder="件名">
+                                    </label>
+                                </div>
+                                <div class="field-row">
+                                    <label class="field area">
+                                        <span class="name">お問い合わせ内容</span>
+                                        <textarea name="message" placeholder="内容を入力してください。"></textarea>
+                                    </label>
+                                </div>
+                                <div class="attach">
+                                    <input class="fileinput" type="file" name="files" multiple>
+                                    <button class="filebtn" type="button">
+                                        <span>ファイル添付</span>
+                                        <i class="icon" aria-hidden="true"></i>
+                                    </button>
+                                    <div class="files empty"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="agree">
+                            <label class="check">
+                                <input type="checkbox" name="privacy">
+                                <span>個人情報の取扱いに同意(必須)</span>
+                            </label>
+                            <button class="link" type="button">全文を見る</button>
+                        </div>
+
+                        <div class="action">
+                            <button class="submit" type="submit">
+                                <span>送信</span>
+                                <i class="arrow" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="policy" aria-hidden="true">
+                    <div class="box" role="dialog" aria-modal="true">
+                        <button class="close" type="button" aria-label="閉じる" tabindex="-1">
+                            <i class="icon" aria-hidden="true"></i>
+                        </button>
+                        <div class="copy">
+                            <div class="title" id="policytitle">個人情報の取扱い</div>
+                            <div class="text">
+                                <div class="para">
+                                    <p>STARSTECHは関連法に基づき個人情報を適切に扱います。</p>
+                                    <p>下記をご確認の上、同意してください。</p>
+                                </div>
+                                <div class="para">
+                                    <p>1. 収集項目</p>
+                                    <p>必須: 氏名、連絡先、メール、件名、内容、会社、役職</p>
+                                    <p>任意: 添付ファイル</p>
+                                </div>
+                                <div class="para">
+                                    <p>2. 利用目的</p>
+                                    <p>お問い合わせへの回答</p>
+                                </div>
+                                <div class="para">
+                                    <p>3. 保管期間</p>
+                                    <p>お問い合わせ情報は3年間保管後、削除します。</p>
+                                </div>
+                                <div class="para">
+                                    <p>4. 同意しない場合、利用に制限が生じることがあります。</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- s: section 2 -->
+        <section class="cont2" aria-labelledby="cont2-title">
+            <div class="bg"></div>
+            <div class="container">
+                <div class="tagline">
+                    <div class="tag" id="cont2-title">所在地</div>
+                </div>
+
+                <div class="layout">
+                    <div class="name">
+                        <div class="title">本社</div>
+                    </div>
+                    <div class="detail">
+                        <div class="block">
+                            <div class="label">住所</div>
+                            <div class="line">
+                                <i class="pin" aria-hidden="true"></i>
+                                <div class="text">Mario Tower 1202, 1203, 28 Digital-ro 30-gil, Guro-gu, Seoul, Korea</div>
+                            </div>
+                        </div>
+                        <div class="info">
+                            <div class="block">
+                                <div class="label">代表メール</div>
+                                <div class="line">
+                                    <i class="mail" aria-hidden="true"></i>
+                                    <div class="text"><a class="contact-mail" href="mailto:starstechad@starstech.co.kr">starstechad@starstech.co.kr</a></div>
+                                </div>
+                            </div>
+                            <div class="block">
+                                <div class="label">代表番号</div>
+                                <div class="line">
+                                    <i class="phone" aria-hidden="true"></i>
+                                    <div class="text"><a class="contact-phone" href="tel:+82269528260">+82 2-6952-8260</a></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="items">
+                    <div class="item">
+                        <div class="title">企業付設研究所</div>
+                        <div class="block">
+                            <div class="label">住所</div>
+                            <div class="line">
+                                <i class="pin" aria-hidden="true"></i>
+                                <div class="text">
+                                    <span>Mario Tower 1208, 28 Digital-ro 30-gil, Guro-gu, Seoul, Korea</span>
+                                    <span>STARSTECH</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="item">
+                        <div class="title">Dangjin工場</div>
+                        <div class="block">
+                            <div class="label">住所</div>
+                            <div class="line">
+                                <i class="pin" aria-hidden="true"></i>
+                                <div class="text">66 Sandan 3-ro 6-gil, Seokmun-myeon, Dangjin-si, Chungcheongnam-do, Korea</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="item">
+                        <div class="title">Suncheon工場</div>
+                        <div class="block">
+                            <div class="label">住所</div>
+                            <div class="line">
+                                <i class="pin" aria-hidden="true"></i>
+                                <div class="text">82-44 Haeryong Sandan 1-ro, Haeryong-myeon, Suncheon-si, Jeollanam-do, Korea</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- s: section 3 -->
+        <section class="cont3" aria-labelledby="cont3-title">
+            <div class="bg" aria-hidden="true"></div>
+            <div class="container">
+                <div class="copy">
+                    <div class="tag" id="cont3-title">採用</div>
+                    <div class="text">
+                        <div class="title">あなたの成長が
+                            私たちの未来です。</div>
+                        <div class="desc">明日を共につくる人材を
+                            募集しています。</div>
+                    </div>
+                </div>
+                <a class="btn" href="#">
+                    <span>採用サイトへ</span><i class="icon" aria-hidden="true"></i>
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <div id="footer-container"></div>
+    <button class="scroll-top-btn" id="scrollTopBtn" aria-label="Scroll to Top"></button>
+
+    <!-- jquery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <!-- gsap -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <!-- ScrollTrigger -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <!-- ScrollTo Plugin -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollToPlugin.min.js"></script>
+    
+    <script src="../../assets/js/common.js"></script>
+    <script src="../../assets/js/pages/sub0501.js"></script>
+</body>
+
+</html>

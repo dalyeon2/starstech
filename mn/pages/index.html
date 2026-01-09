@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="mn">
 <head>
     <meta charset="UTF-8">
@@ -83,12 +83,12 @@
                 })
                 .then(function (html) {
                     var doc = new DOMParser().parseFromString(html, 'text/html');
-                    var links = doc.querySelectorAll('.panel a.link[href]');
+                    var links = doc.querySelectorAll('.panel a.link[href], .panel a.title[href], .header .contact[href]');
                     var map = new Map();
 
                     links.forEach(function (link) {
-                        var text = link.textContent || '';
-                        var slugValue = slugifyLabel(text);
+                        var slugSource = link.getAttribute('data-slug') || link.textContent || '';
+                        var slugValue = slugifyLabel(slugSource);
                         if (!slugValue || map.has(slugValue)) return;
                         var href = link.getAttribute('href') || '';
                         if (!href) return;
@@ -116,3 +116,4 @@
     </script>
 </body>
 </html>
+

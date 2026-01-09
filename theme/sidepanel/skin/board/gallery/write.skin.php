@@ -104,11 +104,11 @@ $pr_youtube = $show_link && !empty($write['wr_link1']) && sidepanel_gallery_is_y
                     <div class="pr-type-options" role="radiogroup" aria-label="PR 유형 선택">
                         <label class="pr-type-option">
                             <input type="radio" name="pr_type" value="image"<?php echo $pr_youtube ? '' : ' checked'; ?>>
-                            <span>이미지</span>
+                            <span>공지사항</span>
                         </label>
                         <label class="pr-type-option">
                             <input type="radio" name="pr_type" value="youtube"<?php echo $pr_youtube ? ' checked' : ''; ?>>
-                            <span>유튜브</span>
+                            <span>홍보자료</span>
                         </label>
                     </div>
                 </div>
@@ -1014,7 +1014,8 @@ function fwrite_submit(f) {
     }
 
     var hasDeleteChecked = !!f.querySelector("input[name^='bf_file_del']:checked");
-    if (!discardFiles) {
+    var requireImage = !isPr;
+    if (!discardFiles && requireImage) {
         if (isNew && !hasSelectedFile && !isYoutube) {
             alert('이미지를 반드시 첨부해주세요.');
             if (fileInput) fileInput.focus();

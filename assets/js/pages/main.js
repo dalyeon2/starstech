@@ -469,7 +469,7 @@
             }
             if (width <= 768) return { mode: 'slider', columns: 2 };
             if (width <= 1024) return { mode: 'slider', columns: 3 };
-            return { mode: 'grid', columns: 4 };
+            return { mode: 'slider', columns: 4 };
         }
 
         function updateButtons() {

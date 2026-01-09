@@ -129,7 +129,7 @@ Init from common.js:
         w.ScrollTrigger.create({
             trigger: el,
             scroller: scroller(),
-            start: 'top 80%',
+            start: 'top 70%',
             onEnter: function () {
                 w.gsap.to(el, {
                     x: 0,
@@ -211,7 +211,7 @@ Init from common.js:
         w.ScrollTrigger.create({
             trigger: el,
             scroller: scroller(),
-            start: 'top 80%',
+            start: 'top 70%',
             onEnter: function () {
                 w.gsap.to(el, {
                     autoAlpha: 1,

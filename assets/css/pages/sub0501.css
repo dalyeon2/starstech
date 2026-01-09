@@ -960,7 +960,6 @@
 }
 
 .cont3 .copy {
-    max-width: 431px;
     display: flex;
     flex-direction: column;
     gap: 20px;

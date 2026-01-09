@@ -77,8 +77,7 @@ if (!empty($_FILES) && isset($_FILES['files'])) {
 $adminEmail = 'ubique99@naver.com';
 $serverName = isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : 'example.com';
 $subject = '[웹문의] ' . ($input['subject'] ?: '(무제)');
-$body = "웹 문의가 접수되었습니다.\n\n";
-$body .= "문의 유형: " . $input['type'] . "\n";
+$body = "문의 유형: " . $input['type'] . "\n";
 $body .= "기업/소속: " . $input['company'] . "\n";
 $body .= "담당자: " . $input['manager'] . "\n";
 $body .= "국가: " . $input['country'] . "\n";

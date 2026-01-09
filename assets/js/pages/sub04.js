@@ -20,6 +20,34 @@
     var boardCache = null;
     var lastDetailSignature = '';
     var detailHasLoaded = false;
+    var smoothScrollPaused = false;
+    var I18N = {
+        ko: {
+            emptyList: '게시물이 없습니다.',
+            emptySearch: '검색 결과가 없습니다.'
+        },
+        en: {
+            emptyList: 'No posts yet.',
+            emptySearch: 'No results found.'
+        },
+        fr: {
+            emptyList: 'Aucun article pour le moment.',
+            emptySearch: 'Aucun resultat.'
+        },
+        ja: {
+            emptyList: '記事がありません。',
+            emptySearch: '検索結果がありません。'
+        },
+        mn: {
+            emptyList: 'Одоогоор нийтлэл алга.',
+            emptySearch: 'Хайлтын үр дүн алга.'
+        }
+    };
+
+    function t(key) {
+        var dict = I18N[LANG] || I18N.en;
+        return (dict && dict[key]) || (I18N.en && I18N.en[key]) || key;
+    }
 
     function isDetailPage() {
         return /sub-detail\.html/i.test(location.pathname);
@@ -113,6 +141,59 @@
         return isNaN(parsed) ? new Date(0) : new Date(parsed);
     }
 
+    function getYoutubeId(url) {
+        if (!url) return '';
+        var match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([A-Za-z0-9_-]{6,})/);
+        return match ? match[1] : '';
+    }
+
+    function getYoutubeThumb(url) {
+        var id = getYoutubeId(url);
+        return id ? 'https://img.youtube.com/vi/' + id + '/hqdefault.jpg' : '';
+    }
+
+    function playYoutubeIframe(iframe) {
+        if (!iframe || !iframe.contentWindow) return;
+        try {
+            iframe.contentWindow.postMessage(JSON.stringify({
+                event: 'command',
+                func: 'playVideo',
+                args: []
+            }), '*');
+        } catch (err) {
+            // ignore postMessage failures
+        }
+    }
+
+    function isDefaultMediaSrc(src) {
+        if (!src) return true;
+        var clean = String(src).split('?')[0];
+        return /default-image\.jpg$/i.test(clean);
+    }
+
+    function parseMediaTokens(text) {
+        var segments = [];
+        if (!text) return segments;
+        var regex = /\[(?:media|image)\s*:\s*(\d+)\]/ig;
+        var lastIndex = 0;
+        var match;
+
+        while ((match = regex.exec(text)) !== null) {
+            var chunk = text.slice(lastIndex, match.index);
+            if (chunk && chunk.trim()) {
+                segments.push({ type: 'text', value: chunk });
+            }
+            segments.push({ type: 'media', index: parseInt(match[1], 10) - 1 });
+            lastIndex = regex.lastIndex;
+        }
+
+        var tail = text.slice(lastIndex);
+        if (tail && tail.trim()) {
+            segments.push({ type: 'text', value: tail });
+        }
+        return segments;
+    }
+
     function normalizeNewsItems(items) {
         if (!Array.isArray(items)) return [];
         return items.map(function (item, idx) {
@@ -128,6 +209,7 @@
                 thumb: thumb,
                 images: images,
                 content: (item && item.content) || '',
+                contentMedia: (item && (item.content_media || item.contentMedia)) || '',
                 source: (item && item.source) || null,
                 label: (item && item.label) || '보도자료',
                 type: (item && item.type) || 'news'
@@ -153,6 +235,7 @@
                 thumb: thumb,
                 images: images,
                 content: (item && item.content) || '',
+                contentMedia: (item && (item.content_media || item.contentMedia)) || '',
                 source: (item && item.source) || null,
                 link: (item && item.link) || ''
             };
@@ -197,6 +280,14 @@
 
     function formatText(value) {
         return (value || '').replace(/\n/g, '<br />');
+    }
+
+    function buildHighlightSummary(value) {
+        var raw = String(value || '').replace(/\r/g, '').trim();
+        if (!raw) return '';
+        var parts = raw.split(/\n\s*\n/).filter(Boolean);
+        var summary = (parts[0] || raw).replace(/\n+/g, ' ');
+        return summary.replace(/\s+/g, ' ').trim();
     }
 
     function splitContent(value) {
@@ -313,6 +404,27 @@
         }
     }
 
+    function setSmoothScrollPaused(shouldPause) {
+        var scroller = window.scrollInstance;
+        if (!scroller || typeof scroller.stop !== 'function' || typeof scroller.start !== 'function') return;
+        if (shouldPause) {
+            if (smoothScrollPaused) return;
+            smoothScrollPaused = true;
+            scroller.stop();
+            if (typeof ScrollTrigger !== 'undefined' && typeof ScrollTrigger.refresh === 'function') {
+                ScrollTrigger.refresh();
+            }
+            return;
+        }
+        if (!smoothScrollPaused) return;
+        smoothScrollPaused = false;
+        scroller.start();
+        if (typeof scroller.update === 'function') scroller.update();
+        if (typeof ScrollTrigger !== 'undefined' && typeof ScrollTrigger.refresh === 'function') {
+            ScrollTrigger.refresh();
+        }
+    }
+
     function updateSubtop(key) {
         var $title = $('.subtop .title');
         var $desc = $('.subtop .desc');
@@ -369,7 +481,12 @@
 
         function renderHighlight(item, idx) {
             var $highlight = $('.cont1');
-            if (!$highlight.length || !item) return;
+            if (!$highlight.length) return;
+            if (!item) {
+                $highlight.addClass('is-empty');
+                return;
+            }
+            $highlight.removeClass('is-empty');
 
             var $img = $highlight.find('.img');
             var $title = $highlight.find('.title');
@@ -378,7 +495,7 @@
             var $btn = $highlight.find('.btn');
 
             var cover = (item.images && item.images[0] && item.images[0].src) || item.thumb || NEWS_PLACEHOLDER_IMG;
-            var summary = (item.content || '').split(/\n+/).filter(Boolean)[0] || '';
+            var summary = buildHighlightSummary(item.content);
 
             if ($img.length) {
                 $img.attr('src', cover);
@@ -477,7 +594,7 @@
             updateTotal(total);
 
             if (total === 0) {
-                var message = totalCount ? '검색 결과가 없습니다.' : '게시물이 없습니다.';
+                var message = totalCount ? t('emptySearch') : t('emptyList');
                 if ($empty) $empty.text(message);
                 $list.addClass('showempty');
             } else {
@@ -544,6 +661,8 @@
                 var sorted = sortNewsItems(newsItems);
                 if (sorted.length) {
                     renderHighlight(sorted[0], 0);
+                } else {
+                    renderHighlight(null);
                 }
                 setCachedItems(NEWS_STORAGE_KEY, sorted);
                 renderCards(sorted);
@@ -615,7 +734,12 @@
 
         function renderHighlight(item) {
             var $highlight = $('.cont1');
-            if (!$highlight.length || !item) return;
+            if (!$highlight.length) return;
+            if (!item) {
+                $highlight.addClass('is-empty');
+                return;
+            }
+            $highlight.removeClass('is-empty');
 
             var $img = $highlight.find('.img');
             var $left = $highlight.find('.left');
@@ -626,7 +750,7 @@
             var $btn = $highlight.find('.btn');
 
             var cover = (item.images && item.images[0] && item.images[0].src) || item.thumb || NEWS_PLACEHOLDER_IMG;
-            var summary = (item.content || '').split(/\n+/).filter(Boolean)[0] || '';
+            var summary = buildHighlightSummary(item.content);
 
             if ($img.length) {
                 $img.attr('src', cover);
@@ -638,20 +762,8 @@
             if ($desc.length) $desc.text(summary);
 
             if ($left.length) {
-                $left.toggleClass('is-video', !!(getBoardType(item) === PR_KEY && item.link));
+                $left.removeClass('is-video');
                 $left.find('.media-link').remove();
-                if (getBoardType(item) === PR_KEY && item.link) {
-                    var $link = $('<a/>', {
-                        'class': 'media-link',
-                        href: item.link,
-                        target: '_blank',
-                        rel: 'noopener',
-                        'aria-label': 'YouTube link'
-                    });
-                    $link.append($('<span/>', { 'class': 'media-play', 'aria-hidden': 'true' }));
-                    $link.append($('<span/>', { 'class': 'media-youtube', text: 'YouTube' }));
-                    $left.append($link);
-                }
             }
 
             if ($btn.length) {
@@ -685,11 +797,6 @@
 
                 $meta.append($label, $title, $date);
                 $media.append($img);
-                if (typeKey === PR_KEY && item.link) {
-                    $media.addClass('is-video');
-                    $media.append($('<span/>', { 'class': 'media-play', 'aria-hidden': 'true' }));
-                    $media.append($('<span/>', { 'class': 'media-youtube', text: 'YouTube' }));
-                }
                 $card.append($media, $meta);
                 $list.append($card);
             });
@@ -767,7 +874,7 @@
             updateTotal(total);
 
             if (total === 0) {
-                var message = totalCount ? '검색 결과가 없습니다.' : '게시물이 없습니다.';
+                var message = totalCount ? t('emptySearch') : t('emptyList');
                 if ($empty) $empty.text(message);
                 $list.addClass('showempty');
             } else {
@@ -844,6 +951,8 @@
                 buildTypeIndexMap(sorted);
                 if (sorted.length) {
                     renderHighlight(sorted[0]);
+                } else {
+                    renderHighlight(null);
                 }
                 setCachedItems(BOARD_STORAGE_KEY, sorted);
                 renderCards(sorted);
@@ -891,68 +1000,150 @@
         if ($content.length) {
             $content.empty();
             if (item) {
+                var contentWithMedia = item.contentMedia || item.content || '';
                 var parts = splitContent(item.content || '');
-                if (parts.before) {
-                    $content.append($('<div/>', { 'class': 'text', html: formatText(parts.before) }));
-                }
-
-                var $media = $('<div/>', { 'class': 'media' });
+                var contextKey = cfg.key || (item && item.type) || NEWS_KEY;
+                var isNewsContext = contextKey === NEWS_KEY;
+                var isPrContext = contextKey === PR_KEY;
+                var images = Array.isArray(item.images) ? item.images : [];
+                var hasImages = images.some(function (img) {
+                    return img && img.src && !isDefaultMediaSrc(img.src);
+                });
+                var youtubeId = isPrContext && item.link ? getYoutubeId(item.link) : '';
+                setSmoothScrollPaused(!!youtubeId);
+                var hasTokenMedia = !isPrContext && /\[(?:media|image)\s*:\s*\d+\]/i.test(contentWithMedia);
+                var mediaThumb = '';
+                var $media = null;
                 var captions = [];
-                var isNewsContext = (cfg.key || (item && item.type)) === NEWS_KEY;
 
-                if (Array.isArray(item.images) && item.images.length) {
-                    item.images.forEach(function (img, index) {
-                        var $img = $('<img/>', {
-                            src: img.src || NEWS_PLACEHOLDER_IMG,
-                            alt: item.title || '',
-                            decoding: 'async'
-                        });
-                        if (index > 0) {
-                            $img.attr('loading', 'lazy');
-                        } else {
-                            $img.attr('fetchpriority', 'high');
+                function getImageAt(index) {
+                    var img = images[index];
+                    if (!img || !img.src || isDefaultMediaSrc(img.src)) return null;
+                    return img;
+                }
+
+                function appendMediaBlock(img) {
+                    if (!img) return;
+                    var $block = $('<div/>', { 'class': 'media' });
+                    $block.append($('<img/>', {
+                        src: img.src,
+                        alt: item.title || '',
+                        decoding: 'async',
+                        fetchpriority: 'high'
+                    }));
+                    if (img.caption) {
+                        $block.append($('<div/>', { 'class': 'caption', text: img.caption }));
+                    }
+                    $content.append($block);
+                }
+
+                if (hasTokenMedia) {
+                    var segments = parseMediaTokens(contentWithMedia);
+                    var usedIndexes = {};
+
+                    segments.forEach(function (segment) {
+                        if (segment.type === 'text') {
+                            $content.append($('<div/>', { 'class': 'text', html: formatText(segment.value) }));
+                            return;
                         }
-                        $media.append($img);
-                        if (img.caption) captions.push(img.caption);
+                        if (segment.type === 'media') {
+                            var img = getImageAt(segment.index);
+                            if (!img) return;
+                            usedIndexes[segment.index] = true;
+                            appendMediaBlock(img);
+                        }
                     });
-                } else if (item.thumb) {
-                    $media.append($('<img/>', {
-                        src: item.thumb,
-                        alt: item.title || '',
-                        decoding: 'async',
-                        fetchpriority: 'high'
-                    }));
+
+                    images.forEach(function (_, index) {
+                        if (usedIndexes[index]) return;
+                        appendMediaBlock(getImageAt(index));
+                    });
                 } else {
-                    $media.append($('<img/>', {
-                        src: NEWS_PLACEHOLDER_IMG,
-                        alt: item.title || '',
-                        decoding: 'async',
-                        fetchpriority: 'high'
-                    }));
-                }
+                    if (!hasImages && !youtubeId) {
+                        if (item.thumb && !isDefaultMediaSrc(item.thumb)) {
+                            mediaThumb = item.thumb;
+                        }
+                    }
 
-                if (captions.length) {
-                    $media.append($('<div/>', { 'class': 'caption', text: captions.join(' ') }));
-                }
+                    if (youtubeId) {
+                        $media = $('<div/>', { 'class': 'media is-iframe' });
+                        var $wrap = $('<div/>', { 'class': 'iframe-wrap' });
+                        var $iframe = $('<iframe/>', {
+                            src: 'https://www.youtube.com/embed/' + youtubeId + '?rel=0&enablejsapi=1',
+                            title: item.title || 'YouTube video',
+                            allow: 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share',
+                            allowfullscreen: 'allowfullscreen'
+                        });
+                        var $guard = $('<button/>', {
+                            'class': 'iframe-guard',
+                            type: 'button',
+                            'aria-label': 'YouTube 영상 재생'
+                        });
+                        $guard.on('click', function () {
+                            $media.addClass('is-interactive');
+                            $guard.remove();
+                            playYoutubeIframe($iframe.get(0));
+                        });
+                        $wrap.append($iframe, $guard);
+                        $media.append($wrap);
+                    }
 
-                if (!isNewsContext && item && item.link) {
-                    $media.addClass('is-video');
-                    var $mediaLink = $('<a/>', {
-                        'class': 'media-link',
-                        href: item.link,
-                        target: '_blank',
-                        rel: 'noopener',
-                        'aria-label': 'YouTube link'
-                    });
-                    $mediaLink.append($('<span/>', { 'class': 'media-play', 'aria-hidden': 'true' }));
-                    $mediaLink.append($('<span/>', { 'class': 'media-youtube', text: 'YouTube' }));
-                    $media.append($mediaLink);
-                }
+                    if (hasImages || mediaThumb) {
+                        var mediaCount = 0;
+                        if (!$media) {
+                            $media = $('<div/>', { 'class': 'media' });
+                        }
+                        if (hasImages) {
+                            images.forEach(function (img, index) {
+                                if (!img || !img.src || isDefaultMediaSrc(img.src)) return;
+                                var $img = $('<img/>', {
+                                    src: img.src,
+                                    alt: item.title || '',
+                                    decoding: 'async'
+                                });
+                                if (index > 0) {
+                                    $img.attr('loading', 'lazy');
+                                } else {
+                                    $img.attr('fetchpriority', 'high');
+                                }
+                                $media.append($img);
+                                mediaCount += 1;
+                                if (img.caption) captions.push(img.caption);
+                            });
+                        } else {
+                            $media.append($('<img/>', {
+                                src: mediaThumb,
+                                alt: item.title || '',
+                                decoding: 'async',
+                                fetchpriority: 'high'
+                            }));
+                            mediaCount += 1;
+                        }
 
-                $content.append($media);
+                        if (captions.length) {
+                            $media.append($('<div/>', { 'class': 'caption', text: captions.join(' ') }));
+                        }
 
-                if (parts.after) {
-                    $content.append($('<div/>', { 'class': 'text', html: formatText(parts.after) }));
+                        if (!mediaCount) {
+                            $media = null;
+                        }
+                    }
+
+                    if (isPrContext && $media) {
+                        $content.append($media);
+                    }
+
+                    if (parts.before) {
+                        $content.append($('<div/>', { 'class': 'text', html: formatText(parts.before) }));
+                    }
+
+                    if (!isPrContext && $media) {
+                        $content.append($media);
+                    }
+
+                    if (parts.after) {
+                        $content.append($('<div/>', { 'class': 'text', html: formatText(parts.after) }));
+                    }
                 }
 
                 var showSource = isNewsContext && item && item.source && (item.source.text || item.source.url);
@@ -977,7 +1168,8 @@
                 }
 
             } else {
-                $content.append($('<div/>', { 'class': 'text', text: '게시물이 없습니다.' }));
+                setSmoothScrollPaused(false);
+                $content.append($('<div/>', { 'class': 'text', text: t('emptyList') }));
             }
         }
 
@@ -1092,7 +1284,7 @@
             initNewsDetail(cachedItems, {
                 key: typeKey,
                 listUrl: BOARD_LIST_URL,
-                label: typeKey === NOTICE_KEY ? '????' : '????',
+                label: typeKey === NOTICE_KEY ? '공지사항' : '홍보자료',
                 idx: hashIdx
             });
             scrollToTop();
@@ -1111,7 +1303,7 @@
             initNewsDetail(filteredItems, {
                 key: typeKey,
                 listUrl: BOARD_LIST_URL,
-                label: typeKey === NOTICE_KEY ? '????' : '????',
+                label: typeKey === NOTICE_KEY ? '공지사항' : '홍보자료',
                 idx: hashIdx
             });
             scrollToTop();

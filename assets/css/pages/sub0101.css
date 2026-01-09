@@ -4,28 +4,37 @@
 --------------------------------------------- 
 */
 /* cont1 */
+.cont1 {
+    --cont1-gap: 70px;
+    --cont1-photo-width: clamp(360px, 46vw, 824px);
+    --cont1-copy-width: clamp(320px, 44vw, 798px);
+}
+
 .cont1 .container {
     padding-top: 50px;
     padding-bottom: 40px;
     display: flex;
     align-items: stretch;
-    gap: 70px;
+    gap: var(--cont1-gap);
     width: 100%;
 }
 
 .cont1 .photo {
     position: relative;
-    flex: 1;
-    padding-right: 20px;
+    flex: 0 0 var(--cont1-photo-width);
+    width: var(--cont1-photo-width);
+    aspect-ratio: 824 / 910;
+    margin-left: calc(50% - 50vw);
     display: flex;
     justify-content: center;
     align-items: center;
-    border-right: 1px dashed var(--black-500);
+    padding-right: 0;
+    border-right: 0;
 }
 
 .cont1 .photo .pic {
     width: 100%;
-    height: 874px;
+    height: 100%;
     object-fit: cover;
     display: block;
 }
@@ -41,14 +50,15 @@
 }
 
 .cont1 .copy {
-    flex: 1.5;
-    padding: 170px 20px 0 0;
+    flex: 0 0 var(--cont1-copy-width);
+    width: var(--cont1-copy-width);
+    padding: 170px 0 0;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     align-items: flex-start;
     gap: 80px;
-    border-right: 1px dashed var(--black-500);
+    border-right: 0;
 }
 
 .cont1 .head {
@@ -78,6 +88,10 @@
 }
 
 @media (max-width: 1440px) {
+    .cont1 {
+        --cont1-gap: 50px;
+    }
+
     .cont1 .headline {
         font-size: var(--font-title48);
         line-height: 1.6;
@@ -88,31 +102,23 @@
     }
 
     .cont1 .copy {
-        padding: 120px 20px 0 0;
-    }
-
-    .cont1 .photo .pic {
-        height: 750px;
+        padding: 120px 0 0;
     }
 }
 
 @media (max-width: 1280px) {
-    .cont1 .container {
-        gap: 40px;
+    .cont1 {
+        --cont1-gap: 40px;
     }
 
     .cont1 .copy {
-        padding: 100px 20px 0 0;
-    }
-
-    .cont1 .photo .pic {
-        height: 700px;
+        padding: 100px 0 0;
     }
 }
 
 @media (max-width: 1024px) {
-    .cont1 .container {
-        gap: 30px;
+    .cont1 {
+        --cont1-gap: 30px;
     }
 
     .cont1 .headline {
@@ -140,6 +146,8 @@
 
     .cont1 .photo {
         padding-right: 0;
+        margin-left: 0;
+        aspect-ratio: auto;
     }
 
     .cont1 .photo .pic {
@@ -198,19 +206,18 @@
 .cont2 .container {
     padding-top: 50px;
     display: flex;
-    align-items: flex-start;
-    gap: 40px;
-    justify-content: flex-start;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 50px;
 }
 
 .cont2 .left {
-    flex: 1;
-    position: sticky;
-    top: calc(var(--header-height) + 40px);
+    flex: 0 0 auto;
+    position: static;
     display: flex;
     flex-direction: column;
     gap: 20px;
-    align-self: flex-start;
+    align-self: stretch;
 }
 
 .cont2 .headline {
@@ -225,59 +232,41 @@
 }
 
 .cont2 .right {
-    flex: 1.5;
+    flex: 0 0 auto;
     width: 100%;
-    padding-top: 180px;
+    padding-top: 0;
 }
 
 .cont2 .list {
-    --line-progress: 0%;
-    --line-x: 16px;
-    --line-width: 1px;
-    --line-inset: 0px;
     position: relative;
     display: flex;
     flex-direction: column;
-    gap: 70px;
-    background-image:
-        linear-gradient(180deg, #A66300 0%, #D48F29 35%, #FFA828 70%, rgba(255, 152, 0, 0.4) 100%);
-    background-size:
-        var(--line-width) var(--line-progress),
-        var(--line-width) 100%;
-    background-position:
-        var(--line-x) 0,
-        var(--line-x) 0;
-    background-repeat: no-repeat;
-    background-origin: content-box;
-    background-clip: content-box;
+    gap: 60px;
 }
 
 .cont2 .list::after {
-    content: "";
-    position: absolute;
-    left: var(--line-x);
-    top: calc(var(--line-inset) + var(--line-progress) - 5px);
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    background: #FF980066;
-    transform: translateX(-2px);
-    pointer-events: none;
+    content: none;
 }
 
 .cont2 .item {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: minmax(0, 240px) minmax(0, 1fr);
+    column-gap: 48px;
+    row-gap: 24px;
+    align-items: start;
+}
+
+.cont2 .item > .card,
+.cont2 .item > .cards {
+    grid-column: 2 / -1;
 }
 
 .cont2 .step {
     display: inline-flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 16px;
-    padding: 8px 12px 8px 0;
-    background: var(--white);
-    position: relative;
-    z-index: 1;
+    padding: 0;
+    background: transparent;
     justify-self: start;
     max-width: 100%;
 }
@@ -289,7 +278,7 @@
     align-items: center;
     justify-content: center;
     border-radius: 6px;
-    box-shadow: 0 0 0 6px var(--white);
+    box-shadow: none;
     color: var(--white);
     font-size: var(--font-md);
     font-weight: 500;
@@ -322,30 +311,23 @@
 .cont2 .cards {
     display: flex;
     flex-direction: column;
-    gap: 30px;
+    gap: 40px;
 }
 
 .cont2 .cards .card:last-child {
-    position: relative;
+    position: static;
 }
 
 .cont2 .cards .card:last-child::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 65px;
-    right: 0;
-    height: 1px;
-    background: var(--black-400);
-    pointer-events: none;
+    content: none;
 }
 
 .cont2 .card {
-    padding: 30px 0 0 65px;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    gap: 10px;
+    padding: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 224px;
+    column-gap: 40px;
+    align-items: center;
 }
 
 .cont2 .text {
@@ -396,6 +378,7 @@
     object-fit: cover;
     display: block;
     box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+    justify-self: end;
 }
 
 @media (max-width: 1440px) {
@@ -403,31 +386,22 @@
         gap: 40px;
     }
 
-    .cont2 .left {
-        top: calc(var(--header-height) + 24px);
-    }
-
-    .cont2 .right {
-        max-width: 760px;
-        padding-top: 90px;
-    }
-
     .cont2 .list {
-        gap: 56px;
+        gap: 50px;
     }
 
     .cont2 .item {
-        grid-template-columns: 130px minmax(0, 1fr);
-        column-gap: 22px;
+        grid-template-columns: minmax(0, 220px) minmax(0, 1fr);
+        column-gap: 32px;
     }
 
     .cont2 .cards {
-        gap: 46px;
+        gap: 36px;
     }
 
     .cont2 .card {
         grid-template-columns: minmax(0, 1fr) 200px;
-        column-gap: 22px;
+        column-gap: 24px;
     }
 
     .cont2 .steptitle {
@@ -457,13 +431,7 @@
 
 @media (max-width: 1280px) {
     .cont2 .container {
-        flex-direction: column;
         gap: 30px;
-    }
-
-    .cont2 .left {
-        position: static;
-        max-width: none;
     }
 
     .cont2 .headline {
@@ -471,29 +439,12 @@
         line-height: 1.45;
     }
 
-    .cont2 .right {
-        padding-top: 20px;
-        max-width: none;
-    }
-
     .cont2 .list {
-        --line-inset: 20px;
-        padding: 20px 0;
-        gap: 48px;
-    }
-
-    .cont2 .item {
-        grid-template-columns: 1fr;
-        row-gap: 20px;
-        align-items: start;
-    }
-
-    .cont2 .step {
-        padding: 6px 10px 6px 0;
+        gap: 40px;
     }
 
     .cont2 .cards {
-        gap: 40px;
+        gap: 32px;
     }
 
     .cont2 .card {
@@ -501,8 +452,9 @@
         column-gap: 20px;
     }
 
-    .cont2 .text {
-        max-width: none;
+    .cont2 .item {
+        grid-template-columns: minmax(0, 200px) minmax(0, 1fr);
+        column-gap: 24px;
     }
 
     .cont2 .thumb {
@@ -515,6 +467,22 @@
     .cont2 .headline {
         font-size: var(--font-headline32);
         line-height: 1.4;
+    }
+
+    .cont2 .item {
+        grid-template-columns: minmax(0, 180px) minmax(0, 1fr);
+        column-gap: 20px;
+    }
+
+    .cont2 .card {
+        grid-template-columns: minmax(0, 1fr) 180px;
+        column-gap: 16px;
+        align-items: start;
+    }
+
+    .cont2 .thumb {
+        width: 180px;
+        height: 135px;
     }
 }
 
@@ -543,6 +511,16 @@
 
     .cont2 .desc {
         font-size: var(--font-sm);
+    }
+
+    .cont2 .item {
+        grid-template-columns: 1fr;
+        row-gap: 20px;
+    }
+
+    .cont2 .item > .card,
+    .cont2 .item > .cards {
+        grid-column: 1 / -1;
     }
 
     .cont2 .card {

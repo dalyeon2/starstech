@@ -4,6 +4,137 @@
 (function ($) {
     'use strict';
 
+    function resolveLang() {
+        var docLang = (document.documentElement && document.documentElement.lang) ? document.documentElement.lang : '';
+        if (docLang) return docLang.toLowerCase();
+        var match = location.pathname.match(/\/(ko|en|ja|fr|mn)\//i);
+        return match ? match[1].toLowerCase() : '';
+    }
+
+    var I18N = {
+        ko: {
+            fileExists: '이미 {name} 파일이 존재합니다.',
+            fileRemoveConfirm: '파일을 삭제할까요?',
+            fileRemoveLabel: '파일 삭제',
+            submitError: '문의 접수 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.',
+            submitSuccess: '문의가 접수되었습니다.',
+            inquiryRequired: '문의 유형을 선택해 주세요.',
+            companyRequired: '기업 및 소속명을 입력해 주세요.',
+            companyLength: '기업 및 소속명은 2~100자로 입력해 주세요.',
+            managerRequired: '담당자 성명/직급을 입력해 주세요.',
+            managerLength: '담당자 정보는 2~60자로 입력해 주세요.',
+            countryRequired: '국가를 입력해 주세요.',
+            countryLength: '국가는 2~60자로 입력해 주세요.',
+            emailRequired: '이메일을 입력해 주세요.',
+            emailTooLong: '이메일이 너무 깁니다.',
+            emailInvalid: '이메일 형식이 올바르지 않습니다.',
+            subjectRequired: '제목을 입력해 주세요.',
+            subjectLength: '제목은 3~150자로 입력해 주세요.',
+            messageRequired: '문의 내용을 입력해 주세요.',
+            messageLength: '문의 내용은 10~5000자로 입력해 주세요.',
+            privacyRequired: '개인정보 수집 및 이용에 동의해 주세요.'
+        },
+        en: {
+            fileExists: 'File already added: {name}.',
+            fileRemoveConfirm: 'Remove this file?',
+            fileRemoveLabel: 'Remove file',
+            submitError: 'There was an error while submitting. Please try again.',
+            submitSuccess: 'Your inquiry has been received.',
+            inquiryRequired: 'Please select an inquiry type.',
+            companyRequired: 'Please enter a company or organization.',
+            companyLength: 'Company/organization must be 2-100 characters.',
+            managerRequired: 'Please enter contact name and position.',
+            managerLength: 'Contact info must be 2-60 characters.',
+            countryRequired: 'Please enter a country.',
+            countryLength: 'Country must be 2-60 characters.',
+            emailRequired: 'Please enter an email.',
+            emailTooLong: 'Email is too long.',
+            emailInvalid: 'Invalid email format.',
+            subjectRequired: 'Please enter a subject.',
+            subjectLength: 'Subject must be 3-150 characters.',
+            messageRequired: 'Please enter a message.',
+            messageLength: 'Message must be 10-5000 characters.',
+            privacyRequired: 'Please agree to the privacy policy.'
+        },
+        fr: {
+            fileExists: 'Un fichier du meme nom existe deja: {name}.',
+            fileRemoveConfirm: 'Supprimer ce fichier?',
+            fileRemoveLabel: 'Supprimer le fichier',
+            submitError: 'Erreur lors de l\'envoi. Veuillez reessayer.',
+            submitSuccess: 'Votre demande a bien ete recue.',
+            inquiryRequired: 'Veuillez choisir un type de demande.',
+            companyRequired: 'Veuillez saisir la societe ou l\'organisation.',
+            companyLength: 'Societe/organisation: 2 a 100 caracteres.',
+            managerRequired: 'Veuillez saisir le nom et la fonction.',
+            managerLength: 'Nom/fonction: 2 a 60 caracteres.',
+            countryRequired: 'Veuillez saisir le pays.',
+            countryLength: 'Pays: 2 a 60 caracteres.',
+            emailRequired: 'Veuillez saisir l\'email.',
+            emailTooLong: 'Email trop long.',
+            emailInvalid: 'Format d\'email invalide.',
+            subjectRequired: 'Veuillez saisir l\'objet.',
+            subjectLength: 'Objet: 3 a 150 caracteres.',
+            messageRequired: 'Veuillez saisir le message.',
+            messageLength: 'Message: 10 a 5000 caracteres.',
+            privacyRequired: 'Veuillez accepter la politique de confidentialite.'
+        },
+        ja: {
+            fileExists: '同じ名前のファイルがあります: {name}',
+            fileRemoveConfirm: 'このファイルを削除しますか?',
+            fileRemoveLabel: 'ファイル削除',
+            submitError: '送信中にエラーが発生しました。もう一度お試しください。',
+            submitSuccess: 'お問い合わせを受け付けました。',
+            inquiryRequired: '問い合わせ種別を選択してください。',
+            companyRequired: '会社/所属を入力してください。',
+            companyLength: '会社/所属は2〜100文字です。',
+            managerRequired: '担当者名・役職を入力してください。',
+            managerLength: '担当者情報は2〜60文字です。',
+            countryRequired: '国名を入力してください。',
+            countryLength: '国名は2〜60文字です。',
+            emailRequired: 'メールを入力してください。',
+            emailTooLong: 'メールが長すぎます。',
+            emailInvalid: 'メール形式が正しくありません。',
+            subjectRequired: '件名を入力してください。',
+            subjectLength: '件名は3〜150文字です。',
+            messageRequired: '内容を入力してください。',
+            messageLength: '内容は10〜5000文字です。',
+            privacyRequired: '個人情報の取扱いに同意してください。'
+        },
+        mn: {
+            fileExists: 'Ижил нэртэй файл байна: {name}.',
+            fileRemoveConfirm: 'Файлыг устгах уу?',
+            fileRemoveLabel: 'Файл устгах',
+            submitError: 'Илгээх үед алдаа гарлаа. Дахин оролдоно уу.',
+            submitSuccess: 'Таны хүсэлтийг хүлээн авлаа.',
+            inquiryRequired: 'Асуудлын төрлөө сонгоно уу.',
+            companyRequired: 'Байгууллагын нэр оруулна уу.',
+            companyLength: 'Байгууллага 2-100 тэмдэгт байна.',
+            managerRequired: 'Хариуцагч нэр, албан тушаал оруулна уу.',
+            managerLength: 'Хариуцагч 2-60 тэмдэгт байна.',
+            countryRequired: 'Улс оруулна уу.',
+            countryLength: 'Улс 2-60 тэмдэгт байна.',
+            emailRequired: 'Имэйл оруулна уу.',
+            emailTooLong: 'Имэйл хэт урт байна.',
+            emailInvalid: 'Имэйл формат буруу.',
+            subjectRequired: 'Гарчиг оруулна уу.',
+            subjectLength: 'Гарчиг 3-150 тэмдэгт байна.',
+            messageRequired: 'Агуулга оруулна уу.',
+            messageLength: 'Агуулга 10-5000 тэмдэгт байна.',
+            privacyRequired: 'Хувийн мэдээллийн нөхцөлд зөвшөөрнө үү.'
+        }
+    };
+
+    var LANG = resolveLang();
+
+    function t(key, vars) {
+        var dict = I18N[LANG] || I18N.en;
+        var value = (dict && dict[key]) || (I18N.en && I18N.en[key]) || key;
+        if (!vars) return value;
+        return Object.keys(vars).reduce(function (text, k) {
+            return text.replace(new RegExp('\\{' + k + '\\}', 'g'), vars[k]);
+        }, value);
+    }
+
     function initFileAttach($root) {
         var $fileBtn = $root.find('.filebtn');
         var $fileInput = $root.find('.fileinput');
@@ -37,7 +168,7 @@
                     class: 'remove',
                     role: 'button',
                     tabindex: 0,
-                    'aria-label': 'Remove file',
+                    'aria-label': t('fileRemoveLabel'),
                     'data-index': idx
                 });
 
@@ -53,7 +184,7 @@
                     return existing.name === file.name;
                 });
                 if (exists) {
-                    window.alert('이미 ' + file.name + ' 파일이 존재합니다.');
+                    window.alert(t('fileExists', { name: file.name }));
                     return;
                 }
                 fileList.push(file);
@@ -81,7 +212,7 @@
         $filesWrap.on('click', '.remove', function () {
             var idx = parseInt($(this).attr('data-index'), 10);
             if (Number.isNaN(idx)) return;
-            if (!window.confirm('파일을 삭제할까요?')) return;
+            if (!window.confirm(t('fileRemoveConfirm'))) return;
             fileList.splice(idx, 1);
             renderFiles();
             syncInput();
@@ -233,13 +364,13 @@
         }
         $form.prepend($err);
         // also show a blocking alert for global form errors
-        try { window.alert(text || '문의 접수 중 오류가 발생했습니다.'); } catch (e) { /* silent */ }
+        try { window.alert(text || t('submitError')); } catch (e) { /* silent */ }
     }
 
     function showFormSuccess($form, message) {
         clearFormMessages($form);
         // show success as an alert only (no in-page element)
-        try { window.alert(message || '문의가 접수되었습니다.'); } catch (e) { /* silent */ }
+        try { window.alert(message || t('submitSuccess')); } catch (e) { /* silent */ }
     }
 
     function clearFormMessages($form) {
@@ -377,27 +508,27 @@
             var $privacyInput = $form.find('input[name="privacy"]');
             var $privacyWrap = $privacyInput.closest('.agree');
             var privacy = $privacyInput.is(':checked');
-            var successMessage = $form.data('successMessage') || '문의가 접수되었습니다.';
+            var successMessage = $form.data('successMessage') || t('submitSuccess');
 
             var fieldErrors = {};
             // basic selection
-            if (!inquiry) fieldErrors['inquiry'] = '문의 유형을 선택해주세요.';
+            if (!inquiry) fieldErrors['inquiry'] = t('inquiryRequired');
             // length rules
             function betweenLen(str, min, max) { return typeof str === 'string' && str.length >= min && str.length <= max; }
-            if (!company) fieldErrors['company'] = '기업 및 소속명을 입력해주세요.';
-            else if (!betweenLen(company, 2, 100)) fieldErrors['company'] = '기업 및 소속명은 2자 이상 100자 이하여야 합니다.';
-            if (!manager) fieldErrors['manager'] = '담당자의 성명과 직급을 입력해주세요.';
-            else if (!betweenLen(manager, 2, 60)) fieldErrors['manager'] = '담당자 정보는 2자 이상 60자 이하여야 합니다.';
-            if (!country) fieldErrors['country'] = '국가를 입력해주세요.';
-            else if (!betweenLen(country, 2, 60)) fieldErrors['country'] = '국가는 2자 이상 60자 이하여야 합니다.';
-            if (!email) fieldErrors['email'] = '이메일을 입력해주세요.';
-            else if (email.length > 254) fieldErrors['email'] = '이메일이 너무 깁니다.';
-            else if (!validateEmail(email)) fieldErrors['email'] = '이메일 형식이 올바르지 않습니다.';
-            if (!subject) fieldErrors['subject'] = '제목을 입력해주세요.';
-            else if (!betweenLen(subject, 3, 150)) fieldErrors['subject'] = '제목은 3자 이상 150자 이하여야 합니다.';
-            if (!message) fieldErrors['message'] = '문의 내용을 입력해주세요.';
-            else if (!betweenLen(message, 10, 5000)) fieldErrors['message'] = '문의 내용은 10자 이상 5000자 이하여야 합니다.';
-            if (!privacy) fieldErrors['privacy'] = '개인정보 수집 및 이용에 동의해주세요.';
+            if (!company) fieldErrors['company'] = t('companyRequired');
+            else if (!betweenLen(company, 2, 100)) fieldErrors['company'] = t('companyLength');
+            if (!manager) fieldErrors['manager'] = t('managerRequired');
+            else if (!betweenLen(manager, 2, 60)) fieldErrors['manager'] = t('managerLength');
+            if (!country) fieldErrors['country'] = t('countryRequired');
+            else if (!betweenLen(country, 2, 60)) fieldErrors['country'] = t('countryLength');
+            if (!email) fieldErrors['email'] = t('emailRequired');
+            else if (email.length > 254) fieldErrors['email'] = t('emailTooLong');
+            else if (!validateEmail(email)) fieldErrors['email'] = t('emailInvalid');
+            if (!subject) fieldErrors['subject'] = t('subjectRequired');
+            else if (!betweenLen(subject, 3, 150)) fieldErrors['subject'] = t('subjectLength');
+            if (!message) fieldErrors['message'] = t('messageRequired');
+            else if (!betweenLen(message, 10, 5000)) fieldErrors['message'] = t('messageLength');
+            if (!privacy) fieldErrors['privacy'] = t('privacyRequired');
 
             if (Object.keys(fieldErrors).length) {
                 // show errors under each field individually
@@ -470,7 +601,7 @@
                         else $focusTarget = $form.find('[name="' + firstKey + '"]').closest('.field');
                         if ($focusTarget && $focusTarget.length) scrollToAndFocus($focusTarget);
                     } else {
-                        showFormError($form, (res && res.error) ? res.error : '문의 접수 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+                        showFormError($form, (res && res.error) ? res.error : t('submitError'));
                         scrollToAndFocus($form);
                     }
                     setSubmitting(false);
@@ -484,7 +615,7 @@
                 }
                 setSubmitting(false);
             }).fail(function () {
-                showFormError($form, '문의 접수 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+                showFormError($form, t('submitError'));
                 scrollToAndFocus($form);
                 setSubmitting(false);
             });

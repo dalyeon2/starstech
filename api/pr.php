@@ -37,11 +37,13 @@ if (!$board) {
 $debug = isset($_GET['debug']) && $_GET['debug'] === '1';
 $debug_allowed = $debug && isset($is_admin) && $is_admin === 'super';
 
-function normalize_content_text($html)
+function normalize_content_text($html, $keep_media = false)
 {
     $html = (string)$html;
     if ($html === '') return '';
-    $html = preg_replace('/\\[(?:media|image)\\s*:\\s*\\d+\\]/i', '', $html);
+    if (!$keep_media) {
+        $html = preg_replace('/\\[(?:media|image)\\s*:\\s*\\d+\\]/i', '', $html);
+    }
     $html = preg_replace('~<\\s*(script|style)[^>]*>.*?<\\s*/\\s*\\1\\s*>~is', '', $html);
     $html = preg_replace('~<\\s*br\\s*/?\\s*>~i', "\n", $html);
     $html = preg_replace('~<\\s*/\\s*(p|div|li|section|article|header|footer|h[1-6])\\s*>~i', "\n\n", $html);
@@ -140,15 +142,6 @@ if ($limit > 0) {
     $sql .= " LIMIT {$offset}, {$limit}";
 }
 
-$notice_lookup = [];
-if (!empty($board['bo_notice'])) {
-    $notice_ids = array_filter(array_map('trim', explode(',', $board['bo_notice'])));
-    foreach ($notice_ids as $notice_id) {
-        $nid = (int)$notice_id;
-        if ($nid > 0) $notice_lookup[$nid] = true;
-    }
-}
-
 $items = [];
 $res = sql_query($sql, false);
 if (!$res) {
@@ -189,12 +182,17 @@ while ($row = sql_fetch_array($res)) {
         }
     }
 
-    $type = isset($notice_lookup[$wr_id]) ? 'notice' : 'pr';
-    if ($thumb === '') {
-        $yt_thumb = youtube_thumb(trim($row['wr_link1'] ?? ''));
-        if ($yt_thumb) $thumb = $yt_thumb;
+    $link = trim($row['wr_link1'] ?? '');
+    $youtube_thumb = $link ? youtube_thumb($link) : '';
+    $is_youtube = $youtube_thumb !== '';
+
+    if ($thumb === '' && $youtube_thumb) {
+        $thumb = $youtube_thumb;
     }
 
+    $type = $is_youtube ? 'pr' : 'notice';
+
+    $raw_content = $row['wr_content'] ?? '';
     $item = [
         'id' => $bo_table . '-' . $wr_id,
         'title' => get_text($row['wr_subject'] ?? ''),
@@ -202,13 +200,14 @@ while ($row = sql_fetch_array($res)) {
         'datetime' => $row['wr_datetime'] ?? '',
         'thumb' => $thumb,
         'images' => $images,
-        'content' => normalize_content_text($row['wr_content'] ?? ''),
+        'content' => normalize_content_text($raw_content),
+        'content_media' => normalize_content_text($raw_content, true),
         'type' => $type,
         'label' => $type === 'notice' ? '공지사항' : '홍보자료'
     ];
 
-    if (!empty($row['wr_link1'])) {
-        $item['link'] = trim($row['wr_link1']);
+    if ($link !== '') {
+        $item['link'] = $link;
     }
 
     $items[] = $item;
