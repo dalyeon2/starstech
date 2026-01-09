@@ -98,7 +98,7 @@
 }
 
 .cont1 .meta .label {
-    width: 56px;
+    min-width: 56px;
     flex-shrink: 0;
     color: var(--black-800);
     font-size: var(--font-base);

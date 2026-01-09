@@ -29,6 +29,18 @@
         return NEWS_ENDPOINT + '?' + params.join('&');
     }
 
+    function getEmptyMessage() {
+        var lang = resolveLang();
+        var messages = {
+            ko: '\uac8c\uc2dc\ubb3c\uc774 \uc5c6\uc2b5\ub2c8\ub2e4.',
+            en: 'No news yet.',
+            fr: 'Aucun article pour le moment.',
+            ja: '\u8a18\u4e8b\u304c\u3042\u308a\u307e\u305b\u3093\u3002',
+            mn: '\u041e\u0434\u043e\u043e\u0433\u043e\u043e\u0440 \u043d\u0438\u0439\u0442\u043b\u044d\u043b \u0430\u043b\u0433\u0430.'
+        };
+        return messages[lang] || messages.en;
+    }
+
     function getDetailBase() {
         return /\/pages\//i.test(w.location.pathname) ? './sub-detail.html' : './pages/sub-detail.html';
     }
@@ -120,7 +132,7 @@
                     trigger: $list[0],
                     scroller: scroller,
                     start: 'top 70%',
-                    end: 'bottom 70%',
+                    end: 'bottom bottom',
                     scrub: 0.6
                 }
             });
@@ -142,6 +154,8 @@
         if (!endpoint) return;
 
         function renderCards(items) {
+            $section.removeClass('is-empty');
+            $track.css('transform', '');
             var detailBase = getDetailBase();
             $track.empty();
             items.forEach(function (item, idx) {
@@ -164,13 +178,31 @@
             initNewsCards();
         }
 
+        function renderEmpty() {
+            var message = getEmptyMessage();
+            var $prev = $section.find('.nav.prev');
+            var $next = $section.find('.nav.next');
+            $prev.off('click.cont4cards').prop('disabled', true).attr('aria-disabled', 'true');
+            $next.off('click.cont4cards').prop('disabled', true).attr('aria-disabled', 'true');
+            $(w).off('resize.cont4cards');
+            $section.addClass('is-empty').removeClass('is-slider is-stacked');
+            $track.css('transform', '');
+            $track.empty();
+            var $empty = $('<div/>', { 'class': 'empty', text: message, role: 'status', 'aria-live': 'polite' });
+            $track.append($empty);
+        }
+
         w.fetch(endpoint)
             .then(function (resp) {
                 if (!resp.ok) throw new Error('network');
                 return resp.json();
             })
             .then(function (data) {
-                if (!data || !Array.isArray(data.items) || !data.items.length) return;
+                if (!data || !Array.isArray(data.items)) return;
+                if (!data.items.length) {
+                    renderEmpty();
+                    return;
+                }
                 renderCards(data.items);
             })
             .catch(function () {

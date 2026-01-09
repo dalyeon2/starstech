@@ -484,6 +484,11 @@
             if (!$highlight.length) return;
             if (!item) {
                 $highlight.addClass('is-empty');
+                var $imgFallback = $highlight.find('.img');
+                if ($imgFallback.length) {
+                    $imgFallback.attr('src', NEWS_PLACEHOLDER_IMG);
+                    $imgFallback.attr('alt', '');
+                }
                 return;
             }
             $highlight.removeClass('is-empty');
@@ -737,6 +742,16 @@
             if (!$highlight.length) return;
             if (!item) {
                 $highlight.addClass('is-empty');
+                var $imgFallback = $highlight.find('.img');
+                if ($imgFallback.length) {
+                    $imgFallback.attr('src', NEWS_PLACEHOLDER_IMG);
+                    $imgFallback.attr('alt', '');
+                }
+                var $leftFallback = $highlight.find('.left');
+                if ($leftFallback.length) {
+                    $leftFallback.removeClass('is-video');
+                    $leftFallback.find('.media-link').remove();
+                }
                 return;
             }
             $highlight.removeClass('is-empty');

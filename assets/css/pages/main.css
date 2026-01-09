@@ -1886,13 +1886,17 @@ html[lang="ja"] .cont6 .name {
     position: relative;
 }
 
+.cont7 .cards-viewport {
+    width: 100%;
+}
+
 .cont7 .cards {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 32px;
 }
 
-.cont7.is-slider .list {
+.cont7.is-slider .cards-viewport {
     overflow: hidden;
 }
 
@@ -1916,17 +1920,35 @@ html[lang="ja"] .cont6 .name {
     gap: 16px;
 }
 
+.cont7.is-empty .cards {
+    display: block;
+    min-height: 220px;
+}
+
+.cont7.is-empty .nav {
+    display: none;
+}
+
+.cont7 .empty {
+    padding: 80px 0;
+    text-align: center;
+    color: var(--black-600);
+    font-size: var(--font-md);
+    font-weight: 500;
+    line-height: 1.6;
+}
+
 .cont7 .nav[disabled] {
     opacity: 0.4;
     cursor: default;
 }
 
 .cont7.is-slider .nav.prev {
-    left: 8px;
+    left: -18px;
 }
 
 .cont7.is-slider .nav.next {
-    right: 8px;
+    right: -18px;
 }
 
 .cont7 .card {

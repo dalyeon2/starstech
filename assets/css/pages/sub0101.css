@@ -208,7 +208,7 @@
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    gap: 50px;
+    gap: 100px;
 }
 
 .cont2 .left {
@@ -238,21 +238,48 @@
 }
 
 .cont2 .list {
+    --line-progress: 0%;
     position: relative;
     display: flex;
     flex-direction: column;
-    gap: 60px;
+    gap: 170px;
+    padding-bottom: 16px;
+}
+
+.cont2 .list::before {
+    content: "";
+    position: absolute;
+    left: 315px;
+    top: 0;
+    width: 2px;
+    height: calc(var(--line-progress) + 30px);
+    background: linear-gradient(180deg, #A66300 0%, #D48F29 35%, #FFA828 70%, rgba(255, 152, 0, 0.4) 100%);
+    pointer-events: none;
 }
 
 .cont2 .list::after {
-    content: none;
+    content: "";
+    position: absolute;
+    left: 315px;
+    top: calc(var(--line-progress) + 30px - 11px);
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: #FF980066;
+    transform: translateX(-4px);
+    pointer-events: none;
+}
+
+@supports (color: color-mix(in srgb, #000, #fff)) {
+    .cont2 .list::after {
+        background: color-mix(in srgb, #A66300 calc(100% - var(--line-progress)), rgba(255, 152, 0, 0.4) var(--line-progress));
+    }
 }
 
 .cont2 .item {
     display: grid;
-    grid-template-columns: minmax(0, 240px) minmax(0, 1fr);
-    column-gap: 48px;
-    row-gap: 24px;
+    grid-template-columns: minmax(0, 280px) minmax(0, 1fr);
+    gap: 92px;
     align-items: start;
 }
 
@@ -263,12 +290,12 @@
 
 .cont2 .step {
     display: inline-flex;
-    align-items: flex-start;
+    align-items: center;
     gap: 16px;
-    padding: 0;
-    background: transparent;
-    justify-self: start;
-    max-width: 100%;
+    padding: 8px 12px 8px 0;
+    background: var(--white);
+    position: relative;
+    z-index: 1;
 }
 
 .cont2 .badge {
@@ -278,7 +305,7 @@
     align-items: center;
     justify-content: center;
     border-radius: 6px;
-    box-shadow: none;
+    box-shadow: 0 0 0 6px var(--white);
     color: var(--white);
     font-size: var(--font-md);
     font-weight: 500;
@@ -311,7 +338,7 @@
 .cont2 .cards {
     display: flex;
     flex-direction: column;
-    gap: 40px;
+    gap: 100px;
 }
 
 .cont2 .cards .card:last-child {
@@ -325,8 +352,8 @@
 .cont2 .card {
     padding: 0;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 224px;
-    column-gap: 40px;
+    grid-template-columns: minmax(0, 1fr) 472px;
+    column-gap: 60px;
     align-items: center;
 }
 
@@ -336,12 +363,12 @@
 }
 
 .cont2 .chip {
-    margin-bottom: 13px;
+    margin-bottom: 24px;
     display: inline-flex;
     align-items: center;
     width: fit-content;
     padding: 2px 8px;
-    background: rgba(255, 228, 189, 0.4);
+    background: #FFE4BD66;
     border-radius: 6px;
     color: var(--eco-1);
     font-size: var(--font-base);
@@ -349,16 +376,28 @@
     line-height: 1.6;
 }
 
+.cont2 .item:nth-child(1) .chip {
+    color: #A66300;
+}
+
+.cont2 .item:nth-child(2) .cards .card:nth-child(1) .chip {
+    color: #D48F29;
+}
+
+.cont2 .item:nth-child(2) .cards .card:nth-child(2) .chip {
+    color: #EF9F29;
+}
+
 .cont2 .title {
-    margin-bottom: 6px;
-    font-size: 26px;
+    margin-bottom: 14px;
+    font-size: var(--font-headline32);
     font-weight: 600;
     line-height: 41.6px;
 }
 
 .cont2 .lead {
     margin-bottom: 4px;
-    font-size: 20px;
+    font-size: var(--font-lg);
     font-weight: 500;
     line-height: 32px;
 }
@@ -372,8 +411,8 @@
 }
 
 .cont2 .thumb {
-    width: 224px;
-    height: 170px;
+    width: 472px;
+    height: 177px;
     border-radius: 6px;
     object-fit: cover;
     display: block;
@@ -390,18 +429,13 @@
         gap: 50px;
     }
 
-    .cont2 .item {
-        grid-template-columns: minmax(0, 220px) minmax(0, 1fr);
-        column-gap: 32px;
-    }
-
     .cont2 .cards {
         gap: 36px;
     }
 
     .cont2 .card {
-        grid-template-columns: minmax(0, 1fr) 200px;
-        column-gap: 24px;
+        grid-template-columns: minmax(0, 1fr) 472px;
+        column-gap: 60px;
     }
 
     .cont2 .steptitle {
@@ -424,8 +458,8 @@
     }
 
     .cont2 .thumb {
-        width: 200px;
-        height: 150px;
+        width: 472px;
+        height: 177px;
     }
 }
 
@@ -448,18 +482,13 @@
     }
 
     .cont2 .card {
-        grid-template-columns: minmax(0, 1fr) 200px;
-        column-gap: 20px;
-    }
-
-    .cont2 .item {
-        grid-template-columns: minmax(0, 200px) minmax(0, 1fr);
-        column-gap: 24px;
+        grid-template-columns: minmax(0, 1fr) 472px;
+        column-gap: 60px;
     }
 
     .cont2 .thumb {
-        width: 200px;
-        height: 150px;
+        width: 472px;
+        height: 177px;
     }
 }
 
@@ -469,20 +498,15 @@
         line-height: 1.4;
     }
 
-    .cont2 .item {
-        grid-template-columns: minmax(0, 180px) minmax(0, 1fr);
-        column-gap: 20px;
-    }
-
     .cont2 .card {
-        grid-template-columns: minmax(0, 1fr) 180px;
-        column-gap: 16px;
-        align-items: start;
+        grid-template-columns: minmax(0, 1fr) 472px;
+        column-gap: 60px;
+        align-items: center;
     }
 
     .cont2 .thumb {
-        width: 180px;
-        height: 135px;
+        width: 472px;
+        height: 177px;
     }
 }
 
@@ -511,6 +535,14 @@
 
     .cont2 .desc {
         font-size: var(--font-sm);
+    }
+
+    .cont2 .list::before {
+        left: 16px;
+    }
+
+    .cont2 .list::after {
+        left: 16px;
     }
 
     .cont2 .item {
@@ -696,13 +728,17 @@
     position: relative;
 }
 
+.cont4 .cards-viewport {
+    width: 100%;
+}
+
 .cont4 .cards {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 32px;
 }
 
-.cont4.is-slider .list {
+.cont4.is-slider .cards-viewport {
     overflow: hidden;
 }
 
@@ -726,17 +762,35 @@
     gap: 16px;
 }
 
+.cont4.is-empty .cards {
+    display: block;
+    min-height: 220px;
+}
+
+.cont4.is-empty .nav {
+    display: none;
+}
+
+.cont4 .empty {
+    padding: 80px 0;
+    text-align: center;
+    color: var(--black-600);
+    font-size: var(--font-md);
+    font-weight: 500;
+    line-height: 1.6;
+}
+
 .cont4 .nav[disabled] {
     opacity: 0.4;
     cursor: default;
 }
 
 .cont4.is-slider .nav.prev {
-    left: 8px;
+    left: -18px;
 }
 
 .cont4.is-slider .nav.next {
-    right: 8px;
+    right: -18px;
 }
 
 .cont4 .card {

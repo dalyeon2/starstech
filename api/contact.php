@@ -26,7 +26,6 @@ $input['privacy'] = isset($_POST['privacy']) ? trim($_POST['privacy']) : '';
 
 $errors = [];
 if ($input['type'] === '') $errors['inquiry'] = '문의 유형을 선택해주세요.';
-// length validation rules
 function str_between_len($s, $min, $max) {
     $len = mb_strlen($s);
     return $len >= $min && $len <= $max;
@@ -50,7 +49,6 @@ if (!empty($errors)) {
     json_exit(400, ['success' => false, 'errors' => $errors]);
 }
 
-// handle file uploads
 $savedFiles = [];
 if (!empty($_FILES) && isset($_FILES['files'])) {
     $files = $_FILES['files'];
@@ -73,10 +71,9 @@ if (!empty($_FILES) && isset($_FILES['files'])) {
     }
 }
 
-// prepare e-mail to admin
 $adminEmail = 'ubique99@naver.com';
 $serverName = isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : 'example.com';
-$subject = '[웹문의] ' . ($input['subject'] ?: '(무제)');
+$subject = ($input['subject'] ?: '(무제)');
 $body = "문의 유형: " . $input['type'] . "\n";
 $body .= "기업/소속: " . $input['company'] . "\n";
 $body .= "담당자: " . $input['manager'] . "\n";
@@ -136,8 +133,7 @@ if (defined('G5_DATA_URL') && isset($g5['write_prefix'])) {
     $write_table = $g5['write_prefix'] . 'inquiry';
     $link1 = isset($fileUrls[0]) ? $fileUrls[0] : '';
 
-    // build a concise post content for sidepanel 'basic' view (avoid dumping full email body into the board)
-    $postSubject = '[웹문의] ' . ($input['subject'] ?: '(무제)');
+    $postSubject = ($input['subject'] ?: '(무제)');
     $shortMsg = (mb_strlen($input['message']) > 400) ? mb_substr($input['message'], 0, 400) . '...' : $input['message'];
     $postContent = "문의 유형: " . $input['type'] . "\n";
     $postContent .= "기업/소속: " . $input['company'] . "\n";
@@ -149,11 +145,26 @@ if (defined('G5_DATA_URL') && isset($g5['write_prefix'])) {
         $postContent .= "\n첨부: " . implode(', ', $fileUrls) . "\n";
     }
 
-    $sql = "INSERT INTO `{$write_table}` (wr_subject, wr_content, wr_name, wr_email, wr_link1, wr_datetime, wr_ip, wr_is_comment) VALUES ('" . sql_escape_string($postSubject) . "', '" . sql_escape_string($postContent) . "', '" . sql_escape_string($input['manager']) . "', '" . sql_escape_string($input['email']) . "', '" . sql_escape_string($link1) . "', NOW(), '" . sql_escape_string($_SERVER['REMOTE_ADDR']) . "', 0)";
+    $bo_table = 'inquiry';
+    $wr_num_sql = "(SELECT IFNULL(MIN(wr_num) - 1, -1) FROM `{$write_table}` as sq)";
+    $sql = "INSERT INTO `{$write_table}` (wr_num, wr_reply, wr_parent, wr_subject, wr_content, wr_name, wr_email, wr_link1, wr_datetime, wr_last, wr_ip, wr_is_comment) VALUES (" . $wr_num_sql . ", '', 0, '" . sql_escape_string($postSubject) . "', '" . sql_escape_string($postContent) . "', '" . sql_escape_string($input['manager']) . "', '" . sql_escape_string($input['email']) . "', '" . sql_escape_string($link1) . "', NOW(), NOW(), '" . sql_escape_string($_SERVER['REMOTE_ADDR']) . "', 0)";
     $res = @sql_query($sql);
     if ($res !== false) {
         $wr_id = @sql_insert_id();
         $gnuboard_inserted = (bool)$wr_id;
+        if ($wr_id) {
+            @sql_query("UPDATE `{$write_table}` SET wr_parent = '{$wr_id}' WHERE wr_id = '{$wr_id}'");
+            if (isset($g5['board_new_table'])) {
+                $bn_datetime = defined('G5_TIME_YMDHIS') ? G5_TIME_YMDHIS : date('Y-m-d H:i:s');
+                @sql_query("INSERT INTO {$g5['board_new_table']} (bo_table, wr_id, wr_parent, bn_datetime, mb_id) VALUES ('{$bo_table}', '{$wr_id}', '{$wr_id}', '{$bn_datetime}', '')");
+            }
+            if (isset($g5['board_table'])) {
+                $count_row = @sql_fetch("SELECT COUNT(*) AS cnt FROM `{$write_table}` WHERE wr_is_comment = 0");
+                if ($count_row && isset($count_row['cnt'])) {
+                    @sql_query("UPDATE {$g5['board_table']} SET bo_count_write = '" . (int)$count_row['cnt'] . "' WHERE bo_table = '{$bo_table}'");
+                }
+            }
+        }
         $logEntry['wr_id'] = $wr_id;
         $logEntry['post_subject'] = $postSubject;
     } else {

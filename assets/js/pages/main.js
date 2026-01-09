@@ -24,6 +24,18 @@
         return NEWS_ENDPOINT + '?' + params.join('&');
     }
 
+    function getEmptyMessage() {
+        const lang = resolveLang();
+        const messages = {
+            ko: '\uac8c\uc2dc\ubb3c\uc774 \uc5c6\uc2b5\ub2c8\ub2e4.',
+            en: 'No news yet.',
+            fr: 'Aucun article pour le moment.',
+            ja: '\u8a18\u4e8b\u304c\u3042\u308a\u307e\u305b\u3093\u3002',
+            mn: '\u041e\u0434\u043e\u043e\u0433\u043e\u043e\u0440 \u043d\u0438\u0439\u0442\u043b\u044d\u043b \u0430\u043b\u0433\u0430.'
+        };
+        return messages[lang] || messages.en;
+    }
+
     function getDetailBase() {
         return /\/pages\//i.test(w.location.pathname) ? './sub-detail.html' : './pages/sub-detail.html';
     }
@@ -412,6 +424,8 @@
         if (!endpoint) return;
 
         const renderCards = (items) => {
+            $section.removeClass('is-empty');
+            $track.css('transform', '');
             const detailBase = getDetailBase();
             $track.empty();
             items.forEach((item, idx) => {
@@ -434,13 +448,31 @@
             initNewsCards();
         };
 
+        const renderEmpty = () => {
+            const message = getEmptyMessage();
+            const $prev = $section.find('.nav.prev');
+            const $next = $section.find('.nav.next');
+            $prev.off('click.cont7cards').prop('disabled', true).attr('aria-disabled', 'true');
+            $next.off('click.cont7cards').prop('disabled', true).attr('aria-disabled', 'true');
+            $(w).off('resize.cont7cards');
+            $section.addClass('is-empty').removeClass('is-slider is-stacked');
+            $track.css('transform', '');
+            $track.empty();
+            const $empty = $('<div/>', { 'class': 'empty', text: message, role: 'status', 'aria-live': 'polite' });
+            $track.append($empty);
+        };
+
         w.fetch(endpoint)
             .then((resp) => {
                 if (!resp.ok) throw new Error('network');
                 return resp.json();
             })
             .then((data) => {
-                if (!data || !Array.isArray(data.items) || !data.items.length) return;
+                if (!data || !Array.isArray(data.items)) return;
+                if (!data.items.length) {
+                    renderEmpty();
+                    return;
+                }
                 renderCards(data.items);
             })
             .catch(() => {

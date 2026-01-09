@@ -67,9 +67,6 @@ $sidepanel_basic_disable_move = isset($bo_table) && $bo_table === 'inquiry';
                     <?php foreach ($list as $item) { ?>
                         <?php
                             $display_num = $item['num'];
-                            if (isset($bo_table) && $bo_table === 'inquiry' && is_numeric($display_num)) {
-                                $display_num = (int)$display_num + 1;
-                            }
                         ?>
                         <tr>
                             <?php if ($is_checkbox) { ?>
