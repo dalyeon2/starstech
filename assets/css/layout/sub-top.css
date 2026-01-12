@@ -433,13 +433,12 @@
     }
 
     .subtop.duo .actions {
-        width: 100%;
+        flex-wrap: wrap;
         margin-top: 24px;
     }
 
     .subtop.duo .btn,
     .subtop.duo .btn.line {
-        width: 100%;
         justify-content: space-between;
     }
 
@@ -481,7 +480,6 @@
 
     .subtop .copy .desc {
         font-size: var(--font-sm);
-        white-space: pre-line;
     }
 
     .subtop.duo .left {
@@ -494,6 +492,7 @@
     }
 
     .subtop.duo .copy .title {
+        white-space: normal;
         font-size: var(--font-headline32);
         line-height: 1.3;
     }

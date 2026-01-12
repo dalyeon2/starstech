@@ -1190,6 +1190,7 @@ function initScrollTop(scrollBus) {
     // Button dock settings
     const btnEl = $btn.get(0);
     const dockGap = 24;
+    const dockMinWidth = 769;
     let scrollRootOverride = null;
 
     const parsePx = (value) => {
@@ -1206,8 +1207,13 @@ function initScrollTop(scrollBus) {
 
     // Footer overlap docking
     const updateDock = () => {
+        const viewportW = window.innerWidth || document.documentElement.clientWidth || 0;
+        if (!btnEl || viewportW < dockMinWidth) {
+            btnEl?.style.setProperty('--scroll-top-dock', '0px');
+            return;
+        }
         const footerEl = document.querySelector('.footer');
-        if (!footerEl || !btnEl) {
+        if (!footerEl) {
             btnEl?.style.setProperty('--scroll-top-dock', '0px');
             return;
         }
