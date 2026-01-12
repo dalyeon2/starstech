@@ -24,29 +24,109 @@
     var I18N = {
         ko: {
             emptyList: '게시물이 없습니다.',
-            emptySearch: '검색 결과가 없습니다.'
+            emptySearch: '검색 결과가 없습니다.',
+            prLabel: '홍보자료',
+            noticeLabel: '공지사항',
+            newsLabel: '보도자료',
+            prDesc: '홍보자료와 공지사항을 확인하세요.',
+            newsDesc: '스타스테크의 새로운 소식을 확인하세요.',
+            newsTitle: 'Newsroom',
+            prevEmpty: '이전글이 없습니다.',
+            nextEmpty: '다음글이 없습니다.',
+            sourceLabel: '출처',
+            sourceLink: '기사 원문 보기',
+            youtubePlay: 'YouTube 영상 재생'
         },
         en: {
             emptyList: 'No posts yet.',
-            emptySearch: 'No results found.'
+            emptySearch: 'No results found.',
+            prLabel: 'PR',
+            noticeLabel: 'Notice',
+            newsLabel: 'Press Release',
+            prDesc: 'Check PR materials and notices.',
+            newsDesc: 'Check the latest updates from STARSTECH.',
+            newsTitle: 'Newsroom',
+            prevEmpty: 'No previous post.',
+            nextEmpty: 'No next post.',
+            sourceLabel: 'Source',
+            sourceLink: 'View original article',
+            youtubePlay: 'Play YouTube video'
         },
         fr: {
             emptyList: 'Aucun article pour le moment.',
-            emptySearch: 'Aucun resultat.'
+            emptySearch: 'Aucun resultat.',
+            prLabel: 'PR',
+            noticeLabel: 'Avis',
+            newsLabel: 'Communique',
+            prDesc: 'Consultez les documents PR et avis.',
+            newsDesc: 'Decouvrez les dernieres nouvelles de STARSTECH.',
+            newsTitle: 'Actualites',
+            prevEmpty: 'Aucun article precedent.',
+            nextEmpty: 'Aucun article suivant.',
+            sourceLabel: 'Source',
+            sourceLink: "Voir l'article original",
+            youtubePlay: 'Lire la video YouTube'
         },
         ja: {
             emptyList: '記事がありません。',
-            emptySearch: '検索結果がありません。'
+            emptySearch: '検索結果がありません。',
+            prLabel: 'PR',
+            noticeLabel: 'お知らせ',
+            newsLabel: 'プレスリリース',
+            prDesc: 'PR資料とお知らせをご確認ください。',
+            newsDesc: 'STARSTECHの最新ニュースをご覧ください。',
+            newsTitle: 'ニュースルーム',
+            prevEmpty: '前の記事はありません。',
+            nextEmpty: '次の記事はありません。',
+            sourceLabel: '出典',
+            sourceLink: '記事原文を見る',
+            youtubePlay: 'YouTube動画を再生'
         },
         mn: {
             emptyList: 'Одоогоор нийтлэл алга.',
-            emptySearch: 'Хайлтын үр дүн алга.'
+            emptySearch: 'Хайлтын үр дүн алга.',
+            prLabel: 'PR',
+            noticeLabel: 'Мэдэгдэл',
+            newsLabel: 'Хэвлэлийн мэдээ',
+            prDesc: 'PR материал болон мэдэгдлийг үзнэ үү.',
+            newsDesc: 'STARSTECH-ийн шинэ мэдээг үзнэ үү.',
+            newsTitle: 'Мэдээ',
+            prevEmpty: 'Өмнөх нийтлэл алга.',
+            nextEmpty: 'Дараагийн нийтлэл алга.',
+            sourceLabel: 'Эх сурвалж',
+            sourceLink: 'Эх нийтлэлийг үзэх',
+            youtubePlay: 'YouTube видеог тоглуулах'
         }
     };
 
     function t(key) {
         var dict = I18N[LANG] || I18N.en;
         return (dict && dict[key]) || (I18N.en && I18N.en[key]) || key;
+    }
+
+    function getNewsLabel() {
+        return t('newsLabel');
+    }
+
+    function getBoardLabel(typeKey) {
+        return typeKey === NOTICE_KEY ? t('noticeLabel') : t('prLabel');
+    }
+
+    function isNoticeLabel(labelText) {
+        var text = (labelText || '').toLowerCase();
+        if (!text) return false;
+        var keywords = [
+            '공지',
+            'notice',
+            'avis',
+            'お知らせ',
+            'мэдэгд',
+            t('noticeLabel')
+        ];
+        return keywords.some(function (keyword) {
+            if (!keyword) return false;
+            return text.indexOf(String(keyword).toLowerCase()) !== -1;
+        });
     }
 
     function isDetailPage() {
@@ -74,7 +154,10 @@
     }
 
     function getBoardType(item) {
-        return normalizeKey(item && item.type) === NOTICE_KEY ? NOTICE_KEY : PR_KEY;
+        var raw = normalizeKey(item && item.type);
+        if (raw === NOTICE_KEY) return NOTICE_KEY;
+        if (raw && raw.indexOf('공지') !== -1) return NOTICE_KEY;
+        return PR_KEY;
     }
 
     function parseHash() {
@@ -211,7 +294,7 @@
                 content: (item && item.content) || '',
                 contentMedia: (item && (item.content_media || item.contentMedia)) || '',
                 source: (item && item.source) || null,
-                label: (item && item.label) || '보도자료',
+                label: getNewsLabel(),
                 type: (item && item.type) || 'news'
             };
         });
@@ -224,11 +307,11 @@
                 return img && img.src;
             }) : [];
             var thumb = (item && item.thumb) || (images[0] ? images[0].src : NEWS_PLACEHOLDER_IMG);
-            var type = normalizeKey(item && item.type) || 'pr';
+            var type = getBoardType(item);
             return {
                 id: (item && item.id) || ('board-' + idx),
                 type: type,
-                label: (item && item.label) || (type === NOTICE_KEY ? '공지사항' : '홍보자료'),
+                label: getBoardLabel(type),
                 title: (item && item.title) || 'Untitled',
                 date: (item && item.date) || '',
                 datetime: (item && item.datetime) || '',
@@ -432,12 +515,12 @@
 
         if (key === NOTICE_KEY || key === PR_KEY) {
             $title.html('PR<span class="dot">.</span>');
-            $desc.text('홍보자료와 공지사항을 확인하세요.');
+            $desc.text(t('prDesc'));
             return;
         }
 
-        $title.html('Newsroom<span class="dot">.</span>');
-        $desc.text('스타스테크의 새로운 소식을 확인하세요.');
+        $title.html(t('newsTitle') + '<span class="dot">.</span>');
+        $desc.text(t('newsDesc'));
     }
 
     function initNewsList() {
@@ -836,7 +919,7 @@
                 var labelText = $card.find('.label').text();
                 var title = $card.find('.title').text();
                 var date = $card.find('.date').text();
-                var type = labelText.indexOf('공지') !== -1 ? NOTICE_KEY : PR_KEY;
+                var type = isNoticeLabel(labelText) ? NOTICE_KEY : PR_KEY;
                 arr.push({
                     $el: $card,
                     type: type,
@@ -1006,8 +1089,8 @@
         var $backBtn = $('.cont1 .back');
 
         if ($label.length) {
-            var fallbackLabel = cfg.label || '보도자료';
-            $label.text(item && item.label ? item.label : fallbackLabel);
+            var fallbackLabel = cfg.label || (item && item.label) || getNewsLabel();
+            $label.text(fallbackLabel);
         }
         if ($title.length) $title.text(item ? item.title || '' : '');
         if ($date.length) $date.text(item ? item.date || '' : '');
@@ -1092,7 +1175,7 @@
                         var $guard = $('<button/>', {
                             'class': 'iframe-guard',
                             type: 'button',
-                            'aria-label': 'YouTube 영상 재생'
+                            'aria-label': t('youtubePlay')
                         });
                         $guard.on('click', function () {
                             $media.addClass('is-interactive');
@@ -1164,7 +1247,7 @@
                 var showSource = isNewsContext && item && item.source && (item.source.text || item.source.url);
                 if (showSource) {
                     var $source = $('<div/>', { 'class': 'source' });
-                    $source.append($('<span/>', { 'class': 'label', text: '출처' }));
+                    $source.append($('<span/>', { 'class': 'label', text: t('sourceLabel') }));
                     if (item.source.text) {
                         $source.append($('<span/>', { 'class': 'text', text: item.source.text }));
                     }
@@ -1175,7 +1258,7 @@
                             target: '_blank',
                             rel: 'noopener'
                         });
-                        $link.append($('<span/>', { 'class': 'text', text: '기사 원문 보기' }));
+                        $link.append($('<span/>', { 'class': 'text', text: t('sourceLink') }));
                         $link.append($('<i/>', { 'class': 'icon', 'aria-hidden': 'true' }));
                         $source.append($link);
                     }
@@ -1223,7 +1306,7 @@
                 bindNav($prevBtn, idx - 1, safeItems[idx - 1].title || 'Previous');
             } else {
                 $prevBtn.addClass('muted');
-                $prevBtn.find('> .text').text('이전글이 없습니다.');
+                $prevBtn.find('> .text').text(t('prevEmpty'));
                 $prevBtn.off('click.newsnav').removeAttr('data-href')
                     .prop('disabled', true).attr('aria-disabled', 'true');
             }
@@ -1234,7 +1317,7 @@
                 bindNav($nextBtn, idx + 1, safeItems[idx + 1].title || 'Next');
             } else {
                 $nextBtn.addClass('muted');
-                $nextBtn.find('> .text').text('다음글이 없습니다.');
+                $nextBtn.find('> .text').text(t('nextEmpty'));
                 $nextBtn.off('click.newsnav').removeAttr('data-href')
                     .prop('disabled', true).attr('aria-disabled', 'true');
             }
@@ -1255,7 +1338,7 @@
             initNewsDetail(cached, {
                 key: NEWS_KEY,
                 listUrl: NEWS_LIST_URL,
-                label: '보도자료',
+                label: getNewsLabel(),
                 idx: hashIdx
             });
             scrollToTop();
@@ -1271,7 +1354,7 @@
             initNewsDetail(sorted, {
                 key: NEWS_KEY,
                 listUrl: NEWS_LIST_URL,
-                label: '보도자료',
+                label: getNewsLabel(),
                 idx: hashIdx
             });
             scrollToTop();
@@ -1299,7 +1382,7 @@
             initNewsDetail(cachedItems, {
                 key: typeKey,
                 listUrl: BOARD_LIST_URL,
-                label: typeKey === NOTICE_KEY ? '공지사항' : '홍보자료',
+                label: getBoardLabel(typeKey),
                 idx: hashIdx
             });
             scrollToTop();
@@ -1318,7 +1401,7 @@
             initNewsDetail(filteredItems, {
                 key: typeKey,
                 listUrl: BOARD_LIST_URL,
-                label: typeKey === NOTICE_KEY ? '공지사항' : '홍보자료',
+                label: getBoardLabel(typeKey),
                 idx: hashIdx
             });
             scrollToTop();

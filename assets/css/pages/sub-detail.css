@@ -251,6 +251,7 @@ body.news-loading .cont1 .back {
 }
 
 .cont1 .btn .label {
+    min-width: 100px;
     display: flex;
     align-items: center;
     gap: 12px;

@@ -474,13 +474,25 @@ function normalizeLangMenuLinks($root) {
 
     const currentLang = resolveFooterLang();
     const relPath = getRelativePathForLang(currentLang);
-    const suffix = `${window.location.search || ''}${window.location.hash || ''}`;
+    const cleanRelPath = (relPath || '').toLowerCase();
+    const isSubDetail = cleanRelPath === '/pages/sub-detail.html' || cleanRelPath === 'pages/sub-detail.html';
+    const hash = (window.location.hash || '').replace(/^#/, '');
+    const detailKey = hash.split(/[/?]/)[0].toLowerCase();
+    const detailTarget = isSubDetail
+        ? (detailKey === 'pr' || detailKey === 'notice'
+            ? '/pages/sub0402.html'
+            : '/pages/sub0401.html')
+        : '';
+    const suffix = isSubDetail
+        ? (window.location.search || '')
+        : `${window.location.search || ''}${window.location.hash || ''}`;
 
     $links.each(function () {
         const code = ($(this).data('lang') || '').toString().toLowerCase();
         if (!code) return;
         const langBase = buildLangBase(code);
-        const target = relPath && relPath !== '/' ? `${langBase}${relPath}` : `${langBase}/`;
+        const nextPath = detailTarget || relPath;
+        const target = nextPath && nextPath !== '/' ? `${langBase}${nextPath}` : `${langBase}/`;
         $(this).attr('href', target + suffix);
     });
 }
