@@ -7,6 +7,8 @@ if (function_exists('add_stylesheet')) {
     add_stylesheet('<link rel="stylesheet" href="' . $theme_url . '/skin/board/product/style.css">', 1);
 }
 
+$list_href = $list_href ?? '';
+
 $product_placeholder = G5_URL . '/img/default-image.jpg';
 $product_image_count = 3;
 $product_manual_accept = '.pdf,.hwp,.hwpx,.doc,.docx';
@@ -98,7 +100,7 @@ if (!function_exists('sidepanel_product_items_text')) {
     <div class="section-header">
         <h2><?php echo $board['bo_subject']; ?></h2>
         <div class="top-actions">
-            <?php if ($list_href) { ?><a class="btn-minimal" href="<?php echo $list_href; ?>"><i class="fa-solid fa-list"></i> 목록</a><?php } ?>
+            <?php if (!empty($list_href)) { ?><a class="btn-minimal" href="<?php echo $list_href; ?>"><i class="fa-solid fa-list"></i> 목록</a><?php } ?>
         </div>
     </div>
 

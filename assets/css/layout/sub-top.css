@@ -155,7 +155,7 @@
 }
 
 .subtop.duo .left {
-    padding: 167px 80px 0 228px;
+    padding: 220px 80px 0 228px;
     display: flex;
     flex-direction: column;
     gap: 130px;
@@ -178,8 +178,9 @@
 }
 
 .subtop.duo .copy .title {
+    font-size: var(--font-headline46);
     font-weight: 700;
-    line-height: 1.4;
+    line-height: 1.5;
     white-space: pre-line;
 }
 

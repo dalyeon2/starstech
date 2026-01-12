@@ -117,6 +117,17 @@ if (!function_exists('dash_escape')) {
     }
 }
 
+if (!function_exists('dash_is_image_file')) {
+    function dash_is_image_file($name)
+    {
+        if (!$name) {
+            return false;
+        }
+        $ext = strtolower(pathinfo($name, PATHINFO_EXTENSION));
+        return in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'], true);
+    }
+}
+
 if (!function_exists('dash_count_posts')) {
     function dash_count_posts($bo_table, $write_prefix)
     {
@@ -195,6 +206,10 @@ if (!function_exists('dash_post_thumb')) {
             $files = get_file($bo_table, $wr_id);
             if (!empty($files) && is_array($files)) {
                 foreach ($files as $file) {
+                    $fname = $file['file'] ?? ($file['source'] ?? '');
+                    if (!$fname || !dash_is_image_file($fname)) {
+                        continue;
+                    }
                     if (!empty($file['path']) && !empty($file['file'])) {
                         return rtrim($file['path'], '/') . '/' . rawurlencode($file['file']);
                     }

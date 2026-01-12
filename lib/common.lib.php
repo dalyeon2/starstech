@@ -1556,7 +1556,7 @@ function view_file_link($file, $width, $height, $content='')
     $ids++;
 
     // 파일의 폭이 게시판설정의 이미지폭 보다 크다면 게시판설정 폭으로 맞추고 비율에 따라 높이를 계산
-    if ($board && $width > $board['bo_image_width'] && $board['bo_image_width'])
+    if ($board && isset($board['bo_image_width']) && $width > $board['bo_image_width'] && $board['bo_image_width'])
     {
         $rate = $board['bo_image_width'] / $width;
         $width = $board['bo_image_width'];

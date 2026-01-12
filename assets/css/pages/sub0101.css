@@ -443,12 +443,12 @@
     }
 
     .cont2 .steptitle {
-        font-size: 22px;
+        font-size: var(--font-xl);
         line-height: 1.5;
     }
 
     .cont2 .title {
-        font-size: 24px;
+        font-size: var(--font-3xl);
         line-height: 1.5;
     }
 
@@ -529,7 +529,7 @@
     }
 
     .cont2 .title {
-        font-size: 22px;
+        font-size: var(--font-2xl);
         line-height: 1.4;
     }
 
@@ -567,16 +567,28 @@
     }
 
     .cont2 .title {
-        font-size: 22px;
+        margin-bottom: 8px;
+        font-size: var(--font-xl);
         line-height: 1.5;
     }
 
-    .cont2 .lead {
+    .cont2 .step {
+        gap: 8px;
+    }
+
+    .cont2 .badge {
+        width: 28px;
+        height: 28px;
         font-size: var(--font-base);
     }
 
-    .cont2 .desc {
+    .cont2 .chip {
+        margin-bottom: 10px;
         font-size: var(--font-sm);
+    }
+
+    .cont2 .desc {
+        white-space: normal;
     }
 
     .cont2 .list::before {
@@ -627,6 +639,7 @@
     }
 
     .cont2 .headline {
+        white-space: normal;
         font-size: var(--font-3xl);
     }
 
@@ -636,6 +649,18 @@
 
     .cont2 .cards {
         gap: 20px;
+    }
+
+    .cont2 .title {
+        font-size: var(--font-lg);
+    }
+   
+    .cont2 .lead {
+        font-size: var(--font-base);
+    }
+
+    .cont2 .desc {
+        font-size: var(--font-sm);
     }
 }
 

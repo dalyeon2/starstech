@@ -6,6 +6,8 @@ if (function_exists('add_stylesheet') && defined('G5_THEME_URL')) {
     add_stylesheet('<link rel="stylesheet" href="' . G5_THEME_URL . '/skin/board/gallery/style.css">', 1);
 }
 
+$list_href = $list_href ?? '';
+
 $gallery_placeholder = 'https://via.placeholder.com/360x240/ededed/1f1f1f?text=No+Image';
 $file_count = isset($board['bo_upload_count']) ? (int)$board['bo_upload_count'] : 1;
 if ($file_count < 3) $file_count = 3;
@@ -55,7 +57,7 @@ $pr_youtube = $show_link && !empty($write['wr_link1']) && sidepanel_gallery_is_y
     <div class="section-header">
         <h2><?php echo $board['bo_subject']; ?></h2>
         <div class="top-actions">
-            <?php if ($list_href) { ?><a class="btn-minimal" href="<?php echo $list_href; ?>"><i class="fa-solid fa-list"></i> 목록</a><?php } ?>
+            <?php if (!empty($list_href)) { ?><a class="btn-minimal" href="<?php echo $list_href; ?>"><i class="fa-solid fa-list"></i> 목록</a><?php } ?>
         </div>
     </div>
 
@@ -952,7 +954,7 @@ function fwrite_submit(f) {
         alert('언어를 선택해주세요.');
         return false;
     }
-    var autoSubject = "<?php echo addslashes($auto_subject); ?>";
+    var autoSubject = <?php echo json_encode(isset($auto_subject) ? $auto_subject : ''); ?>;
     if (!f.wr_subject.value.trim()) {
         f.wr_subject.value = autoSubject;
     }

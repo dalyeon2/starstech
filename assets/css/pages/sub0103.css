@@ -187,7 +187,7 @@
 
     .cont1 .stats {
         flex-direction: column;
-        gap: 16px;
+        gap: 10px;
     }
 
     .cont1 .value {
@@ -309,7 +309,7 @@
 }
 
 .cont2 .grouphead-title {
-    font-size: var(--font-2xl);
+    font-size: var(--font-headline32);
     font-weight: 700;
     line-height: 1.4;
     margin: 0 0 10px;
@@ -404,7 +404,7 @@
     scroll-margin-top: calc(var(--header-height) + var(--history-head-height) + var(--history-offset) + var(--history-head-gap));
 }
 
-.cont2 .track > .group:first-child {
+.cont2 .track>.group:first-child {
     padding-top: 64px;
 }
 
@@ -523,10 +523,6 @@
     .cont2 .year {
         font-size: var(--font-3xl);
     }
-
-    .cont2 .list li {
-        font-size: var(--font-md);
-    }
 }
 
 @media (max-width: 1280px) {
@@ -536,11 +532,8 @@
     }
 
     .cont2 .head {
-        grid-template-columns: 1fr;
-        align-items: flex-start;
         gap: 14px;
         padding-top: 12px;
-        padding-bottom: 10px;
     }
 
     .cont2 .tag {
@@ -555,16 +548,16 @@
     }
 
     .cont2 .tab {
-        font-size: var(--font-lg);
-        padding-bottom: 8px;
+        padding-bottom: 5px;
     }
 
     .cont2 .layout {
-        gap: 28px;
+        padding-top: 140px;
+        gap: 50px;
     }
 
     .cont2 .left {
-        flex: 0 0 520px;
+        flex: 0 0 480px;
         gap: 18px;
     }
 
@@ -587,6 +580,7 @@
 
     .cont2 .track::before {
         left: 12px;
+        top: -140px;
     }
 
     .cont2 .item::before {
@@ -596,45 +590,68 @@
     .cont2 .group {
         padding: 200px 0 48px;
     }
-
-    .cont2 .year {
-        font-size: var(--font-2xl);
-    }
-
-    .cont2 .list li {
-        font-size: var(--font-md);
-    }
 }
 
 @media (max-width: 1024px) {
+    .cont2 .layout {
+        padding-top: 112px;
+        gap: 40px;
+    }
+
+    .cont2 .track::before {
+        top: -112px;
+    }
+
+    .cont2 .left {
+        flex: 0 0 420px;
+    }
+
+    .cont2 .title {
+        font-size: var(--font-headline36);
+    }
+}
+
+@media (max-width: 768px) {
     .cont2 {
-        --history-offset: 20px;
+        --history-offset: 16px;
         --history-head-gap: 0px;
     }
 
-    .cont2 .layout {
+    .cont2 .head {
+        position: sticky;
+        top: var(--header-height);
+        display: flex;
+        align-items: flex-start;
         flex-direction: column;
+        gap: 2px;
+    }
+
+    .cont2 .right {
+        width: 100%;
+    }
+
+    .cont2 .tag {
+        padding-bottom: 4px;
+    }
+
+    .cont2 .tabs {
+        gap: 16px;
+    }
+
+    .cont2 .tab {
+        font-size: var(--font-lg);
+    }
+
+    .cont2 .layout {
+        padding-top: 0;
+        flex-direction: column;
+        min-height: auto;
+        align-items: flex-start;
         gap: 24px;
     }
 
     .cont2 .left {
-        position: static;
-        top: auto;
-        flex: 0 0 auto;
-        width: 100%;
-        padding: 0 0 12px;
-        gap: 12px;
-    }
-
-    .cont2.pin .layout {
-        min-height: auto;
-        align-items: flex-start;
-    }
-
-    .cont2.pin .left {
-        position: static;
-        top: auto;
-        padding-top: 0;
+        display: none;
     }
 
     .cont2.pin .right {
@@ -642,10 +659,6 @@
         min-height: 0;
         max-height: none;
         overflow: visible;
-    }
-
-    .cont2 .tab {
-        font-size: var(--font-base);
     }
 
     .cont2 .title {
@@ -663,98 +676,27 @@
         font-size: var(--font-base);
     }
 
-    .cont2 .left {
-        display: none;
-    }
-
     .cont2 .grouphead {
         display: block;
         margin: 0 0 16px;
     }
 
     .cont2 .track {
-        padding-left: 28px;
+        padding-left: 40px;
+        padding-right: 40px;
     }
 
     .cont2 .track::before {
-        left: 10px;
-    }
-
-    .cont2 .item::before {
-        left: -24px;
-        top: 14px;
-        width: 10px;
-        height: 10px;
+        display: none;
     }
 
     .cont2 .group {
-        padding: 96px 0 44px;
-    }
-
-    .cont2 .year {
-        font-size: var(--font-2xl);
+        padding: 50px 0 40px;
+        gap: 20px;
     }
 
     .cont2 .list {
         gap: 12px;
-    }
-
-    .cont2 .list li {
-        font-size: var(--font-base);
-    }
-}
-
-@media (max-width: 768px) {
-    .cont2 {
-        --history-offset: 16px;
-        --history-head-gap: 0px;
-    }
-
-    .cont2 .head {
-        position: sticky;
-        top: var(--header-height);
-    }
-
-    .cont2 .tabs {
-        gap: 12px;
-    }
-
-    .cont2 .tab {
-        font-size: var(--font-base);
-    }
-
-    .cont2 .left {
-        display: none;
-    }
-
-    .cont2 .grouphead {
-        display: block;
-        margin: 0 0 16px;
-    }
-
-    .cont2 .track {
-        padding-left: 22px;
-    }
-
-    .cont2 .track::before {
-        left: 8px;
-    }
-
-    .cont2 .item::before {
-        left: -20px;
-        top: 13px;
-    }
-
-    .cont2 .group {
-        padding: 72px 0 40px;
-    }
-
-    .cont2 .year {
-        font-size: var(--font-xl);
-    }
-
-    .cont2 .list li {
-        font-size: var(--font-base);
     }
 }
 
@@ -765,22 +707,21 @@
     }
 
     .cont2 .head {
-        gap: 10px;
         padding-top: 10px;
-        padding-bottom: 8px;
     }
 
     .cont2 .tabs {
+        width: 100%;
+        justify-content: space-between;
         gap: 10px;
     }
 
     .cont2 .tab {
-        font-size: var(--font-base);
-        padding-bottom: 6px;
+        font-size: var(--font-md);
     }
 
     .cont2 .grouphead-title {
-        font-size: var(--font-xl);
+        font-size: var(--font-4xl);
     }
 
     .cont2 .grouphead-photo {
@@ -793,10 +734,12 @@
 
     .cont2 .track {
         padding-left: 18px;
+        padding-right: 18px;
     }
 
     .cont2 .track::before {
         left: 7px;
+        top: -56px;
     }
 
     .cont2 .item::before {
@@ -807,14 +750,20 @@
     }
 
     .cont2 .group {
-        padding: 64px 0 36px;
+        padding: 64px 0 10px;
     }
 
     .cont2 .year {
-        font-size: var(--font-lg);
+        font-size: var(--font-xl);
     }
 
     .cont2 .list li {
+        font-size: var(--font-base);
+    }
+}
+
+@media (max-width: 380px) {
+    .cont2 .tab {
         font-size: var(--font-base);
     }
 }

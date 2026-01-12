@@ -5,6 +5,10 @@ $theme_url = '/theme/sidepanel';
 if (defined('G5_URL') && G5_URL) {
     $theme_url = rtrim(G5_URL, '/') . '/theme/sidepanel';
 }
+$favicon_url = '/img/favicon.png?v=123';
+if (defined('G5_URL') && G5_URL) {
+    $favicon_url = rtrim(G5_URL, '/') . '/img/favicon.png?v=123';
+}
 
 if (!$standalone) {
     if (function_exists('add_stylesheet')) {
@@ -29,6 +33,7 @@ if (!$standalone) {
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>STARSTECH</title>
+    <link rel="icon" href="<?php echo $favicon_url; ?>" type="image/x-icon">
     <link rel="stylesheet" href="<?php echo $theme_url; ?>/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script>document.addEventListener("DOMContentLoaded",function(){document.body.classList.add("theme-sidepanel");});</script>

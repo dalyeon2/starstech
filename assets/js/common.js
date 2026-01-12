@@ -668,11 +668,12 @@ async function loadComponents() {
         const hasSubtop = !!$('#subtop-container').length;
         const hasCta = !!$('#cta-container').length;
 
-        const [headerRes, footerRes, subtopRes, ctaRes] = await Promise.all([
+        const [headerRes, footerRes, subtopRes, ctaRes, cookieRes] = await Promise.all([
             fetch(`${compBase}/header.html`),
             fetch(footerPath),
             hasSubtop ? fetch(`${compBase}/sub-top.html`) : Promise.resolve(null),
-            hasCta ? fetch(`${compBase}/cta.html`) : Promise.resolve(null)
+            hasCta ? fetch(`${compBase}/cta.html`) : Promise.resolve(null),
+            fetch(`${compBase}/cookie-consent.html`)
         ]);
 
         let headerHtml = await headerRes.text();
@@ -695,6 +696,11 @@ async function loadComponents() {
         if(hasCta && ctaRes && ctaRes.ok) {
             ctaHtml = await ctaRes.text();
         }
+        let cookieHtml = '';
+        if (cookieRes && cookieRes.ok) {
+            cookieHtml = await cookieRes.text();
+        }
+        window.__cookieConsentTemplate = cookieHtml;
 
         // START: Path correction logic
         const isSubPage = (window.location.pathname || '').includes('/pages/');
@@ -712,6 +718,9 @@ async function loadComponents() {
 
         if (hasSubtop) $('#subtop-container').html(subtopHtml);
         if (hasCta) $('#cta-container').html(ctaHtml);
+        if (cookieHtml && !document.getElementById('cookieConsent')) {
+            document.body.insertAdjacentHTML('beforeend', cookieHtml);
+        }
 
         // Fix logo root link after injection
         const lang = resolveFooterLang();
@@ -1325,9 +1334,347 @@ function initFooterPopup() {
     });
 }
 
+/* ===== Cookie consent ===== */
+const COOKIE_CONSENT_KEY = 'stc_cookie_consent';
+const COOKIE_CONSENT_VERSION = 1;
+const COOKIE_MAX_AGE = 60 * 60 * 24 * 180;
+
+function readCookieValue(name) {
+    if (!document.cookie) return '';
+    const match = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
+    return match ? match[1] : '';
+}
+
+function parseConsent(raw) {
+    if (!raw || typeof raw !== 'string') return null;
+    try {
+        const data = JSON.parse(raw);
+        if (!data || typeof data !== 'object') return null;
+        if (data.version && data.version !== COOKIE_CONSENT_VERSION) return null;
+        return {
+            version: COOKIE_CONSENT_VERSION,
+            analytics: !!data.analytics,
+            marketing: !!data.marketing,
+            updatedAt: data.updatedAt || new Date().toISOString()
+        };
+    } catch (e) {
+        return null;
+    }
+}
+
+function getStoredConsent() {
+    let stored = null;
+    try {
+        stored = localStorage.getItem(COOKIE_CONSENT_KEY);
+    } catch (e) {
+    }
+    let parsed = parseConsent(stored);
+    if (parsed) return parsed;
+
+    const cookieRaw = readCookieValue(COOKIE_CONSENT_KEY);
+    if (!cookieRaw) return null;
+    try {
+        parsed = parseConsent(decodeURIComponent(cookieRaw));
+    } catch (e) {
+        return null;
+    }
+    return parsed;
+}
+
+function storeConsent(consent) {
+    if (!consent) return;
+    const payload = {
+        version: COOKIE_CONSENT_VERSION,
+        analytics: !!consent.analytics,
+        marketing: !!consent.marketing,
+        updatedAt: new Date().toISOString()
+    };
+    const raw = JSON.stringify(payload);
+    try {
+        localStorage.setItem(COOKIE_CONSENT_KEY, raw);
+    } catch (e) {
+    }
+    const secure = window.location.protocol === 'https:' ? '; secure' : '';
+    document.cookie = COOKIE_CONSENT_KEY + '=' + encodeURIComponent(raw)
+        + '; max-age=' + COOKIE_MAX_AGE
+        + '; path=/; samesite=lax' + secure;
+}
+
+function isConsentAllowed(consent, category) {
+    const key = (category || '').toLowerCase();
+    if (!key) return false;
+    if (key === 'essential') return true;
+    if (!consent) return false;
+    if (key === 'nonessential') return !!(consent.analytics || consent.marketing);
+    return !!consent[key];
+}
+
+function loadDeferredScripts(consent) {
+    const nodes = document.querySelectorAll('script[data-consent]');
+    nodes.forEach((node) => {
+        if (!node || node.dataset.consentLoaded === 'true') return;
+        const category = node.getAttribute('data-consent') || '';
+        if (!isConsentAllowed(consent, category)) return;
+
+        const script = document.createElement('script');
+        const src = node.getAttribute('data-src') || node.getAttribute('src');
+        Array.from(node.attributes || []).forEach((attr) => {
+            if (!attr || !attr.name) return;
+            if (attr.name === 'type' || attr.name.startsWith('data-')) return;
+            script.setAttribute(attr.name, attr.value);
+        });
+        if (src) {
+            script.setAttribute('src', src);
+        } else if (node.textContent) {
+            script.text = node.textContent;
+        }
+        node.dataset.consentLoaded = 'true';
+        node.parentNode.insertBefore(script, node);
+    });
+}
+
+function resolveCookieLang() {
+    const lang = resolveFooterLang();
+    return lang || 'ko';
+}
+
+function buildPolicyHref() {
+    const lang = resolveCookieLang();
+    return joinPath(buildLangBase(lang), '/pages/policy.html');
+}
+
+function buildCookieConsentNode() {
+    let root = document.getElementById('cookieConsent');
+    if (root) return root;
+
+    const template = window.__cookieConsentTemplate;
+    if (!template) return null;
+
+    const holder = document.createElement('div');
+    holder.innerHTML = template.trim();
+    root = holder.firstElementChild;
+    if (!root) return null;
+
+    document.body.appendChild(root);
+    return root;
+}
+
+function applyConsent(consent) {
+    const normalized = parseConsent(JSON.stringify(consent));
+    if (!normalized) return;
+    window.__cookieConsent = normalized;
+    loadDeferredScripts(normalized);
+    const event = new CustomEvent('cookie-consent:updated', { detail: normalized });
+    document.dispatchEvent(event);
+}
+
+function initCookieConsent() {
+    const i18n = {
+        ko: {
+            title: '쿠키 및 개인정보',
+            desc: '사이트 이용을 위해 필수 쿠키와 분석 쿠키를 사용합니다. 설정에서 언제든 변경할 수 있습니다.',
+            link: '정책 보기',
+            accept: '모두 동의',
+            reject: '모두 거부',
+            settings: '설정',
+            settingsTitle: '쿠키 설정',
+            save: '??',
+            essentialLabel: '필수 쿠키',
+            essentialDesc: '사이트 동작에 필요하며 끌 수 없습니다.',
+            analyticsLabel: '분석 쿠키',
+            analyticsDesc: '방문 통계를 통해 서비스 개선에 활용됩니다.',
+            alwaysOn: '항상 사용'
+        },
+        en: {
+            title: 'Cookies & Privacy',
+            desc: 'We use essential cookies and analytics cookies to improve the site. You can update settings anytime.',
+            link: 'View policy',
+            accept: 'Accept all',
+            reject: 'Reject all',
+            settings: 'Settings',
+            settingsTitle: 'Cookie settings',
+            save: 'Save',
+            essentialLabel: 'Essential cookies',
+            essentialDesc: 'Required for the site to function and cannot be disabled.',
+            analyticsLabel: 'Analytics cookies',
+            analyticsDesc: 'Help us understand site usage and improve performance.',
+            alwaysOn: 'Always on'
+        },
+        fr: {
+            title: 'Cookies et confidentialité',
+            desc: "Nous utilisons des cookies essentiels et d'analyse pour améliorer le site. Vous pouvez modifier les paramètres à tout moment.",
+            link: 'Voir la politique',
+            accept: 'Tout accepter',
+            reject: 'Tout refuser',
+            settings: 'Paramètres',
+            settingsTitle: 'Paramètres des cookies',
+            save: 'Enregistrer',
+            essentialLabel: 'Cookies essentiels',
+            essentialDesc: 'Nécessaires au fonctionnement du site et ne peuvent pas être désactivés.',
+            analyticsLabel: "Cookies d'analyse",
+            analyticsDesc: "Permettent de comprendre l'utilisation du site et d'améliorer ses performances.",
+            alwaysOn: 'Toujours actif'
+        },
+        ja: {
+            title: 'クッキーとプライバシー',
+            desc: '当サイトでは必須クッキーと分析クッキーを使用しています。設定でいつでも変更できます。',
+            link: 'ポリシーを見る',
+            accept: 'すべて同意',
+            reject: 'すべて拒否',
+            settings: '設定',
+            settingsTitle: 'クッキー設定',
+            save: '??',
+            essentialLabel: '必須クッキー',
+            essentialDesc: 'サイトの機能に必要なため無効にできません。',
+            analyticsLabel: '分析クッキー',
+            analyticsDesc: '利用状況を把握し、サービス改善に役立てます。',
+            alwaysOn: '常に有効'
+        },
+        mn: {
+            title: 'Күүки ба нууцлал',
+            desc: 'Бид сайтын ажиллагаанд шаардлагатай болон шинжилгээний күүкийг ашигладаг. Тохиргоог хүссэн үедээ өөрчилж болно.',
+            link: 'Бодлого харах',
+            accept: 'Бүгдийг зөвшөөрөх',
+            reject: 'Бүгдийг татгалзах',
+            settings: 'Тохиргоо',
+            settingsTitle: 'Күүки тохиргоо',
+            save: '????????',
+            essentialLabel: 'Шаардлагатай күүки',
+            essentialDesc: 'Сайт зөв ажиллахад шаардлагатай тул унтраах боломжгүй.',
+            analyticsLabel: 'Шинжилгээний күүки',
+            analyticsDesc: 'Хэрэглээний статистикийг ойлгож, үйлчилгээ сайжруулахад тусална.',
+            alwaysOn: 'Үргэлж асаалттай'
+        }
+    };
+
+    const lang = resolveCookieLang();
+    if (lang === 'ko') {
+        applyConsent({ analytics: false, marketing: false });
+        window.CookieConsent = { open: () => {}, close: () => {} };
+        return;
+    }
+    const dict = i18n[lang] || i18n.en;
+    let root = document.getElementById('cookieConsent');
+    if (!root) {
+        root = buildCookieConsentNode();
+    }
+    if (!root) {
+        window.CookieConsent = { open: () => {}, close: () => {} };
+        return;
+    }
+
+    root.querySelectorAll('[data-cookie]').forEach((node) => {
+        const key = node.getAttribute('data-cookie');
+        if (!key || !dict[key]) return;
+        node.textContent = dict[key];
+    });
+    const link = root.querySelector('[data-cookie="link"]');
+    const prefs = root.querySelector('[data-cookie-view="prefs"]');
+    const settingsBtn = root.querySelector('[data-cookie-action="settings"]');
+    const acceptBtn = root.querySelector('[data-cookie-action="accept"]');
+    const rejectBtn = root.querySelector('[data-cookie-action="reject"]');
+    const saveBtn = root.querySelector('[data-cookie-action="save"]');
+    const analyticsToggle = root.querySelector('[data-cookie-toggle="analytics"]');
+
+    if (analyticsToggle && dict.analyticsLabel) {
+        analyticsToggle.setAttribute('aria-label', dict.analyticsLabel);
+    }
+
+    function setVisibility(show) {
+        root.classList.toggle('is-visible', show);
+        root.setAttribute('aria-hidden', show ? 'false' : 'true');
+    }
+
+    function setSettingsOpen(open) {
+        root.classList.toggle('show-settings', open);
+        if (prefs) prefs.setAttribute('aria-hidden', open ? 'false' : 'true');
+    }
+
+    function syncToggles(consent) {
+        const normalized = consent ? parseConsent(JSON.stringify(consent)) : null;
+        const analytics = normalized ? !!normalized.analytics : false;
+        if (analyticsToggle) analyticsToggle.checked = analytics;
+    }
+
+    function getToggleConsent() {
+        return {
+            analytics: !!(analyticsToggle && analyticsToggle.checked),
+            marketing: false
+        };
+    }
+
+    function finalize(consent) {
+        storeConsent(consent);
+        applyConsent(consent);
+        setVisibility(false);
+        setSettingsOpen(false);
+    }
+
+    if (link) {
+        link.setAttribute('href', buildPolicyHref());
+        link.addEventListener('click', () => {
+            setSettingsOpen(false);
+            setVisibility(false);
+        });
+    }
+
+    if (acceptBtn) {
+        acceptBtn.textContent = dict.accept || 'Accept all';
+        acceptBtn.addEventListener('click', () => finalize({ analytics: true, marketing: false }));
+    }
+
+    if (rejectBtn) {
+        rejectBtn.textContent = dict.reject || 'Reject all';
+        rejectBtn.addEventListener('click', () => finalize({ analytics: false, marketing: false }));
+    }
+
+    if (settingsBtn) {
+        settingsBtn.textContent = dict.settings || 'Settings';
+        settingsBtn.addEventListener('click', () => {
+            const isOpen = root.classList.contains('show-settings');
+            if (isOpen) {
+                setSettingsOpen(false);
+                return;
+            }
+            syncToggles(getStoredConsent());
+            setSettingsOpen(true);
+        });
+    }
+
+    if (saveBtn) {
+        saveBtn.textContent = dict.save || 'Save';
+        saveBtn.addEventListener('click', () => finalize(getToggleConsent()));
+    }
+
+    setSettingsOpen(false);
+
+    const stored = getStoredConsent();
+    if (stored) {
+        applyConsent(stored);
+        syncToggles(stored);
+        setVisibility(false);
+    } else {
+        syncToggles({ analytics: false, marketing: false });
+        setVisibility(true);
+    }
+
+    window.CookieConsent = {
+        open: () => {
+            syncToggles(getStoredConsent());
+            setSettingsOpen(false);
+            setVisibility(true);
+        },
+        close: () => {
+            setSettingsOpen(false);
+            setVisibility(false);
+        }
+    };
+}
+
 /* ===== Boot ===== */
 $(async function () {
     await loadComponents();
+    initCookieConsent();
     initSubtopReveal();
     await loadCommonScriptOnce(resolveCommonAssetPath('animation/reveal.js'));
 

@@ -1,0 +1,39 @@
+<div class="cookie-consent" id="cookieConsent" aria-live="polite" aria-hidden="true">
+    <div class="card" role="dialog" aria-modal="true" aria-labelledby="cookieConsentTitle" aria-describedby="cookieConsentDesc">
+        <div class="summary" data-cookie-view="summary">
+            <div class="title" id="cookieConsentTitle" data-cookie="title"></div>
+            <div class="desc" id="cookieConsentDesc" data-cookie="desc"></div>
+            <a class="link" data-cookie="link" href="#" target="_blank" rel="noopener noreferrer"></a>
+        </div>
+        <div class="prefs" data-cookie-view="prefs" aria-hidden="true">
+            <div class="section-title" data-cookie="settingsTitle"></div>
+            <div class="options">
+                <div class="option">
+                    <div class="option-text">
+                        <div class="label" data-cookie="essentialLabel"></div>
+                        <div class="hint" data-cookie="essentialDesc"></div>
+                    </div>
+                    <span class="badge" data-cookie="alwaysOn"></span>
+                </div>
+                <div class="option">
+                    <div class="option-text">
+                        <div class="label" data-cookie="analyticsLabel"></div>
+                        <div class="hint" data-cookie="analyticsDesc"></div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" data-cookie-toggle="analytics" />
+                        <span class="slider" aria-hidden="true"></span>
+                    </label>
+                </div>
+            </div>
+            <div class="prefs-actions">
+                <button type="button" class="primary" data-cookie-action="save"></button>
+            </div>
+        </div>
+        <div class="actions">
+            <button type="button" class="primary" data-cookie-action="accept"></button>
+            <button type="button" class="ghost" data-cookie-action="reject"></button>
+            <button type="button" class="ghost" data-cookie-action="settings"></button>
+        </div>
+    </div>
+</div>

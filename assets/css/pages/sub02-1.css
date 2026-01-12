@@ -55,12 +55,7 @@
     }
 
     .cont1 .headline {
-        font-size: var(--font-headline36);
         line-height: 1.45;
-    }
-
-    .cont1 .copy .desc {
-        font-size: var(--font-base);
     }
 }
 
@@ -71,7 +66,7 @@
     }
 
     .cont1 .headline {
-        font-size: var(--font-headline32);
+        font-size: var(--font-headline36);
         line-height: 1.4;
     }
 }
@@ -235,6 +230,10 @@
         padding-top: 80px;
         padding-bottom: 80px;
         gap: 60px;
+    }
+
+    .cont2 .head {
+        gap: 20px;
     }
 
     .cont2 .title,
