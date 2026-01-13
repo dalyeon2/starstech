@@ -58,32 +58,12 @@ function sidepanel_basic_files($view) {
     </div>
 
     <?php list($view_images, $download_files) = sidepanel_basic_files($view); ?>
-    <?php if (!empty($view_images)) { ?>
-        <div class="view-images">
-            <?php foreach ($view_images as $file) {
-                $img_src = '';
-                if (!empty($file['path']) && !empty($file['file'])) {
-                    $img_src = rtrim($file['path'], '/') . '/' . rawurlencode($file['file']);
-                } elseif (!empty($file['href'])) {
-                    $img_src = $file['href'];
-                }
-                if (!$img_src) continue;
-            ?>
-                <figure class="view-image">
-                    <img src="<?php echo $img_src; ?>" alt="<?php echo get_text($file['source']); ?>">
-                    <figcaption>
-                        <div class="title"><?php echo get_text($file['source']); ?></div>
-                        <?php if (!empty($file['size'])) { ?><div class="meta"><?php echo $file['size']; ?></div><?php } ?>
-                    </figcaption>
-                </figure>
-            <?php } ?>
-        </div>
-    <?php } ?>
 
     <?php
     $post_raw = trim($view['wr_content'] ?? $write['wr_content'] ?? '');
     $is_inquiry = (isset($board['bo_table']) && $board['bo_table'] === 'inquiry') || (strpos(($view['subject'] ?? $write['wr_subject'] ?? ''), '[웹문의]') !== false);
-    if ($is_inquiry && $post_raw) {
+    $show_inquiry_layout = ($is_inquiry && $post_raw);
+    if ($show_inquiry_layout) {
         $lines = preg_split('/\r\n|\n|\r/', $post_raw);
         $fields = [];
         $others = [];
@@ -98,11 +78,21 @@ function sidepanel_basic_files($view) {
             }
         }
         $attachments = [];
-        if (!empty($fields['첨부'])) {
-            $attachments = array_map('trim', explode(',', $fields['첨부']));
-        } else {
-            foreach ($others as $o) {
-                if (preg_match_all('!(https?://[^\s]+)!', $o, $m)) { foreach ($m[1] as $u) $attachments[] = $u; }
+        if (!empty($view['file']) && is_array($view['file'])) {
+            foreach ($view['file'] as $file) {
+                if (!is_array($file) || empty($file['href'])) continue;
+                $label = $file['source'] ?? '';
+                if ($label === '') $label = $file['file'] ?? '';
+                $attachments[] = ['href' => $file['href'], 'label' => $label];
+            }
+        }
+        if (empty($attachments)) {
+            if (!empty($fields['첨부'])) {
+                $attachments = array_map('trim', explode(',', $fields['첨부']));
+            } else {
+                foreach ($others as $o) {
+                    if (preg_match_all('!(https?://[^\s]+)!', $o, $m)) { foreach ($m[1] as $u) $attachments[] = $u; }
+                }
             }
         }
 
@@ -125,9 +115,6 @@ function sidepanel_basic_files($view) {
                             <?php if (!empty($fields['이메일'])): ?><div class="row"><dt>이메일</dt><dd><a href="mailto:<?php echo htmlspecialchars($fields['이메일'], ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($fields['이메일'], ENT_QUOTES, 'UTF-8'); ?></a></dd></div><?php endif; ?>
                         </dl>
                     </div>
-                    <div class="inquiry-right">
-                        <?php if (!empty($attachments)): ?><div class="attachments"><strong>첨부파일</strong><ul><?php foreach($attachments as $att) { ?><li><a href="<?php echo htmlspecialchars($att, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener"><?php echo htmlspecialchars(basename(parse_url($att, PHP_URL_PATH)), ENT_QUOTES, 'UTF-8'); ?></a></li><?php } ?></ul></div><?php endif; ?>
-                    </div>
                 </div>
             </div>
 
@@ -138,6 +125,7 @@ function sidepanel_basic_files($view) {
                 <div class="inquiry-full-content"><strong>내용</strong>
                     <div class="content-body-text"><?php echo nl2br(htmlspecialchars($content_body, ENT_QUOTES, 'UTF-8')); ?></div>
                 </div>
+                <?php if (!empty($attachments)): ?><div class="attachments attachments-bottom"><strong>첨부파일</strong><ul><?php foreach($attachments as $att) { $href = ''; $label = ''; if (is_array($att)) { $href = $att['href'] ?? ''; $label = $att['label'] ?? ''; } else { $href = $att; } if ($href === '') continue; if ($label === '') { $label = basename(parse_url($href, PHP_URL_PATH)); } $label = get_text(stripslashes($label)); ?><li><a href="<?php echo htmlspecialchars($href, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener"><?php echo htmlspecialchars($label, ENT_QUOTES, 'UTF-8'); ?></a></li><?php } ?></ul></div><?php endif; ?>
             </div>
         </div>
 
@@ -149,13 +137,35 @@ function sidepanel_basic_files($view) {
 
     <?php } ?>
 
-    <?php if (!empty($download_files)) { ?>
+    <?php if (!empty($download_files) && !$show_inquiry_layout) { ?>
         <div class="link-list">
             <?php foreach ($download_files as $file) { ?>
                 <div class="row">
                     <a class="t-title" href="<?php echo $file['href']; ?>" target="_blank" rel="noopener"><?php echo get_text($file['source']); ?></a>
                     <?php if (!empty($file['size'])) { ?><span class="t-meta"><?php echo $file['size']; ?></span><?php } ?>
                 </div>
+            <?php } ?>
+        </div>
+    <?php } ?>
+
+    <?php if (!empty($view_images)) { ?>
+        <div class="view-images">
+            <?php foreach ($view_images as $file) {
+                $img_src = '';
+                if (!empty($file['path']) && !empty($file['file'])) {
+                    $img_src = rtrim($file['path'], '/') . '/' . rawurlencode($file['file']);
+                } elseif (!empty($file['href'])) {
+                    $img_src = $file['href'];
+                }
+                if (!$img_src) continue;
+            ?>
+                <figure class="view-image">
+                    <img src="<?php echo $img_src; ?>" alt="<?php echo get_text($file['source']); ?>">
+                    <figcaption>
+                        <div class="title"><?php echo get_text($file['source']); ?></div>
+                        <?php if (!empty($file['size'])) { ?><div class="meta"><?php echo $file['size']; ?></div><?php } ?>
+                    </figcaption>
+                </figure>
             <?php } ?>
         </div>
     <?php } ?>

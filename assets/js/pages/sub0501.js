@@ -233,7 +233,10 @@
         renderFiles();
 
         return {
-            reset: resetFiles
+            reset: resetFiles,
+            getFiles: function () {
+                return fileList.slice();
+            }
         };
     }
 
@@ -554,6 +557,7 @@
 
             var payload = {
                 type: inquiry.label || inquiry.value || '',
+                type_value: inquiry.value || '',
                 company: company,
                 manager: manager,
                 country: country,
@@ -566,8 +570,16 @@
             var formData = new FormData();
             Object.keys(payload).forEach(function (k) { formData.append(k, payload[k]); });
             var fileInput = $form.find('.fileinput').get(0);
-            if (fileInput && fileInput.files && fileInput.files.length) {
-                Array.prototype.forEach.call(fileInput.files, function (file) {
+            var filesToSend = [];
+            if (fileControl && typeof fileControl.getFiles === 'function') {
+                filesToSend = fileControl.getFiles() || [];
+            }
+            if (!filesToSend.length && fileInput && fileInput.files && fileInput.files.length) {
+                filesToSend = Array.prototype.slice.call(fileInput.files);
+            }
+            if (filesToSend.length) {
+                formData.append('files_expected', String(filesToSend.length));
+                filesToSend.forEach(function (file) {
                     formData.append('files[]', file);
                 });
             }
@@ -593,6 +605,7 @@
                         if (res.errors['subject']) showFieldErrorFor($subjectField, res.errors['subject']);
                         if (res.errors['message']) showFieldErrorFor($messageField, res.errors['message']);
                         if (res.errors['privacy']) showFieldErrorFor($privacyWrap, res.errors['privacy']);
+                        if (res.errors['files']) showFormError($form, res.errors['files']);
                         var order = ['inquiry','company','manager','country','email','subject','message','privacy'];
                         var firstKey = order.filter(function (k) { return res.errors[k]; })[0];
                         var $focusTarget = null;
@@ -614,8 +627,14 @@
                     fileControl.reset();
                 }
                 setSubmitting(false);
-            }).fail(function () {
-                showFormError($form, t('submitError'));
+            }).fail(function (xhr) {
+                if (xhr && xhr.responseJSON && xhr.responseJSON.errors) {
+                    var errs = xhr.responseJSON.errors;
+                    if (errs['files']) showFormError($form, errs['files']);
+                    else showFormError($form, t('submitError'));
+                } else {
+                    showFormError($form, t('submitError'));
+                }
                 scrollToAndFocus($form);
                 setSubmitting(false);
             });
