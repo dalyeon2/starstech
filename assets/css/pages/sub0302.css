@@ -73,6 +73,108 @@
     background: var(--black-100);
 }
 
+@media (max-width: 1280px) {
+    .cont1 .container {
+        gap: 60px;
+    }
+
+    .cont1 .left {
+        gap: 60px;
+    }
+
+    .cont1 .right {
+        flex-basis: 520px;
+    }
+
+    .cont1 .headline {
+        font-size: var(--font-headline36);
+        line-height: 1.45;
+    }
+}
+
+@media (max-width: 1024px) {
+    .cont1 .container {
+        gap: 20px;
+    }
+
+    .cont1 .left {
+        gap: 40px;
+    }
+
+    .cont1 .right {
+        flex-basis: 400px;
+    }
+
+    .cont1 .headline {
+        font-size: var(--font-headline32);
+        line-height: 1.4;
+    }
+
+    .cont1 .desc p {
+        font-size: var(--font-base);
+    }
+}
+
+@media (max-width: 768px) {
+    .cont1 .container {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 32px;
+    }
+
+    .cont1 .left {
+        width: 100%;
+        gap: 32px;
+    }
+
+    .cont1 .right {
+        width: 100%;
+        flex-basis: auto;
+    }
+
+    .cont1 .photo {
+        max-width: 520px;
+        margin: 0 auto;
+    }
+
+    .cont1 .headline {
+        font-size: var(--font-4xl);
+        line-height: 1.4;
+        white-space: normal;
+    }
+
+    .cont1 .desc p {
+        font-size: var(--font-base);
+        white-space: normal;
+    }
+
+    .cont1 .desc .note {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .cont1 .container {
+        gap: 24px;
+    }
+
+    .cont1 .left {
+        gap: 24px;
+    }
+
+    .cont1 .headline {
+        font-size: var(--font-3xl);
+    }
+
+    .cont1 .desc p {
+        font-size: var(--font-base);
+    }
+
+    .cont1 .photo {
+        max-width: 360px;
+    }
+}
+
 /* cont2 */
 .cont2 .container {
     padding-top: 0;
@@ -139,23 +241,6 @@
 }
 
 @media (max-width: 1280px) {
-    .cont1 .container {
-        gap: 60px;
-    }
-
-    .cont1 .left {
-        gap: 60px;
-    }
-
-    .cont1 .right {
-        flex-basis: 520px;
-    }
-
-    .cont1 .headline {
-        font-size: var(--font-headline36);
-        line-height: 1.45;
-    }
-
     .cont2 .container {
         gap: 40px;
     }
@@ -165,55 +250,41 @@
         line-height: 1.45;
     }
 
-    .cont2 .title {
-        font-size: var(--font-lg);
-    }
-
-    .cont2 .desc {
-        font-size: 16px;
-    }
 }
 
 @media (max-width: 1024px) {
-    .cont1 .container {
-        flex-direction: column;
-        gap: 40px;
-    }
-
-    .cont1 .left {
-        gap: 40px;
-    }
-
-    .cont1 .right {
-        width: 100%;
-        flex-basis: auto;
-    }
-
     .cont2 .container {
-        gap: 40px;
-    }
-
-    .cont2 .cards {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-}
-
-@media (max-width: 768px) {
-    .cont1 .left {
         gap: 32px;
     }
 
-    .cont1 .headline {
+    .cont2 .headline {
         font-size: var(--font-4xl);
         line-height: 1.4;
     }
 
-    .cont1 .desc {
-        font-size: var(--font-base);
+    .cont2 .cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+
+    .cont2 .headline {
+        font-size: var(--font-4xl);
+        line-height: 1.4;
     }
 
-    .cont1 .desc .note {
-        font-size: 14px;
+    .cont2 .desc {
+        font-size: var(--font-base);
+        white-space: normal;
+    }
+}
+
+@media (max-width: 480px) {
+
+    .cont2 .container {
+        gap: 32px;
     }
 
     .cont2 .cards {
@@ -222,37 +293,15 @@
     }
 
     .cont2 .headline {
-        font-size: var(--font-4xl);
-        line-height: 1.4;
-    }
-
-    .cont2 .desc {
-        font-size: var(--font-base);
-    }
-}
-
-@media (max-width: 480px) {
-    .cont1 .container {
-        gap: 28px;
-    }
-
-    .cont1 .left {
-        gap: 28px;
-    }
-
-    .cont1 .headline {
         font-size: var(--font-3xl);
+        white-space: normal;
     }
 
-    .cont1 .desc {
-        font-size: 15px;
+    .cont2 .photo {
+        height: 220px;
     }
 
-    .cont2 .container {
-        gap: 32px;
-    }
-
-    .cont2 .headline {
-        font-size: var(--font-3xl);
+    .cont2 .title {
+        font-size: var(--font-lg);
     }
 }
