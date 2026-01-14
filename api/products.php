@@ -40,6 +40,7 @@ if ($limit > 200) $limit = 200;
 if ($offset < 0) $offset = 0;
 
 $lang = isset($_GET['lang']) ? strtolower(trim($_GET['lang'])) : '';
+$lang_filter = in_array($lang, ['ko', 'en', 'ja', 'fr', 'mn'], true) ? $lang : '';
 $req_id = 0;
 if (isset($_GET['id'])) {
     $req_id = (int)$_GET['id'];
@@ -169,6 +170,9 @@ $filters = ['wr_is_comment = 0'];
 if ($req_id > 0) {
     $filters[] = 'wr_id = ' . $req_id;
 }
+if ($lang_filter !== '') {
+    $filters[] = "wr_1 = '{$lang_filter}'";
+}
 $where = implode(' AND ', $filters);
 
 $total = null;
@@ -189,7 +193,7 @@ if (!$count_res) {
 $cnt_row = sql_fetch_array($count_res);
 $total = isset($cnt_row['cnt']) ? (int)$cnt_row['cnt'] : 0;
 
-$sql = "SELECT wr_id, wr_subject, wr_content, wr_datetime FROM {$write_table} WHERE {$where} ORDER BY wr_datetime DESC";
+$sql = "SELECT wr_id, wr_subject, wr_content, wr_datetime, wr_1 FROM {$write_table} WHERE {$where} ORDER BY wr_datetime DESC";
 if ($req_id > 0) {
     $sql .= " LIMIT 1";
 } elseif ($limit > 0) {
@@ -223,10 +227,19 @@ while ($row = sql_fetch_array($res)) {
         if (is_array($decoded)) $product_data = $decoded;
     }
 
-    $lang_key = pick_lang_key($product_data, $lang);
+    $row_lang = isset($row['wr_1']) ? strtolower(trim($row['wr_1'])) : '';
+    $lang_key = '';
     $lang_data = [];
-    if ($lang_key && !empty($product_data['lang'][$lang_key]) && is_array($product_data['lang'][$lang_key])) {
-        $lang_data = $product_data['lang'][$lang_key];
+    if ($row_lang !== '') {
+        $lang_key = $row_lang;
+        if (!empty($product_data['lang'][$row_lang]) && is_array($product_data['lang'][$row_lang])) {
+            $lang_data = $product_data['lang'][$row_lang];
+        }
+    } else {
+        $lang_key = pick_lang_key($product_data, $lang_filter ?: $lang);
+        if ($lang_key && !empty($product_data['lang'][$lang_key]) && is_array($product_data['lang'][$lang_key])) {
+            $lang_data = $product_data['lang'][$lang_key];
+        }
     }
 
     $title = trim((string)($lang_data['title'] ?? ''));

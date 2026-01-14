@@ -14,13 +14,32 @@
         labope: 'sub0204.html',
         fertilizer: 'sub0206.html'
     };
+    var SUPPORTED_LANGS = ['ko', 'en', 'ja', 'fr', 'mn'];
     var LANG = resolveLang();
 
     function prefersReducedMotion() {
         return !!(w.matchMedia && w.matchMedia('(prefers-reduced-motion: reduce)').matches);
     }
 
+    function normalizeLang(value) {
+        if (!value) return '';
+        var lower = String(value).toLowerCase();
+        lower = lower.split(/[-_]/)[0];
+        return SUPPORTED_LANGS.indexOf(lower) !== -1 ? lower : '';
+    }
+
     function resolveLang() {
+        var doc = w.document && w.document.documentElement;
+        var htmlLang = doc ? doc.getAttribute('lang') : '';
+        var normalized = normalizeLang(htmlLang);
+        if (normalized) return normalized;
+
+        if (w.URLSearchParams) {
+            var params = new URLSearchParams(w.location.search || '');
+            var queryLang = normalizeLang(params.get('lang'));
+            if (queryLang) return queryLang;
+        }
+
         var path = w.location && w.location.pathname ? w.location.pathname : '';
         var match = path.match(/\/(ko|en|ja|fr|mn)\//i);
         return match ? match[1].toLowerCase() : 'ko';
