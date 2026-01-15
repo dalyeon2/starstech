@@ -1018,6 +1018,7 @@
     .cont5 .container {
         min-height: 0;
         padding-top: 70px;
+        padding-bottom: 80px;
         gap: 20px;
     }
 
@@ -1030,6 +1031,7 @@
 @media (max-width: 768px) {
     .cont5 .container {
         padding-top: 60px;
+        padding-bottom: 60px;
         gap: 8px;
     }
 
