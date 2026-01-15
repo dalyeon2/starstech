@@ -144,7 +144,7 @@
     }
 
     function initNewsFeed() {
-        var $section = $('.cont4');
+        var $section = $('.cont6');
         if (!$section.length || !w.fetch) return;
 
         var $track = $section.find('.cards');
@@ -182,9 +182,9 @@
             var message = getEmptyMessage();
             var $prev = $section.find('.nav.prev');
             var $next = $section.find('.nav.next');
-            $prev.off('click.cont4cards').prop('disabled', true).attr('aria-disabled', 'true');
-            $next.off('click.cont4cards').prop('disabled', true).attr('aria-disabled', 'true');
-            $(w).off('resize.cont4cards');
+            $prev.off('click.cont6cards').prop('disabled', true).attr('aria-disabled', 'true');
+            $next.off('click.cont6cards').prop('disabled', true).attr('aria-disabled', 'true');
+            $(w).off('resize.cont6cards');
             $section.addClass('is-empty').removeClass('is-slider is-stacked');
             $track.css('transform', '');
             $track.empty();
@@ -211,7 +211,7 @@
     }
 
     function initNewsCards() {
-        var $section = $('.cont4');
+        var $section = $('.cont6');
         if (!$section.length) return;
 
         var $track = $section.find('.cards');
@@ -307,14 +307,14 @@
             updateButtons();
         }
 
-        $prev.off('click.cont4cards').on('click.cont4cards', function () {
+        $prev.off('click.cont6cards').on('click.cont6cards', function () {
             if (!$section.hasClass('is-slider') || index <= 0) return;
             index -= 1;
             applyTransform();
             updateButtons();
         });
 
-        $next.off('click.cont4cards').on('click.cont4cards', function () {
+        $next.off('click.cont6cards').on('click.cont6cards', function () {
             if (!$section.hasClass('is-slider') || index >= maxIndex) return;
             index += 1;
             applyTransform();
@@ -324,7 +324,7 @@
         applyLayout();
 
         var resizeTimer;
-        $(w).off('resize.cont4cards').on('resize.cont4cards', function () {
+        $(w).off('resize.cont6cards').on('resize.cont6cards', function () {
             clearTimeout(resizeTimer);
             resizeTimer = setTimeout(applyLayout, 150);
         });

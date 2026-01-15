@@ -249,7 +249,6 @@
         font-size: var(--font-headline32);
         line-height: 1.45;
     }
-
 }
 
 @media (max-width: 1024px) {
@@ -269,7 +268,6 @@
 }
 
 @media (max-width: 768px) {
-
     .cont2 .headline {
         font-size: var(--font-4xl);
         line-height: 1.4;
@@ -282,7 +280,6 @@
 }
 
 @media (max-width: 480px) {
-
     .cont2 .container {
         gap: 32px;
     }
@@ -306,8 +303,7 @@
     }
 }
 
-
-/* section 3 */
+/* cont3 */
 .cont3 {
     position: relative;
     color: var(--white);
