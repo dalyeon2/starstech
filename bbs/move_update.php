@@ -23,6 +23,24 @@ $save_count_comment = 0;
 $cnt = 0;
 
 $wr_id_list = isset($_POST['wr_id_list']) ? preg_replace('/[^0-9\,]/', '', $_POST['wr_id_list']) : '';
+$target_lang_map = [];
+$target_lang_global = '';
+if (isset($_POST['target_lang'])) {
+    if (is_array($_POST['target_lang'])) {
+        foreach ($_POST['target_lang'] as $key => $value) {
+            $bo_key = preg_replace('/[^a-z0-9_]/i', '', $key);
+            $lang_value = strtolower(trim($value));
+            if (in_array($lang_value, ['ko', 'en', 'ja', 'fr', 'mn'], true)) {
+                $target_lang_map[$bo_key] = $lang_value;
+            }
+        }
+    } else {
+        $target_lang_global = strtolower(trim($_POST['target_lang']));
+        if (!in_array($target_lang_global, ['ko', 'en', 'ja', 'fr', 'mn'], true)) {
+            $target_lang_global = '';
+        }
+    }
+}
 
 $sql = " select distinct wr_num from $write_table where wr_id in ({$wr_id_list}) order by wr_id ";
 $result = sql_query($sql);
@@ -40,6 +58,24 @@ while ($row = sql_fetch_array($result))
         $move_board = sql_fetch($sql);
         // 존재하지 않다면
         if( !$move_board['bo_table'] ) continue;
+
+        $move_skin = strtolower(trim($move_board['bo_skin'] ?? ''));
+        $move_mobile_skin = strtolower(trim($move_board['bo_mobile_skin'] ?? ''));
+        if (strpos($move_skin, 'theme/') === 0) {
+            $move_skin = substr($move_skin, 6);
+        }
+        if (strpos($move_skin, '/') !== false) {
+            $move_skin_parts = explode('/', $move_skin);
+            $move_skin = end($move_skin_parts);
+        }
+        if (strpos($move_mobile_skin, 'theme/') === 0) {
+            $move_mobile_skin = substr($move_mobile_skin, 6);
+        }
+        if (strpos($move_mobile_skin, '/') !== false) {
+            $move_mobile_skin_parts = explode('/', $move_mobile_skin);
+            $move_mobile_skin = end($move_mobile_skin_parts);
+        }
+        $is_lang_move = ($move_skin === 'product_lang' || $move_mobile_skin === 'product_lang');
 
         $move_write_table = $g5['write_prefix'] . $move_bo_table;
 
@@ -77,6 +113,52 @@ while ($row = sql_fetch_array($result))
             if ($sw == 'move' && $i == 0) {
                 $wr_good = $row2['wr_good'];
                 $wr_nogood = $row2['wr_nogood'];
+            }
+
+            $target_lang = $target_lang_global;
+            if (isset($target_lang_map[$move_bo_table])) {
+                $target_lang = $target_lang_map[$move_bo_table];
+            }
+
+            if ($sw === 'copy' && $target_lang && $is_lang_move && !$row2['wr_is_comment']) {
+                $source_lang = strtolower(trim($row2['wr_1']));
+                $row2['wr_1'] = $target_lang;
+
+                if (!empty($move_board['bo_use_category'])) {
+                    $category_value = '';
+                    if (!empty($move_board['bo_category_list'])) {
+                        $cats = array_map('trim', explode('|', $move_board['bo_category_list']));
+                        foreach ($cats as $cat) {
+                            if ($cat === '') continue;
+                            if (strtolower($cat) === $target_lang) {
+                                $category_value = $cat;
+                                break;
+                            }
+                        }
+                    }
+                    $row2['ca_name'] = $category_value !== '' ? $category_value : $target_lang;
+                }
+
+                $payload = json_decode($row2['wr_content'], true);
+                if (is_array($payload)) {
+                    if (!isset($payload['lang']) || !is_array($payload['lang'])) {
+                        $payload['lang'] = [];
+                    }
+                    $source_key = $source_lang;
+                    if (!$source_key || !isset($payload['lang'][$source_key]) || !is_array($payload['lang'][$source_key])) {
+                        $keys = array_keys($payload['lang']);
+                        $source_key = $keys ? $keys[0] : '';
+                    }
+                    if ($source_key && isset($payload['lang'][$source_key]) && is_array($payload['lang'][$source_key])) {
+                        $payload['lang'] = [$target_lang => $payload['lang'][$source_key]];
+                    } else {
+                        $payload['lang'] = [$target_lang => []];
+                    }
+                    if (!empty($payload['lang'][$target_lang]['title'])) {
+                        $row2['wr_subject'] = $payload['lang'][$target_lang]['title'];
+                    }
+                    $row2['wr_content'] = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+                }
             }
 
             $sql = " insert into $move_write_table
@@ -277,7 +359,30 @@ if ($sw == 'move')
 }
 
 $msg = '해당 게시물을 선택한 게시판으로 '.$act.' 하였습니다.';
-$opener_href  = get_pretty_url($bo_table,'','&amp;page='.$page.'&amp;'.$qstr);
+$redirect_bo_table = $bo_table;
+$redirect_sca = '';
+if (isset($_POST['sca'])) {
+    $redirect_sca = trim($_POST['sca']);
+}
+if ($sw === 'copy' && isset($_POST['chk_bo_table']) && is_array($_POST['chk_bo_table'])) {
+    foreach ($_POST['chk_bo_table'] as $target_bo_table) {
+        $target_bo_table = preg_replace('/[^a-z0-9_]/i', '', $target_bo_table);
+        if ($target_bo_table === '') continue;
+        if (isset($target_lang_map[$target_bo_table])) {
+            $redirect_bo_table = $target_bo_table;
+            $redirect_sca = $target_lang_map[$target_bo_table];
+            break;
+        }
+    }
+}
+
+$redirect_qstr = $qstr;
+if ($redirect_sca !== '') {
+    $redirect_qstr = preg_replace('/&amp;sca=[^&]*/', '', $redirect_qstr);
+    $redirect_qstr .= '&amp;sca=' . urlencode($redirect_sca);
+}
+
+$opener_href  = get_pretty_url($redirect_bo_table,'',$redirect_qstr);
 $opener_href1 = str_replace('&amp;', '&', $opener_href);
 
 run_event('bbs_move_update', $bo_table, $chk_bo_table, $wr_id_list, $opener_href);
@@ -285,7 +390,11 @@ run_event('bbs_move_update', $bo_table, $chk_bo_table, $wr_id_list, $opener_href
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
 <script>
 alert("<?php echo $msg; ?>");
-opener.document.location.href = "<?php echo $opener_href1; ?>";
+if (opener && !opener.closed) {
+    var target = "<?php echo $opener_href1; ?>";
+    var sep = target.indexOf('?') === -1 ? '?' : '&';
+    opener.location.href = target + sep + '_reload=' + Date.now();
+}
 window.close();
 </script>
 <noscript>

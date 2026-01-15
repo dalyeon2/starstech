@@ -44,6 +44,18 @@ if (!isset($product_langs[$selected_lang])) {
     $selected_lang = $default_lang;
 }
 
+$list_href_lang = $list_href ?? '';
+if ($list_href_lang && $selected_lang) {
+    $separator = (strpos($list_href_lang, '?') !== false) ? '&' : '?';
+    $list_href_lang = $list_href_lang . $separator . 'sca=' . urlencode($selected_lang);
+}
+
+$write_href_lang = $write_href ?? '';
+if ($write_href_lang && $selected_lang) {
+    $separator = (strpos($write_href_lang, '?') !== false) ? '&' : '?';
+    $write_href_lang = $write_href_lang . $separator . 'lang=' . urlencode($selected_lang) . '&sca=' . urlencode($selected_lang);
+}
+
 $product_wr_id = $view['wr_id'] ?? ($write['wr_id'] ?? ($wr_id ?? 0));
 $product_hit_default = $view['wr_hit'] ?? ($write['wr_hit'] ?? 0);
 if (!function_exists('sidepanel_view_hit')) {
@@ -205,8 +217,8 @@ if (!empty($selected_lang_data['features']) && is_array($selected_lang_data['fea
             </div>
         </div>
         <div class="view-actions top-actions">
-            <?php if ($list_href) { ?><a class="btn-minimal" href="<?php echo $list_href; ?>"><i class="fa-solid fa-list"></i> 목록</a><?php } ?>
-            <?php if ($write_href) { ?><a class="btn-minimal" href="<?php echo $write_href; ?>"><i class="fa-solid fa-pen"></i> 글쓰기</a><?php } ?>
+            <?php if ($list_href_lang) { ?><a class="btn-minimal" href="<?php echo $list_href_lang; ?>"><i class="fa-solid fa-list"></i> 목록</a><?php } ?>
+            <?php if ($write_href_lang) { ?><a class="btn-minimal" href="<?php echo $write_href_lang; ?>"><i class="fa-solid fa-pen"></i> 글쓰기</a><?php } ?>
             <?php if ($update_href) { ?><a class="btn-minimal" href="<?php echo $update_href; ?>"><i class="fa-solid fa-pen-to-square"></i> 수정</a><?php } ?>
             <?php if ($delete_href) { ?><a class="btn-minimal" href="<?php echo $delete_href; ?>" onclick="del(this.href); return false;"><i class="fa-solid fa-trash"></i> 삭제</a><?php } ?>
         </div>

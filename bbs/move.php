@@ -32,6 +32,15 @@ else {
     }
 }
 
+$lang_codes = ['ko', 'en', 'ja', 'fr', 'mn'];
+$target_lang_default = 'ko';
+if (isset($sca) && $sca !== '') {
+    $tmp_lang = strtolower(trim($sca));
+    if (in_array($tmp_lang, $lang_codes, true)) {
+        $target_lang_default = $tmp_lang;
+    }
+}
+
 //$sql = " select * from {$g5['board_table']} a, {$g5['group_table']} b where a.gr_id = b.gr_id and bo_table <> '$bo_table' ";
 // 원본 게시판을 선택 할 수 있도록 함.
 $sql = " select * from {$g5['board_table']} a, {$g5['group_table']} b where a.gr_id = b.gr_id ";
@@ -59,6 +68,7 @@ for ($i=0; $row=sql_fetch_array($result); $i++)
     <input type="hidden" name="sfl" value="<?php echo $sfl ?>">
     <input type="hidden" name="stx" value="<?php echo $stx ?>">
     <input type="hidden" name="spt" value="<?php echo $spt ?>">
+    <input type="hidden" name="sca" value="<?php echo $sca ?>">
     <input type="hidden" name="sst" value="<?php echo $sst ?>">
     <input type="hidden" name="sod" value="<?php echo $sod ?>">
     <input type="hidden" name="page" value="<?php echo $page ?>">
@@ -85,6 +95,23 @@ for ($i=0; $row=sql_fetch_array($result); $i++)
                 $atc_mark = '<span class="copymove_current">현재<span class="sound_only">게시판</span></span>';
                 $atc_bg = 'copymove_currentbg';
             }
+            $row_skin = strtolower(trim($list[$i]['bo_skin'] ?? ''));
+            $row_mobile_skin = strtolower(trim($list[$i]['bo_mobile_skin'] ?? ''));
+            if (strpos($row_skin, 'theme/') === 0) {
+                $row_skin = substr($row_skin, 6);
+            }
+            if (strpos($row_skin, '/') !== false) {
+                $row_skin_parts = explode('/', $row_skin);
+                $row_skin = end($row_skin_parts);
+            }
+            if (strpos($row_mobile_skin, 'theme/') === 0) {
+                $row_mobile_skin = substr($row_mobile_skin, 6);
+            }
+            if (strpos($row_mobile_skin, '/') !== false) {
+                $row_mobile_skin_parts = explode('/', $row_mobile_skin);
+                $row_mobile_skin = end($row_mobile_skin_parts);
+            }
+            $row_is_lang = ($row_skin === 'product_lang' || $row_mobile_skin === 'product_lang');
         ?>
         <tr class="<?php echo $atc_bg; ?>">
             <td class="td_chk">
@@ -100,6 +127,16 @@ for ($i=0; $row=sql_fetch_array($result); $i++)
                     <?php echo $list[$i]['bo_subject'] ?> (<?php echo $list[$i]['bo_table'] ?>)
                     <?php echo $atc_mark; ?>
                 </label>
+                <?php if ($sw === 'copy' && $row_is_lang) { ?>
+                <div style="margin-top:6px;">
+                    <span style="margin-right:6px; font-weight:600;">언어</span>
+                    <select name="target_lang[<?php echo $list[$i]['bo_table']; ?>]" id="target_lang_<?php echo $i; ?>">
+                        <?php foreach ($lang_codes as $code) { ?>
+                            <option value="<?php echo $code; ?>"<?php echo $target_lang_default === $code ? ' selected' : ''; ?>><?php echo strtoupper($code); ?></option>
+                        <?php } ?>
+                    </select>
+                </div>
+                <?php } ?>
             </td>
         </tr>
         <?php } ?>

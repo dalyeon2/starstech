@@ -37,6 +37,20 @@ if ($use_lang_filter && !empty($is_category) && empty($sca)) {
     return;
 }
 
+$write_href_lang = $write_href;
+if ($write_href && $use_lang_filter) {
+    $selected_lang = '';
+    if (!empty($sca)) {
+        $selected_lang = strtolower(trim($sca));
+    } elseif (isset($_GET['lang'])) {
+        $selected_lang = strtolower(trim($_GET['lang']));
+    }
+    if ($selected_lang && in_array($selected_lang, $lang_codes, true)) {
+        $separator = (strpos($write_href, '?') !== false) ? '&' : '?';
+        $write_href_lang = $write_href . $separator . 'lang=' . urlencode($selected_lang) . '&sca=' . urlencode($selected_lang);
+    }
+}
+
 if (!function_exists('sidepanel_filter_lang_categories')) {
     function sidepanel_filter_lang_categories($category_option, $allowed) {
         if (!$category_option) return $category_option;
@@ -119,7 +133,7 @@ if (!function_exists('sidepanel_product_thumb')) {
             <?php } ?>
         </div>
         <div class="top-actions">
-            <?php if ($product_allow_write) { ?><a class="btn-minimal" href="<?php echo $write_href; ?>"><i class="fa-solid fa-pen"></i> 글쓰기</a><?php } ?>
+            <?php if ($product_allow_write) { ?><a class="btn-minimal" href="<?php echo $write_href_lang; ?>"><i class="fa-solid fa-pen"></i> 글쓰기</a><?php } ?>
             <?php if ($is_checkbox) { ?><button type="submit" name="btn_submit" value="선택삭제" onclick="document.pressed=this.value;" class="btn-minimal"><i class="fa-solid fa-trash"></i> 선택삭제</button><?php } ?>
             <?php if ($is_checkbox) { ?><button type="submit" name="btn_submit" value="선택복사" onclick="document.pressed=this.value;" class="btn-minimal"><i class="fa-solid fa-copy"></i> 선택복사</button><?php } ?>
             <?php if ($is_checkbox) { ?><button type="submit" name="btn_submit" value="선택이동" onclick="document.pressed=this.value;" class="btn-minimal"><i class="fa-solid fa-arrow-right-arrow-left"></i> 선택이동</button><?php } ?>
@@ -176,7 +190,7 @@ if (!function_exists('sidepanel_product_thumb')) {
     <?php } ?>
 
     <div class="board-actions" style="justify-content: flex-end;">
-        <?php if ($product_allow_write) { ?><a class="btn-minimal" href="<?php echo $write_href; ?>"><i class="fa-solid fa-pen"></i> 글쓰기</a><?php } ?>
+        <?php if ($product_allow_write) { ?><a class="btn-minimal" href="<?php echo $write_href_lang; ?>"><i class="fa-solid fa-pen"></i> 글쓰기</a><?php } ?>
     </div>
 </div>
 </form>

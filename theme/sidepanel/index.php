@@ -260,8 +260,9 @@ $sections = [
         'icon' => 'fa-boxes-stacked',
         'boards' => [
             ['table' => 'eco_st', 'label' => 'ECO-ST', 'icon' => 'fa-snowflake'],
-            ['table' => 'fertilizer', 'label' => 'Fertilizer', 'icon' => 'fa-seedling'],
+            ['table' => 'eco_sl', 'label' => 'ECO-SL', 'icon' => 'fa-droplet'],
             ['table' => 'labope', 'label' => 'Labope', 'icon' => 'fa-flask'],
+            ['table' => 'fertilizer', 'label' => 'Fertilizer', 'icon' => 'fa-seedling'],
         ],
     ],
     'pr' => [
@@ -319,8 +320,9 @@ $visit_stats = dash_visit_stats();
 
 $quick_buttons = [
     ['label' => 'ECO-ST', 'icon' => 'fa-snowflake', 'href' => dash_board_list_url('eco_st')],
-    ['label' => 'Fertilizer', 'icon' => 'fa-seedling', 'href' => dash_board_list_url('fertilizer')],
+    ['label' => 'ECO-SL', 'icon' => 'fa-droplet', 'href' => dash_board_list_url('eco_sl')],
     ['label' => 'Labope', 'icon' => 'fa-flask', 'href' => dash_board_list_url('labope')],
+    ['label' => 'Fertilizer', 'icon' => 'fa-seedling', 'href' => dash_board_list_url('fertilizer')],
     ['label' => 'Newsroom', 'icon' => 'fa-newspaper', 'href' => dash_board_list_url('news')],
     ['label' => 'PR', 'icon' => 'fa-bullhorn', 'href' => dash_board_list_url('pr')],
     ['label' => 'Contact', 'icon' => 'fa-envelope-open-text', 'href' => dash_board_list_url('inquiry')],

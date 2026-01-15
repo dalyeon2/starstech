@@ -11,11 +11,14 @@
     var PRODUCT_DETAIL_PAGE = './prod-detail.html';
     var PRODUCT_PAGE_MAP = {
         eco_st: 'sub0202.html',
+        eco_sl: 'sub0207.html',
         labope: 'sub0204.html',
         fertilizer: 'sub0206.html'
     };
     var SUPPORTED_LANGS = ['ko', 'en', 'ja', 'fr', 'mn'];
+    var SUPPORTED_MODES = ['lang', 'legacy'];
     var LANG = resolveLang();
+    var MODE = resolveMode();
 
     function prefersReducedMotion() {
         return !!(w.matchMedia && w.matchMedia('(prefers-reduced-motion: reduce)').matches);
@@ -52,6 +55,27 @@
         if (path.indexOf('sub0202') !== -1) return 'eco_st';
         if (path.indexOf('sub0204') !== -1) return 'labope';
         if (path.indexOf('sub0206') !== -1) return 'fertilizer';
+        if (path.indexOf('sub0207') !== -1) return 'eco_sl';
+        return '';
+    }
+
+    function normalizeMode(value) {
+        if (!value) return '';
+        var lower = String(value).toLowerCase();
+        return SUPPORTED_MODES.indexOf(lower) !== -1 ? lower : '';
+    }
+
+    function resolveMode() {
+        var dataMode = $('[data-product-mode]').data('product-mode');
+        var normalized = normalizeMode(dataMode);
+        if (normalized) return normalized;
+
+        if (w.URLSearchParams) {
+            var params = new URLSearchParams(w.location.search || '');
+            var queryMode = normalizeMode(params.get('mode'));
+            if (queryMode) return queryMode;
+        }
+
         return '';
     }
 
@@ -59,6 +83,7 @@
         if (!board) return '';
         var params = ['board=' + encodeURIComponent(board)];
         if (LANG) params.push('lang=' + encodeURIComponent(LANG));
+        if (MODE) params.push('mode=' + encodeURIComponent(MODE));
         if (options && options.id) params.push('id=' + encodeURIComponent(options.id));
         if (options && typeof options.limit === 'number') params.push('limit=' + options.limit);
         if (options && typeof options.offset === 'number') params.push('offset=' + options.offset);
@@ -147,6 +172,7 @@
 
         items.forEach(function (item) {
             var href = PRODUCT_DETAIL_PAGE + '?board=' + encodeURIComponent(board) + '&id=' + encodeURIComponent(item.id);
+            if (MODE) href += '&mode=' + encodeURIComponent(MODE);
             var thumb = item.thumb || '';
             var title = item.title || '';
             var $card = $('<a/>', { 'class': 'item', href: href });

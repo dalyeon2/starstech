@@ -63,8 +63,9 @@ if (!$standalone) {
                 <div class="nav-title">제품</div>
                 <ul>
                     <li><a href="/bbs/board.php?bo_table=eco_st"><span class="icon"><i class="fa-solid fa-snowflake"></i></span><span class="label">ECO-ST</span></a></li>
-                    <li><a href="/bbs/board.php?bo_table=fertilizer"><span class="icon"><i class="fa-solid fa-seedling"></i></span><span class="label">Fertilizer</span></a></li>
+                    <li><a href="/bbs/board.php?bo_table=eco_sl"><span class="icon"><i class="fa-solid fa-droplet"></i></span><span class="label">ECO-SL</span></a></li>
                     <li><a href="/bbs/board.php?bo_table=labope"><span class="icon"><i class="fa-solid fa-flask"></i></span><span class="label">Labope</span></a></li>
+                    <li><a href="/bbs/board.php?bo_table=fertilizer"><span class="icon"><i class="fa-solid fa-seedling"></i></span><span class="label">Fertilizer</span></a></li>
                 </ul>
             </div>
 

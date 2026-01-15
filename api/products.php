@@ -27,7 +27,7 @@ register_shutdown_function(function () use ($debug) {
     echo json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 });
 
-$allowed_boards = ['eco_st', 'labope', 'fertilizer'];
+$allowed_boards = ['eco_st', 'eco_sl', 'labope', 'fertilizer'];
 $board_key = isset($_GET['board']) ? strtolower(trim($_GET['board'])) : '';
 if (!$board_key || !in_array($board_key, $allowed_boards, true)) {
     json_exit(400, ['success' => false, 'error' => 'invalid_board']);
@@ -82,6 +82,16 @@ $bo_table = $board_key;
 $board = function_exists('get_board_db') ? get_board_db($bo_table, true) : null;
 if (!$board) {
     json_exit(404, ['success' => false, 'error' => 'board_not_found']);
+}
+
+$board_skin = strtolower(trim($board['bo_skin'] ?? ''));
+$board_mobile_skin = strtolower(trim($board['bo_mobile_skin'] ?? ''));
+$is_lang_board = ($board_skin === 'product_lang' || $board_mobile_skin === 'product_lang');
+$mode = isset($_GET['mode']) ? strtolower(trim($_GET['mode'])) : '';
+if ($mode === 'lang' || $mode === 'product_lang') {
+    $is_lang_board = true;
+} elseif ($mode === 'legacy' || $mode === 'product') {
+    $is_lang_board = false;
 }
 
 function resolve_media_url($file)
@@ -170,7 +180,7 @@ $filters = ['wr_is_comment = 0'];
 if ($req_id > 0) {
     $filters[] = 'wr_id = ' . $req_id;
 }
-if ($lang_filter !== '') {
+if ($lang_filter !== '' && $is_lang_board) {
     $filters[] = "wr_1 = '{$lang_filter}'";
 }
 $where = implode(' AND ', $filters);
@@ -230,12 +240,18 @@ while ($row = sql_fetch_array($res)) {
     $row_lang = isset($row['wr_1']) ? strtolower(trim($row['wr_1'])) : '';
     $lang_key = '';
     $lang_data = [];
-    if ($row_lang !== '') {
+    if ($is_lang_board) {
+        if ($row_lang === '') {
+            continue;
+        }
         $lang_key = $row_lang;
         if (!empty($product_data['lang'][$row_lang]) && is_array($product_data['lang'][$row_lang])) {
             $lang_data = $product_data['lang'][$row_lang];
         }
     } else {
+        if ($row_lang !== '') {
+            continue;
+        }
         $lang_key = pick_lang_key($product_data, $lang_filter ?: $lang);
         if ($lang_key && !empty($product_data['lang'][$lang_key]) && is_array($product_data['lang'][$lang_key])) {
             $lang_data = $product_data['lang'][$lang_key];

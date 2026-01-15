@@ -64,6 +64,8 @@ if (!empty($board['bo_category_list'])) {
 }
 if (!empty($ca_name)) {
     $category_default = $ca_name;
+} elseif (!empty($sca)) {
+    $category_default = $sca;
 } elseif ($is_category && !$category_default) {
     $category_default = 'ko';
 }
@@ -76,6 +78,9 @@ if (!empty($write['wr_1'])) {
 if (!$selected_lang && !empty($ca_name)) {
     $selected_lang = strtolower(trim($ca_name));
 }
+if (!$selected_lang && !empty($sca)) {
+    $selected_lang = strtolower(trim($sca));
+}
 if (!$selected_lang && $category_default) {
     $selected_lang = strtolower(trim($category_default));
 }
@@ -85,7 +90,7 @@ if (!$selected_lang && isset($_GET['lang'])) {
 if (!isset($product_langs[$selected_lang])) {
     $selected_lang = $default_lang;
 }
-$lang_locked = ($w === 'u' && !empty($write['wr_1']));
+$lang_locked = false;
 
 if ($use_lang_filter) {
     if (isset($lang_options[$selected_lang])) {
@@ -153,7 +158,7 @@ if (!function_exists('sidepanel_product_items_text')) {
         <input type="hidden" name="w" value="<?php echo $w; ?>">
         <input type="hidden" name="bo_table" value="<?php echo $bo_table; ?>">
         <input type="hidden" name="wr_id" value="<?php echo $wr_id; ?>">
-        <input type="hidden" name="sca" value="<?php echo $sca; ?>">
+        <input type="hidden" name="sca" value="<?php echo htmlspecialchars($category_default, ENT_QUOTES); ?>">
         <input type="hidden" name="sfl" value="<?php echo $sfl; ?>">
         <input type="hidden" name="stx" value="<?php echo $stx; ?>">
         <input type="hidden" name="spt" value="<?php echo $spt; ?>">
@@ -564,7 +569,7 @@ if (!function_exists('sidepanel_product_items_text')) {
             if (visible.length <= 1) return;
             var row = visible[visible.length - 1];
             if (!canHideRow(row)) {
-                alert('??? ???? ?? ?? ??? ??? ???.');
+                alert('파일을 비우거나 기존 파일 삭제를 체크해 주세요.');
                 return;
             }
             var input = row.querySelector('input[type="file"]');
@@ -642,7 +647,7 @@ if (!function_exists('sidepanel_product_items_text')) {
         var lang = currentLang();
         var info = buildInfoData();
         if (!isInfoComplete(info)) {
-            alert('?? ??? ?? ??? ???.');
+            alert('필수 항목을 모두 입력해 주세요.');
             return false;
         }
 
@@ -683,7 +688,7 @@ if (!function_exists('sidepanel_product_items_text')) {
         });
 
         if (missingFeature) {
-            alert('?? ?? ??? ??? ??? ?? ??? ???.');
+            alert('제품 상세정보 항목을 모두 입력해 주세요.');
             return false;
         }
 
