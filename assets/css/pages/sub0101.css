@@ -783,7 +783,7 @@
     padding-top: 90px;
     display: flex;
     flex-direction: column;
-    gap: 50px;
+    gap: 60px;
 }
 
 .cont4 .head {
@@ -793,11 +793,19 @@
 }
 
 .cont4 .headline {
-    font-size: var(--font-headline36);
+    font-size: var(--font-headline42);
     font-weight: 700;
     line-height: 1.5;
     white-space: pre-line;
     word-break: keep-all;
+}
+
+.cont4 .head .desc {
+    color: var(--black);
+    font-size: var(--font-md);
+    font-weight: 500;
+    line-height: 1.6;
+    white-space: pre-line;
 }
 
 .cont4 .cards {
@@ -824,18 +832,42 @@
 .cont4 .body {
     display: flex;
     flex-direction: column;
-    gap: 19px;
+    gap: 20px;
+}
+
+.cont4 .meta {
+    padding-bottom: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    border-bottom: 1px solid var(--black-500);
+}
+
+.cont4 .chip {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    padding: 2px 8px;
+    border-radius: 6px;
+    background: #FFE4BD66;
+    color: #A66300;
+    font-size: var(--font-base);
+    font-weight: 600;
+    line-height: 1.6;
+}
+
+.cont4 .card:nth-child(n+2) .chip {
+    background: rgba(135, 177, 69, 0.1);
+    color: #527B12;
 }
 
 .cont4 .title {
-    padding-bottom: 14px;
-    border-bottom: 1px solid var(--black-500);
     font-size: var(--font-xl);
     font-weight: 600;
     line-height: 1.6;
 }
 
-.cont4 .desc {
+.cont4 .body .desc {
     color: var(--black-800);
     font-size: var(--font-md);
     font-weight: 500;
@@ -849,7 +881,7 @@
     }
 
     .cont4 .headline {
-        font-size: var(--font-headline32);
+        font-size: var(--font-headline36);
         line-height: 1.45;
     }
 }
@@ -860,7 +892,7 @@
     }
 
     .cont4 .headline {
-        font-size: var(--font-4xl);
+        font-size: var(--font-headline32);
         line-height: 1.4;
     }
 
@@ -876,7 +908,12 @@
         line-height: 1.4;
     }
 
-    .cont4 .desc {
+    .cont4 .head .desc {
+        font-size: var(--font-base);
+        white-space: normal;
+    }
+
+    .cont4 .body .desc {
         font-size: var(--font-base);
         white-space: normal;
     }
